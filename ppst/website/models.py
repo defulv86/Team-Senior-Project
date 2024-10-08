@@ -20,6 +20,31 @@ def generate_link():
 
 class Test(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    link = models.CharField(default=generate_link(),max_length=100, null=True)
+    link = models.CharField(default=generate_link ,max_length=100, null=True)
     created_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True)
+    
+    def __str__(self):
+        return self.link
+
+class Result(models.Model):
+    test = models.ForeignKey(Test,on_delete=models.CASCADE)
+    age = models.IntegerField()
+    avg_latency1 = models.IntegerField()
+    avg_latency2 = models.IntegerField()
+    avg_latency3 = models.IntegerField()
+    avg_latency4 = models.IntegerField()
+    avg_latency5 = models.IntegerField()
+    avg_latency6 = models.IntegerField()
+    amount_correct = models.IntegerField()
+
+class Stimulus(models.Model):
+    order = models.IntegerField()
+    stimulus_content = models.CharField(max_length=6)
+
+class Response(models.Model):
+    test = models.ForeignKey(Test, on_delete=models.CASCADE)
+    response = models.CharField(max_length=10)
+    latency = models.IntegerField()
+    is_correct = models.BooleanField()
+    stimulus = models.ForeignKey(Stimulus, on_delete=models.CASCADE, default=1)
