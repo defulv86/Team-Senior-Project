@@ -13,12 +13,29 @@
         <h1>
             Members Database
         </h1>
-        {% for item in all %}
         <p>
-            {{ item.uname }} {{ item.creation_date }} {{ item.last_login}}
-        </p>
-        {% endfor %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Date Created</th>
+                    <th>Last Login</th>
+                </tr>
+            </thead>
+            <tbody>
+                </p>
+                {% for item in all %}
+                <p>
+                    <tr>
+                        <td>{{ item.uname }} </td>
+                        <td>{{ item.creation_date }}</td>
+                        <td>{{ item.last_login}}</td>
+                    </tr>
+                    </tbpdy>
+                </p>
+                {% endfor %}
 
+        </table>
     </div>
 
 </body>

@@ -10,10 +10,13 @@ class UserAdmin(admin.ModelAdmin):
         return fields
 
 class TestAdmin(admin.ModelAdmin):
-    readonly_fields = ('link','created_at','completed_at')
+    readonly_fields = ('link','created_at','started_at','finished_at')
+
+class TestResponse(admin.ModelAdmin):
+    readonly_fields = ('time_submitted',)
     
 admin.site.register(User, UserAdmin)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Result)
 admin.site.register(Stimulus)
-admin.site.register(Response)
+admin.site.register(Response, TestResponse)
