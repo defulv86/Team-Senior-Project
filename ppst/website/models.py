@@ -13,6 +13,11 @@ class User(models.Model):
     def __str__(self):
         return self.uname
 
+    @property
+    def is_authenticated(self):
+        # Always return True for authenticated users
+        return True
+
 def generate_link():
     random_string = ''.join(random.choices(string.ascii_letters, k=6))
     link = f"ppst.com/{random_string}"
