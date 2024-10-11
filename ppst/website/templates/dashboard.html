@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Personnel Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <script src="{% static 'js/sidebar.js' %}"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="Logo">
+            </div>
+            <ul class="menu">
+                <li><a href="#">My Account</a></li>
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#">Tests</a></li>
+                <li><a href="#">Support</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="title">Medical Personnel Dashboard</div>
+                <div class="top-right">
+                    <a href="#"><i class="fa fa-bell"></i> Notifications</a>
+                    <!-- Logout link -->
+                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+                </div>
+            </div>
+
+            <!-- Welcome Message -->
+            <div class="welcome-message">
+                <h1>Welcome back, {{ user.first_name }}!</h1>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
