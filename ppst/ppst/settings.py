@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'website',
 ]
+# AUTHENTICATION_BACKENDS = [
+#     'website.backends.CustomUserBackend'
+# ]
 
 
 MIDDLEWARE = [

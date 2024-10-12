@@ -72,8 +72,11 @@ class Response(models.Model):
     response = models.CharField(max_length=5, default='')
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     time_submitted = models.DateTimeField(null=True)
-    response_posistion = models.IntegerField(default=0)
+    response_position = models.IntegerField(default=0)
     stimulus = models.ForeignKey(Stimulus, on_delete=models.CASCADE, default=1)
+    
+    def  __str__(self):
+        return self.test.link + " Response number: " + str(self.response_position)
 
 class Aggreagate(models.Model):
     age_group = models.CharField(max_length=10)
@@ -107,6 +110,10 @@ class Aggreagate(models.Model):
     avg_fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
     avg_fivemixed_latency_3 = models.IntegerField(default=0)
 
+    def  __str__(self):
+        return "Age Group: " + self.age_group
+
+
 # Ticket model.
 class Ticket(models.Model):
     CATEGORY_CHOICES = [
@@ -123,3 +130,13 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Ticket {self.id} - {self.category} by {self.user.username}"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    header = models.CharField(max_length=50)
+    message = models.CharField(max_length=100)
+    time_created = models.DateTimeField(auto_now=True)
+    is_dismissed = models.BooleanField(default=False)
+
+    def  __str__(self):
+        return "Recipiant: " + self.user.username + " | Header: " + self.header + " | Message: " + self.message
