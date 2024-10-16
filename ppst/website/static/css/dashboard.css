@@ -88,3 +88,32 @@ body {
 .welcome-message h1 {
     font-size: 32px;
 }
+
+.notification-popout {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+.notification-popout .notification-header {
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ccc;
+    font-size: 18px;
+}
+.notification-popout .notification-body {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+}
+.notification-popout .notification-footer {
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-top: 1px solid #ccc;
+    text-align: right;
+}
