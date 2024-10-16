@@ -1,52 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
-    </head>
-        <body>
-            <h3>Online Philadelphia Pointing Span Test</h3><br><br>
-            <h2>Welcome to your Philadelphia Pointing Span test</h2><br><br>
-            <p id="demo_vid"></p>
-            <p id="submit_p"></p>
 
-            <div class="center" id="playDemo">   
-                <button onclick="playDemo()">Play Demo</button>
-            </div> 
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
+</head>
 
-            <div class="center" id="takeTest" style="display: none;">   
-                <button onclick="takeTest()">Take the test</button>
-            </div>
-            
-            <div class="center" id="submit" style="display: none;">   
-                <button onclick="submit()">Submit</button>
-            </div>
-            <script>
-                function playDemo(){ 
-                var video = document.createElement("VIDEO");
-                video.width = 420;
-                video.height = 300;
-                video.controls = true;
-                video.src = "{% static 'images/vecteezy_back-to-school-title-text-cartoon-animation_9173233.mp4' %}";
-                document.getElementById("demo_vid").appendChild(video);
-                var paragraph = document.createElement("P");
-                paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the test.";
-                document.getElementById("demo_vid").appendChild(paragraph);
-                document.getElementById("takeTest").style.display = "block";   
-                }     
-                function takeTest(){
-                    document.getElementById("demo_vid").innerHTML = ""; 
-                    document.getElementById("takeTest").style.display = "none";
-                    document.getElementById("playDemo").style.display = "none";
-                    //show test
-                    document.getElementById("submit").style.display = "block"; 
-                }
-                function submit(){
-                    var paragraph = document.createElement("P");
-                    paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them";
-                    document.getElementById("submit_p").appendChild(paragraph);
-                    document.getElementById("submit").style.display = "none";
-                }
-            </script>
-        </body>
+<body>
+    <h3 id="title">Online Philadelphia Pointing Span Test</h3><br><br>
+    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span test</h2><br><br>
+    <p id="demo_vid"></p>
+    <p id="submit_p"></p>
+
+    <div class="center" id="playDemo">
+        <button onclick="playDemo()">Play Demo</button>
+    </div>
+
+    <div class="center" id="takeTest" style="display: none;">
+        <button onclick="takeTest()">Take the test</button>
+    </div>
+
+    <div class="center" id="submit" style="display: none;">
+        <button onclick="submit()">Submit</button>
+    </div>
+
+    <div class="center" id="numbers" style="display: none;">
+            <button onclick="choice">0</button> <button onclick="choice">1</button> <button onclick="choice">2</button>
+            <button onclick="choice">3</button> <button onclick="choice">4</button> <button onclick="choice">5</button>
+            <button onclick="choice">6</button> <button onclick="choice">7</button> <button onclick="choice">8</button>  
+            <button onclick="choice">9</button>
+    </div>
+    
+    <div class="center" id="letters" style="display: none;">
+            <button onclick="choice">A</button> <button onclick="choice">B</button> <button onclick="choice">C</button> 
+            <button onclick="choice">D</button> <button onclick="choice">E</button> <button onclick="choice">F</button> 
+            <button onclick="choice">G</button> <button onclick="choice">H</button> <button onclick="choice">I</button>  
+            <button onclick="choice">J</button> <button onclick="choice">K</button> <button onclick="choice">L</button>
+            <button onclick="choice">M</button> <button onclick="choice">N</button> <button onclick="choice">O</button> 
+            <button onclick="choice">P</button> <button onclick="choice">Q</button> <button onclick="choice">R</button> 
+            <button onclick="choice">S</button> <button onclick="choice">T</button> <button onclick="choice">U</button>  
+            <button onclick="choice">V</button> <button onclick="choice">W</button> <button onclick="choice">X</button>
+            <button onclick="choice">Y</button> <button onclick="choice">Z</button> 
+    </div>
+    <script>
+        function speak(text) { //allows  text to be spoken
+            var utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+        function playDemo() { // shows  demo video and speaks instructions
+            var video = document.createElement("VIDEO");
+            video.width = 420;
+            video.height = 300;
+            video.controls = true;
+            video.src = "{% static 'images/vecteezy_back-to-school-title-text-cartoon-animation_9173233.mp4' %}";
+            document.getElementById("demo_vid").appendChild(video);
+            var titleText = document.getElementById("title").textContent;
+            var welcomeText = document.getElementById("Welcome").textContent;
+            speak(titleText);
+            speak(welcomeText);
+            var paragraph = document.createElement("P");
+            paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the test.";
+            paragraph.style.fontSize = "25px";
+            document.getElementById("demo_vid").appendChild(paragraph);
+            speak(paragraph.textContent);
+            document.getElementById("takeTest").style.display = "block";
+        }
+        function takeTest() { // sends user to test page and hides video/demo button
+            document.getElementById("demo_vid").innerHTML = "";
+            document.getElementById("takeTest").style.display = "none";
+            document.getElementById("playDemo").style.display = "none";
+            //show test
+
+            //show letters/ numbers
+            //if(test == 4let or test == 5let) {randlet} 
+            //if(test == 4num or test == 5num) {randNum}
+            //if(test == 4mix or test == 5mix) {randmix}
+            document.getElementById("submit").style.display = "block";
+        }
+        function submit() { // sends user to submission page and hides submit button
+            var paragraph = document.createElement("P");
+            paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them. You can now exit this screen.";
+            paragraph.style.fontSize = "25px";
+            document.getElementById("submit_p").appendChild(paragraph);
+            speak(paragraph.textContent);
+            document.getElementById("submit").style.display = "none";
+            // send data to DB 
+        }
+        function choice(){ //takes selected and adds to answer when submitted
+
+        }
+        function randLet(){ // generates 5 remaining random letter (9 or 10 total)
+
+        }
+        function randNum(){ // generates 4 remaining random numbers (8 or 9 total)
+
+        }
+        function randMix(){ // a mix of letters and numbers 4 num & 5 letters (9 total)
+
+        }
+        function DB(){
+            //send data to DB
+        }
+    </script>
+</body>
+
 </html>
