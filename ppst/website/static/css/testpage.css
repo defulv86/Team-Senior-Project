@@ -1,0 +1,22 @@
+h2{
+    text-align: center;
+    color: blue;
+}
+
+p{
+    text-align: center;
+}
+
+button{
+    position : absolute;
+    color: aliceblue;
+    background-color: blue;
+    height: 50px;
+    width:  100px;
+}
+
+.center{
+    top: 50%;
+    position: relative;
+    text-align: center;
+}

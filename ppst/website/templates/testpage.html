@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
+    </head>
+        <body>
+            <h3>Online Philadelphia Pointing Span Test</h3><br><br>
+            <h2>Welcome to your Philadelphia Pointing Span test</h2><br><br>
+            <p id="demo_vid"></p>
+            <p id="submit_p"></p>
+
+            <div class="center" id="playDemo">   
+                <button onclick="playDemo()">Play Demo</button>
+            </div> 
+
+            <div class="center" id="takeTest" style="display: none;">   
+                <button onclick="takeTest()">Take the test</button>
+            </div>
+            
+            <div class="center" id="submit" style="display: none;">   
+                <button onclick="submit()">Submit</button>
+            </div>
+            <script>
+                function playDemo(){ 
+                var video = document.createElement("VIDEO");
+                video.width = 420;
+                video.height = 300;
+                video.controls = true;
+                video.src = "{% static 'images/vecteezy_back-to-school-title-text-cartoon-animation_9173233.mp4' %}";
+                document.getElementById("demo_vid").appendChild(video);
+                var paragraph = document.createElement("P");
+                paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the test.";
+                document.getElementById("demo_vid").appendChild(paragraph);
+                document.getElementById("takeTest").style.display = "block";   
+                }     
+                function takeTest(){
+                    document.getElementById("demo_vid").innerHTML = ""; 
+                    document.getElementById("takeTest").style.display = "none";
+                    document.getElementById("playDemo").style.display = "none";
+                    //show test
+                    document.getElementById("submit").style.display = "block"; 
+                }
+                function submit(){
+                    var paragraph = document.createElement("P");
+                    paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them";
+                    document.getElementById("submit_p").appendChild(paragraph);
+                    document.getElementById("submit").style.display = "none";
+                }
+            </script>
+        </body>
+</html>
