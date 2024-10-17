@@ -1,42 +1,444 @@
+{% load static %}
+
+<!DOCTYPE html>
 <html>
 
-<head></head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<script src="https://unpkg.com/htmx.org@2.0.3"
-    integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
-    crossorigin="anonymous"></script>
+<head>
+    <!-- Meta Tags for Character Set and Viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philadelphia Pointing Span Test</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* General Body Text Styles */
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            scroll-behavior: smooth;
+            background-color: #ffffff;
+            color: #ffffff;
+        }
+
+        /* Navigation Bar Styles */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Navigation Links Styles */
+        nav .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        /* Navigation Bar Margins */
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        /* Navigation Links Margins */
+        nav ul li {
+            margin: 20px;
+        }
+
+        /* Navigation Links Colors */
+        nav ul li a {
+            text-decoration: none;
+            color: #003366;
+            font-weight: bold;
+        }
+
+        /* Navigation Links Hover Colors */
+        nav ul li a:hover {
+            text-decoration: underline;
+            color: #126cc7;
+        }
+
+        /* Login Button Styles */
+        .login-button {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 30px;
+            transition: background-color 0.3s;
+        }
+
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Sign-up Button Styles */
+        .sign-up-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #003366;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sign-up-button:hover {
+            background-color: #004075;
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease forwards;
+        }
+
+        /* Section Styles */
+        section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            padding-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Styles for Section 1 */
+        #section1 {
+            background: linear-gradient(to bottom, #8CB8D9, #3B7CBA, #0077B3, #0056A0, #004B8D);
+
+        }
+
+        #section1 h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5em;
+            margin: 0;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #section1 h2 {
+            text-align: center;
+            font-size: 1.5em;
+            color: rgba(255, 255, 255, 0.3);
+            margin: 0.5em 0;
+        }
+
+        #section1 p {
+            font-size: 1.5em;
+            max-width: 900px;
+            z-index: 1;
+        }
+
+        /* Styles for Other Sections */
+        #section2,
+        #section3,
+        #section4 {
+            background: linear-gradient(to bottom, #8CB8D9, #3B7CBA, #0077B3, #0056A0, #004B8D);
+            padding: 40px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
+        /* Styles for Section 2 */
+        .about-section {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .content {
+            flex: 1;
+            text-align: left;
+            margin-top: 150px;
+            margin-right: 1px;
+            margin-left: 10px;
+        }
+
+        .image-container {
+            margin-top: 150px;
+            margin-right: 50px;
+            flex-shrink: 0;
+        }
+
+        .about-image {
+            width: 430px;
+            height: 400px;
+            border-radius: 30%;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Styles for Section 3 */
+        .services-section {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .services-content {
+            flex: 2;
+            text-align: left;
+            margin-top: 150px;
+            margin-right: 200px;
+            margin-left: 10px;
+        }
+
+        .services-image-container {
+            margin-top: 150px;
+            margin-right: 50px;
+            flex-shrink: 0;
+        }
+
+        .services-image {
+            width: 430px;
+            height: 400px;
+            border-radius: 30%;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+
+        /* Styles for Section 4 */
+        #section4 h2 {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0.02em 0;
+        }
+
+        #section4 h3 {
+            color: #0056A0;
+            font-size: 1.2em;
+        }
+
+        #section4 p {
+            color: #003366;
+            font-size: 1.2em;
+        }
+
+        .benefits {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .benefit {
+            background: #E6F7FF;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 330px;
+            text-align: center;
+            padding: 15px;
+            margin: 20px;
+        }
+
+        .benefit-image {
+            width: 80px;
+            height: auto;
+            margin-bottom: 1px;
+        }
+
+        /* Additional Text Styles */
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h4 {
+            color: #0077B3;
+            margin: 10px 0;
+        }
+
+        p {
+            font-size: 1.4em;
+            max-width: 900px;
+        }
+
+        /* Footer Styles */
+        footer {
+            text-align: left;
+            /* Align text to the left */
+            padding: 20px 15px;
+            /* Add padding on the left (and top/bottom) */
+            background-color: #064482;
+            color: white;
+            width: 100%;
+            /* Ensure it takes full width */
+            margin: 0 auto;
+            /* Center the footer */
+            box-sizing: border-box;
+            /* Include padding in width calculation */
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>
-            Members Database
-        </h1>
-        <p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Member</th>
-                    <th>Date Created</th>
-                    <th>Last Login</th>
-                </tr>
-            </thead>
-            <tbody>
-                </p>
-                {% for item in all %}
-                <p>
-                    <tr>
-                        <td>{{ item.uname }} </td>
-                        <td>{{ item.creation_date }}</td>
-                        <td>{{ item.last_login}}</td>
-                    </tr>
-                    </tbpdy>
-                </p>
-                {% endfor %}
 
-        </table>
-    </div>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-links">
+            <ul>
+                <li><a href="#section1">Home</a></li>
+                <li><a href="#section2">About</a></li>
+                <li><a href="#section3">Services</a></li>
+                <li><a href="#section4">Benefits</a></li>
+            </ul>
+        </div>
+        <a href="/login" class="login-button">Log In</a>
+    </nav>
+
+    <!-- Section 1: Introduction -->
+    <section id="section1">
+        <h1 class="fade-in">Revolutionizing Medical Testing: Fast, Reliable, and At Home.</h1>
+        <h2 class="fade-in">Where convenience meets cutting-edge healthcare technology.</h2>
+        <p> 
+            Our at-home <b>Philadelphia Pointing Span</b> assessment empowers medical professionals to deliver essential
+            evaluations without hospital visits. Designed for accuracy and ease, these tests allow patients to independently
+            take comprehensive assessments in the comfort of their own homes. With our user-friendly platform, healthcare
+            providers can effortlessly access and analyze patient results, ensuring timely and effective care <b>when it
+            matters most.</b>
+        </p>
+    </section>
+
+    <!-- Section 2: About the PPST -->
+    <section id="section2" class="about-section">
+        <div class="content">
+            <h1>About The Philadelphia Pointing Span Test</h1>
+            <p>
+                The <b>Philadelphia Pointing Span Test</b> (PPST) is a neuropsychological test that uses stimuli,
+                whether presented in sequences of digits or sequences of digits and letters, to <b>evaluate cognitive
+                functionality</b>, such as memory and executive function, by <b>measuring patient recall latencies</b>.
+                Patients are asked to reorder the elements given for each question, listing first the digits presented
+                in ascending numerical order followed by any letters presented in alphabetical order. The PPST features
+                a total of twelve stimuli, divided into two groups: six digit stimuli and six mixed stimuli. The six digit
+                and mixed stimuli both comprise three 4-span stimuli followed by three 5-span stimuli. The test measures
+                patient accuracies and latencies to assess patient performance and aid in <b>early detection of neurodegenerative
+                conditions</b>.
+            </p>
+        </div>
+        <div class="image-container">
+            <img src="{% static 'images/about-img.jpg' %}"
+                alt="Description of image" class="about-image">
+        </div>
+    </section>
+
+
+    <!-- Section 3: About the Available Testing Services -->
+    <section id="section3" class="services-section">
+        <div class="services-content">
+            <h1>Testing Services</h1>
+            <p>
+                Our platform enables healthcare providers to create and administer tests that patients can
+                complete to evaluate their risk of neurodegenerative illnesses. The application <b>aggregates
+                testing data</b> into structured spreadsheets, accessible through a comprehensive dashboard. This
+                functionality facilitates in-depth <b>data analysis</b> and enables comparisons across various age groups,
+                supporting informed clinical decisions. By leveraging our tool, medical personnel can enhance patient
+                assessment processes and contribute to more effective detection of neurodegenerative health risks.
+                Experience a new standard in patient care with our innovative solution tailored for healthcare excellence.
+            </p>
+
+            <a href="/login" class="sign-up-button">Sign Up Today to Access These Features</a>
+        </div>
+        <div class="services-image-container">
+            <img src="{% static 'images/spreadsheet-img.jpg' %}"
+                alt="Description of image" class="services-image">
+        </div>
+    </section>
+
+    <!-- Section 4: Benefits of Online Testing -->
+    <section id="section4">
+        <h1>Benefits of Online Testing</h1>
+        <h2>Discover the key advantages of online testing.</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <img src="{% static 'images/ear-icon.png' %}" alt="Benefit 1" class="benefit-image">
+                <h3>Accessibility and Convenience.</h3>
+                <p>
+                    Online testing can significantly enhance access to healthcare for patients who rely on
+                    auditory and visual aids or those with disabilities, by providing a <b>convenient</b> and
+                    <b>accommodating</b> alternative to <b>traditional in-person visits</b>. Online platforms can
+                    offer unique interfaces that cater to individual needs, such as screen readers, enlarged text,
+                    and captioned video instructions.
+                </p>
+            </div>
+            <div class="benefit">
+                <img src="{% static 'images/graph-icon.png' %}" alt="Benefit 2" class="benefit-image">
+                <h3>Powerful Insight and Analytics.</h3>
+                <p>
+                    Healthcare providers can gather substantial, comprehensive data that captures patient
+                    responses and their latencies and accuracies, allowing for definitive assessments of patient
+                    health and behaviors. Automated data entry reduces the risk of human error and streamlines the
+                    analysis process, making it easier to <b>identify trends</b> and gather insights that might
+                    otherwise go undetected.
+                </p>
+            </div>
+            <div class="benefit">
+                <img src="{% static 'images/defense-icon.png' %}" alt="Benefit 3" class="benefit-image">
+                <h3>Research Capabilities</h3>
+                <p>
+                    Significant enhancements in research efforts and deep understanding of various health issues has
+                    been facilitated by online testing and the collection of <b>large-scale, diverse data sets</b> with ease.
+                    The real-time data aggregation and analysis capabilities of online platforms enables researchers to
+                    identify trends and correlations, allowing timely insights into <b>emerging health concerns</b>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Philadelphia Pointing Span Test.</p>
+    </footer>
+
+    <!-- Smooth Scrolling Behavior -->
+    <script>
+        document.querySelectorAll('nav ul li a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                targetSection.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 
 </body>
 
