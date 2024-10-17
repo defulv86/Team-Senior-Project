@@ -45,3 +45,6 @@ def dashboard(request):
         return render(request, 'dashboard.html', {'user': request.user})
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
+
+def testpage(request):
+    return render(request, 'testpage.html')

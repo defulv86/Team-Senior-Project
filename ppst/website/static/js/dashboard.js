@@ -1,3 +1,4 @@
+// dashboard.js
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
     
@@ -14,8 +15,13 @@ function loadContent(section) {
     } else if (section === 'tests') {
         dynamicContent.innerHTML = `
             <h2>Tests</h2>
-            <button onclick="createTest()">Create a Test</button>
-            <button onclick="viewPreviousTests()">View Previous Tests</button>
+            <div class="test-buttons">
+                <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
+                <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
+            </div>
+            <div id="test-content">
+                <!-- Dynamic content for tests will be loaded here -->
+            </div>
         `;
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
@@ -23,6 +29,27 @@ function loadContent(section) {
             <p>Need help? Here you can find resources, contact support, and get answers to frequently asked questions.</p>
         `;
     }
+}
+
+// Function to display the test buttons based on the results
+function retrieveTestResults() {
+    const dynamicContent = document.getElementById('dynamic-content');
+    dynamicContent.innerHTML += `<h3>Patient's Test Results:</h3>`; // Add a heading for the results
+
+    // Assume tests is a global variable set in the template
+    tests.forEach(test => {
+        let colorClass = '';
+        if (test.status === 'complete') {
+            colorClass = 'green-button';
+        } else if (test.status === 'in_progress' || test.status === 'not_started') {
+            colorClass = 'gray-button';
+        } else if (test.status === 'invalid') {
+            colorClass = 'red-button';
+        }
+
+        // Create a button for each test with the appropriate color class
+        dynamicContent.innerHTML += `<button class="${colorClass}">${test.id} Test Results</button>`;
+    });
 }
 
 function createTest() {
@@ -42,9 +69,9 @@ function generateTestLink() {
 
     if (age) {
         // Simulate generating a unique test link
-        const testLink = `www.test.com/${Math.random().toString(36).substr(2, 9)}`;
+        const testLink = `localhost:8000/testpage/${Math.random().toString(36).substr(2, 9)}`;
         linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                   <a href="http://${testLink}" target="_blank">${testLink}</a>`;
+                                   <a href="${testLink}" target="_blank">${testLink}</a>`;
     } else {
         linkContainer.innerHTML = `<p style="color: red;">Invalid: Please enter a valid age.</p>`;
     }
@@ -102,9 +129,21 @@ function closeNotifications() {
 }
 
 // Show or hide the notification popout
-function toggleNotifications() {
+function toggleNotifications(event) {
+    // Prevent the default action of the anchor tag
+    event.preventDefault();
+
+    // Toggle the display of the notification popout
+    const notificationPopout = document.getElementById('notification-popout');
     notificationPopout.style.display = 
         notificationPopout.style.display === 'block' ? 'none' : 'block';
+
+    // Update the isNotificationsOpen variable based on the visibility of the popout
+    isNotificationsOpen = notificationPopout.style.display === 'block';
 }
 
+// Automatically load the "Dashboard" tab when the page is first loaded
+window.addEventListener('load', () => {
+    loadContent('dashboard');
+});
 

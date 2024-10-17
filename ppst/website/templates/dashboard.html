@@ -15,10 +15,10 @@
                 <img src="{% static 'images/logo.png' %}" alt="Logo">
             </div>
             <ul class="menu">
-                <li><a href="#" onclick="loadContent('account')">My Account</a></li>
-                <li><a href="#" onclick="loadContent('dashboard')">Dashboard</a></li>
-                <li><a href="#" onclick="loadContent('tests')">Tests</a></li>
-                <li><a href="#" onclick="loadContent('support')">Support</a></li>
+                <li><a href="#myaccount" onclick="loadContent('account')">My Account</a></li>
+                <li><a href="#dashboard" onclick="loadContent('dashboard')">Dashboard</a></li>
+                <li><a href="#tests" onclick="loadContent('tests')">Tests</a></li>
+                <li><a href="#support" onclick="loadContent('support')">Support</a></li>
             </ul>
         </div>
 
@@ -28,7 +28,7 @@
             <div class="top-bar">
                 <div class="title">Medical Personnel Dashboard</div>
                 <div class="top-right">
-                    <a href="#" onclick="toggleNotifications()"><i class="fa fa-bell"></i> Notifications</a>
+                    <a href="#" onclick="toggleNotifications(event)"><i class="fa fa-bell"></i> Notifications</a>
                     <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
                 </div>
             </div>
@@ -44,14 +44,7 @@
 
             <!-- Content Area -->
             <div id="dynamic-content">
-                <!-- Placeholder for My Account, Dashboard, Tests, etc. -->
-                <div class="test-buttons">
-                    <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
-                    <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
-                </div>
-                <div id="test-content">
-                    <!-- Placeholder for dynamic test content -->
-                </div>
+                <!-- Content for My Account, Dashboard, Tests, etc. will be loaded here -->
             </div>
         </div>
 
