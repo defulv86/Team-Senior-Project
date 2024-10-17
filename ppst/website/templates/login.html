@@ -8,16 +8,21 @@
     <title>Login</title>
 </head>
 <body>
-    <div class="login-container">
+    <div class="flex-item-right">
         <h1>Login</h1>
-        <form method="post">
-            {% csrf_token %}
-            <label for="uname">Username:</label>
-            <input type="text" id="uname" name="uname" required>
-            <label for="passwd">Password:</label>
-            <input type="password" id="passwd" name="passwd" required>
-            <button type="submit">Login</button>
-        </form>
+        <div class="login-container">
+            <div class="new-line"></div>
+            <form method="post">
+                {% csrf_token %}
+                <label for="uname">Username:</label>
+                <input type="text" id="uname" name="uname" required>
+                <div class="new-line"></div>
+                <label for="passwd">Password:</label>
+                <input type="password" id="passwd" name="passwd" required>
+                <div class="new-line"></div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

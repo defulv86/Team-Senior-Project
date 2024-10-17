@@ -1,0 +1,284 @@
+/* General Body Text Styles */
+body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    scroll-behavior: smooth;
+    background-color: #ffffff;
+    color: #ffffff;
+}
+
+/* Navigation Bar Styles */
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Navigation Links Styles */
+nav .nav-links {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+/* Navigation Bar Margins */
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+/* Navigation Links Margins */
+nav ul li {
+    margin: 20px;
+}
+
+/* Navigation Links Colors */
+nav ul li a {
+    text-decoration: none;
+    color: #003366;
+    font-weight: bold;
+}
+
+/* Navigation Links Hover Colors */
+nav ul li a:hover {
+    text-decoration: underline;
+    color: #126cc7;
+}
+
+/* Login Button Styles */
+.login-button {
+    background-color: #003366;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 30px;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #0056b3;
+}
+
+/* Sign-up Button Styles */
+.sign-up-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #003366;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sign-up-button:hover {
+    background-color: #004075;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease forwards;
+}
+
+/* Section Styles */
+section {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    padding-top: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Styles for Section 1 */
+#section1 {
+    background: linear-gradient(to bottom, #8CB8D9, #3B7CBA, #0077B3, #0056A0, #004B8D);
+}
+
+#section1 h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5em;
+    margin: 0;
+    z-index: 1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#section1 h2 {
+    text-align: center;
+    font-size: 1.5em;
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0.5em 0;
+}
+
+#section1 p {
+    font-size: 1.5em;
+    max-width: 900px;
+    z-index: 1;
+}
+
+/* Styles for Other Sections */
+#section2,
+#section3,
+#section4 {
+    background: linear-gradient(to bottom, #8CB8D9, #3B7CBA, #0077B3, #0056A0, #004B8D);
+    padding: 40px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+/* Styles for Section 2 */
+.about-section {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.content {
+    flex: 1;
+    text-align: left;
+    margin-top: 150px;
+    margin-right: 1px;
+    margin-left: 10px;
+}
+
+.image-container {
+    margin-top: 150px;
+    margin-right: 50px;
+    flex-shrink: 0;
+}
+
+.about-image {
+    width: 430px;
+    height: 400px;
+    border-radius: 30%;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Styles for Section 3 */
+.services-section {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.services-content {
+    flex: 2;
+    text-align: left;
+    margin-top: 150px;
+    margin-right: 200px;
+    margin-left: 10px;
+}
+
+.services-image-container {
+    margin-top: 150px;
+    margin-right: 50px;
+    flex-shrink: 0;
+}
+
+.services-image {
+    width: 430px;
+    height: 400px;
+    border-radius: 30%;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Styles for Section 4 */
+#section4 h2 {
+    font-size: 1.3em;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0.02em 0;
+}
+
+#section4 h3 {
+    color: #0056A0;
+    font-size: 1.2em;
+}
+
+#section4 p {
+    color: #003366;
+    font-size: 1.2em;
+}
+
+.benefits {
+    display: flex;
+    margin-top: 20px;
+}
+
+.benefit {
+    background: #E6F7FF;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 330px;
+    text-align: center;
+    padding: 15px;
+    margin: 20px;
+}
+
+.benefit-image {
+    width: 80px;
+    height: auto;
+    margin-bottom: 1px;
+}
+
+/* Additional Text Styles */
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+    font-family: 'Montserrat', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+h4 {
+    color: #0077B3;
+    margin: 10px 0;
+}
+
+p {
+    font-size: 1.4em;
+    max-width: 900px;
+}
+
+/* Footer Styles */
+footer {
+    text-align: left;
+    padding: 20px 15px;
+    background-color: #064482;
+    color: white;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
