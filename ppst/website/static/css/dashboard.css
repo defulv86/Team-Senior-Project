@@ -99,21 +99,71 @@ body {
     border: 1px solid #ccc;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    cursor: move; /* Cursor for dragging */
+    user-select: none; /* Disable text selection while dragging */
 }
-.notification-popout .notification-header {
+
+.notification-header {
     padding: 10px;
     background-color: #f2f2f2;
     border-bottom: 1px solid #ccc;
     font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
 }
-.notification-popout .notification-body {
+
+.notification-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.notification-body {
     max-height: 200px;
     overflow-y: auto;
     padding: 10px;
 }
-.notification-popout .notification-footer {
+
+.notification-footer {
     padding: 10px;
     background-color: #f2f2f2;
     border-top: 1px solid #ccc;
     text-align: right;
+}
+
+.test-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+#test-content {
+    margin-top: 20px;
+}
+
+.test-list li {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.completed {
+    background-color: #00bfff; /* Blue for completed */
+    color: white;
+}
+
+.incomplete {
+    background-color: #d3d3d3; /* Gray for incomplete */
+    color: black;
+}
+
+.invalid {
+    background-color: #ff4c4c; /* Red for invalid */
+    color: white;
 }

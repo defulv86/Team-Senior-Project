@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <!-- Welcome Message | Includes a check to see if user is authenicated or not -->
+            <!-- Welcome Message -->
             <div class="welcome-message">
                 {% if user.is_authenticated %}
                     <h1>Welcome back, {{ user.username }}!</h1>
@@ -44,7 +44,14 @@
 
             <!-- Content Area -->
             <div id="dynamic-content">
-                <!-- This is where the content for My Account, Tests, Support, etc. will be displayed -->
+                <!-- Placeholder for My Account, Dashboard, Tests, etc. -->
+                <div class="test-buttons">
+                    <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
+                    <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
+                </div>
+                <div id="test-content">
+                    <!-- Placeholder for dynamic test content -->
+                </div>
             </div>
         </div>
 
