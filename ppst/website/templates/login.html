@@ -20,13 +20,11 @@
                 <label for="passwd">Password:</label>
                 <input type="password" id="passwd" name="passwd" required>
                 <div class="new-line"></div>
-                
                 <!-- Display error message if it exists -->
                 {% if error_message %}
                     <div class="error-message">{{ error_message }}</div>
                     <div class="new-line"></div>
                 {% endif %}
-
                 <button type="submit">Login</button>
             </form>
         </div>
