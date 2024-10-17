@@ -43,10 +43,6 @@
             <button onclick="choice">Y</button> <button onclick="choice">Z</button> 
     </div>
     <script>
-        function takeTest() {
-            alert("Test started! Good luck!");
-            // Additional logic for starting the test
-        }
         function speak(text) { //allows  text to be spoken
             var utterance = new SpeechSynthesisUtterance(text);
             window.speechSynthesis.speak(utterance);
