@@ -1,0 +1,34 @@
+h2{
+    text-align: center;
+    color: blue;
+}
+p{
+    text-align: center;
+}
+
+.button-container {
+    display: flex; 
+    justify-content: center; 
+}
+
+button{
+    color: aliceblue;
+    background-color: blue;
+    height: 50px;
+    width:  100px;
+}
+
+.center{
+    top: 50%;
+    position: relative;
+    text-align: center;
+}
+
+.testButton{
+    margin: 20px;
+    display: inline-block;
+    height: 75px;
+    width: 75px;
+    position: relative;
+    text-align: center;
+}

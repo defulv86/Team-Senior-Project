@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
+</head>
+
+<body>
+    <h3 id="title">Online Philadelphia Pointing Span Test</h3><br><br>
+    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span test</h2><br><br>
+    <p id="demo_vid"></p>
+    <p id="submit_p"></p>
+
+    <div class="center" id="test" style="display: none;">
+        <p></p> <br>
+    </div>
+
+    <div class="center" id="playDemo">
+        <button onclick="playDemo()">Play Demo</button>
+    </div>
+
+    <div class="center" id="takeTest" style="display: none;">
+        <button onclick="takeTest()">Take the test</button>
+    </div>
+
+    <div class="button-container" id="numbers" style="display: none;">
+        <button class="testButton" , onclick="choice">0</button>
+        <button class="testButton" , onclick="choice">1</button>
+        <button class="testButton" , onclick="choice">2</button>
+        <button class="testButton" , onclick="choice">3</button>
+        <button class="testButton" , onclick="choice">4</button>
+        <button class="testButton" , onclick="choice">5</button>
+        <button class="testButton" , onclick="choice">6</button>
+        <button class="testButton" , onclick="choice">7</button>
+        <button class="testButton" , onclick="choice">8</button>
+        <button class="testButton" , onclick="choice">9</button>
+    </div>
+
+    <div class="button-container" id="letters" style="display: none;">
+        <button class="testButton" , onclick="choice">A</button>
+        <button class="testButton" , onclick="choice">B</button>
+        <button class="testButton" , onclick="choice">C</button>
+        <button class="testButton" , onclick="choice">D</button>
+        <button class="testButton" , onclick="choice">E</button>
+        <button class="testButton" , onclick="choice">F</button>
+        <button class="testButton" , onclick="choice">G</button>
+        <button class="testButton" , onclick="choice">H</button>
+        <button class="testButton" , onclick="choice">I</button>
+        <button class="testButton" , onclick="choice">J</button>
+        <button class="testButton" , onclick="choice">K</button>
+        <button class="testButton" , onclick="choice">L</button>
+        <button class="testButton" , onclick="choice">M</button>
+        <button class="testButton" , onclick="choice">N</button>
+        <button class="testButton" , onclick="choice">O</button>
+        <button class="testButton" , onclick="choice">P</button>
+        <button class="testButton" , onclick="choice">Q</button>
+        <button class="testButton" , onclick="choice">R</button>
+        <button class="testButton" , onclick="choice">S</button>
+        <button class="testButton" , onclick="choice">T</button>
+        <button class="testButton" , onclick="choice">U</button>
+        <button class="testButton" , onclick="choice">V</button>
+        <button class="testButton" , onclick="choice">W</button>
+        <button class="testButton" , onclick="choice">X</button>
+        <button class="testButton" , onclick="choice">Y</button>
+        <button class="testButton" , onclick="choice">Z</button>
+    </div>
+
+    <div class="center" id="submit" style="display: none;">
+        <button onclick="submit()">Submit</button>
+    </div>
+    <script>
+        function speak(text) { //allows  text to be spoken
+            var utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+        function playDemo() { // shows  demo video and speaks/ shows instructions
+            var video = document.createElement("VIDEO");
+            video.width = 420;
+            video.height = 300;
+            video.controls = true;
+            video.src = "{% static 'images/PPSTTestIntoVid.mp4' %}";
+            document.getElementById("demo_vid").appendChild(video);
+            var titleText = document.getElementById("title").textContent;
+            var welcomeText = document.getElementById("Welcome").textContent;
+            speak(titleText);
+            speak(welcomeText);
+            var paragraph = document.createElement("P");
+            paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the test.";
+            paragraph.style.fontSize = "25px";
+            document.getElementById("demo_vid").appendChild(paragraph);
+            speak(paragraph.textContent);
+            document.getElementById("playDemo").style.display = "none";
+            document.getElementById("takeTest").style.display = "block";
+        }
+        function takeTest() { // sends user to test page and hides video/demo button
+            document.getElementById("demo_vid").innerHTML = "";
+            document.getElementById("takeTest").style.display = "none";
+            document.getElementById("playDemo").style.display = "none";
+            //show test
+            document.getElementById("test").style.display = "block";
+            //letTest(5);
+            numTest(5);
+            //show letters/ numbers
+            randMix(3);
+            //if(test == 4let or test == 5let) {randLet(4) randLet(3)} 
+            //if(test == 4num or test == 5num) {randNum(3) randNum(2)}
+            //if(test == 4mix or test == 5mix) {randMix(3) randMix(2)}
+            document.getElementById("submit").style.display = "block";
+        }
+        function submit() { // sends user to submission page and hides submit button
+            var paragraph = document.createElement("P");
+            paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them. You can now exit this screen.";
+            paragraph.style.fontSize = "25px";
+            document.getElementById("submit_p").appendChild(paragraph);
+            speak(paragraph.textContent);
+            document.getElementById("submit").style.display = "none";
+            document.getElementById("letters").style.display = "none";
+            document.getElementById("numbers").style.display = "none";
+            document.getElementById("test").style.display = "none";
+            // send data to DB -> DB() 
+        }
+        function choice() { //takes selected num/let and adds to answer when submitted
+
+        }
+        function randLet(X) { // generates remaining random letters (4-5)
+            const lettersDiv = document.getElementById("letters");
+            const buttons = lettersDiv.children;
+            const selectedButtons = [];
+            while (selectedButtons.length < X) {
+                const randomIndex = Math.floor(Math.random() * buttons.length);
+                const button = buttons[randomIndex];
+                if (!selectedButtons.includes(button)) {
+                    selectedButtons.push(button);
+                }
+            }
+            lettersDiv.innerHTML = '';
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
+
+            selectedButtons.forEach(button => {
+                buttonContainer.appendChild(button);
+            });
+            lettersDiv.appendChild(buttonContainer);
+            lettersDiv.style.display = 'block';
+        }
+        function randNum(X) { // generatesremaining random numbers (2-3)
+            const numbersDiv = document.getElementById("numbers");
+            const buttons = numbersDiv.children;
+            const selectedButtons = [];
+            while (selectedButtons.length < X) {
+                const randomIndex = Math.floor(Math.random() * buttons.length);
+                const button = buttons[randomIndex];
+                if (!selectedButtons.includes(button)) {
+                    selectedButtons.push(button);
+                }
+            }
+            numbersDiv.innerHTML = '';
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
+
+            selectedButtons.forEach(button => {
+                buttonContainer.appendChild(button);
+            });
+            numbersDiv.appendChild(buttonContainer);
+            numbersDiv.style.display = 'block';
+        }
+        function randMix(X) {
+            const numbersDiv = document.getElementById("numbers");
+            const nums = numbersDiv.children;
+            const lettersDiv = document.getElementById("letters");
+            const lett = lettersDiv.children;
+
+            const mixedButtons = [];
+
+            // Ensure at least one letter and one number are included
+            const randomLetterIndex = Math.floor(Math.random() * lett.length);
+            mixedButtons.push(lett[randomLetterIndex]);
+            const randomNumberIndex = Math.floor(Math.random() * nums.length);
+            mixedButtons.push(nums[randomNumberIndex]);
+
+            // Fill the rest of the buttons with random letters and numbers
+            while (mixedButtons.length < X) {
+                const randomChoice = Math.random() < 0.5;
+                if (randomChoice) {
+                    const randomLetterIndex = Math.floor(Math.random() * lett.length);
+                    if (!mixedButtons.includes(lett[randomLetterIndex])) {
+                        mixedButtons.push(lett[randomLetterIndex]);
+                    }
+                } else {
+                    const randomNumberIndex = Math.floor(Math.random() * nums.length);
+                    if (!mixedButtons.includes(nums[randomNumberIndex])) {
+                        mixedButtons.push(nums[randomNumberIndex]);
+                    }
+                }
+            }
+            mixedButtons.sort(() => Math.random() - 0.5);
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
+
+            mixedButtons.forEach(button => {
+                buttonContainer.appendChild(button);
+            });
+
+            lettersDiv.innerHTML = '';
+            numbersDiv.innerHTML = '';
+            lettersDiv.appendChild(buttonContainer);
+            lettersDiv.style.display = 'block';
+        }
+        function DB() {//send data to DB
+        }
+        function letTest(X) {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // All uppercase letters
+            const selectedLetters = []; // Array to hold selected letters
+
+            // Generate X unique random letters
+            while (selectedLetters.length < X) {
+                const randomIndex = Math.floor(Math.random() * letters.length);
+                const letter = letters[randomIndex];
+                if (!selectedLetters.includes(letter)) {
+                    selectedLetters.push(letter);
+                }
+            }
+
+            // Function to display letters one at a time
+            let currentIndex = 0;
+
+            function displayNextLetter() {
+                if (currentIndex < selectedLetters.length) {
+                    const letter = selectedLetters[currentIndex];
+                    const letterDisplay = document.createElement("p");
+                    letterDisplay.textContent = letter;
+                    letterDisplay.style.fontSize = "50px"; // Adjust font size as needed
+                    letterDisplay.style.textAlign = "center"; // Center the letter
+                    document.getElementById("test").innerHTML = ""; // Clear previous letter
+                    document.getElementById("test").appendChild(letterDisplay); // Show the current letter
+                    currentIndex++;
+
+                    // Set a timeout to show the next letter after 1 second (1000 ms)
+                    setTimeout(displayNextLetter, 1000);
+                } else {
+                    // Optionally, you can add code here to handle after all letters have been displayed
+                    // For example, you might want to show the submit button or reset the test
+                }
+            }
+
+            // Start displaying letters
+            displayNextLetter();
+        }
+        function numTest(X) {
+            const numbers = "0123456789"; 
+            const selectedNumbers = []; 
+
+            while (selectedNumbers.length < X) {
+                const randomIndex = Math.floor(Math.random() * numbers.length);
+                const number = numbers[randomIndex];
+                if (!selectedNumbers.includes(number)) {
+                    selectedNumbers.push(number);
+                }
+            }
+
+            // Function to display letters one at a time
+            let currentIndex = 0;
+
+            function displayNextNumber() {
+                if (currentIndex < selectedNumbers.length) {
+                    const number = selectedNumbers[currentIndex];
+                    const numberDisplay = document.createElement("p");
+                    numberDisplay.textContent = number;
+                    numberDisplay.style.fontSize = "50px"; // Adjust font size as needed
+                    numberDisplay.style.textAlign = "center"; // Center the letter
+                    document.getElementById("test").innerHTML = ""; // Clear previous letter
+                    document.getElementById("test").appendChild(numberDisplay); // Show the current letter
+                    currentIndex++;
+
+                    // Set a timeout to show the next letter after 1 second (1000 ms)
+                    setTimeout(displayNextNumber, 1000);
+                } else {
+                    // Optionally, you can add code here to handle after all letters have been displayed
+                    // For example, you might want to show the submit button or reset the test
+                }
+            }
+
+            // Start displaying letters
+            displayNextNumber();
+        }
+        function mixTest(X) {
+
+        }   
+    </script>
+</body>
+
+</html>

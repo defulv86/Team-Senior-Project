@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_backends
+from django.contrib.auth.decorators import login_required
 from .backends import CustomUserBackend  # Import your custom backend
 from .models import User  # Import your User model
 
@@ -11,20 +12,26 @@ def home(request):
     })
 
 def login_view(request):
+    error_message = None
     if request.method == 'POST':
         username = request.POST.get('uname')
         password = request.POST.get('passwd')
 
-        # Use your custom backend to authenticate
-        user = CustomUserBackend().authenticate(request, uname=username, passwd=password)
+        # Authenticate the user
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            auth_login(request, user)  # Log in the user
-            return redirect('dashboard')  # Redirect to the dashboard
+            auth_login(request, user)
+            # Redirect based on the user's staff status
+            if user.is_staff:
+                return redirect('/admin/')
+            else:
+                return redirect('dashboard')
         else:
-            return HttpResponse("Invalid username or password.")
+            error_message = "Invalid username or password."  # Set the error message
     
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'error_message': error_message})
+
 
 
 def logout_view(request):
@@ -35,6 +42,9 @@ def logout_view(request):
 def dashboard(request):
     if request.user.is_authenticated:
         # Your logic for rendering the dashboard goes here
-        return render(request, 'dashboard.html')
+        return render(request, 'dashboard.html', {'user': request.user})
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
+
+def testpage(request):
+    return render(request, 'testpage.html')
