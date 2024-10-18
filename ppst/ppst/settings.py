@@ -39,9 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'website',
 ]
-AUTHENTICATION_BACKENDS = [
-    'website.backends.CustomUserBackend'
-]
 
 
 MIDDLEWARE = [
@@ -66,6 +63,10 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.static',
+                'django.template.context_processors.media',
+                'django.template.context_processors.csrf',
+                'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -74,6 +75,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ppst.wsgi.application'
 
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Ensure this remains if you're overriding backends
+    'website.backends.CustomUserBackend'
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -116,8 +122,9 @@ USE_I18N = True
 
 USE_TZ = True
 
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGIN_URL = '/login/'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
