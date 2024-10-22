@@ -121,3 +121,10 @@ class Aggreagate(models.Model):
     avg_fivemixed_latency_2 = models.IntegerField(default=0)
     avg_fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
     avg_fivemixed_latency_3 = models.IntegerField(default=0)
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    header = models.CharField(max_length=50)
+    message = models.CharField(max_length=100)
+    time_created = models.DateTimeField(auto_now=True)
+    is_dismissed = models.BooleanField(default=False)
