@@ -36,26 +36,55 @@ class Test(models.Model):
 
 class Result(models.Model):
     test = models.ForeignKey(Test,on_delete=models.CASCADE)
-    ans1 = models.CharField(max_length=6,default='')
-    latency1 = models.IntegerField(default=0)
-    ans2 = models.CharField(max_length=6,default='')
-    latency2 = models.IntegerField(default=0)
-    ans3 = models.CharField(max_length=6,default='')
-    latency3 = models.IntegerField(default=0)
-    ans4 = models.CharField(max_length=6,default='')
-    latency4 = models.IntegerField(default=0)
-    ans5 = models.CharField(max_length=6,default='')
-    latency5 = models.IntegerField(default=0)
-    ans6 = models.CharField(max_length=6,default='')
-    latency6 = models.IntegerField(default=0)
+    # four didget stats
+    fourdigit_accuracy_1 = models.FloatField(default=0,null=True)
+    fourdigit_latency_1 = models.IntegerField(default=0)
+    fourdigit_accuracy_2 = models.FloatField(default=0,null=True)
+    fourdigit_latency_2 = models.IntegerField(default=0)
+    fourdigit_accuracy_3 = models.FloatField(default=0,null=True)
+    fourdigit_latency_3 = models.IntegerField(default=0)
+    # five didgit stats
+    fivedigit_accuracy_1 = models.FloatField(default=0,null=True)
+    fivedigit_latency_1 = models.IntegerField(default=0)
+    fivedigit_accuracy_2 = models.FloatField(default=0,null=True)
+    fivedigit_latency_2 = models.IntegerField(default=0)
+    fivedigit_accuracy_3 = models.FloatField(default=0,null=True)
+    fivedigit_latency_3 = models.IntegerField(default=0)
+    # four mixed stats
+    fourmixed_accuracy_1 = models.FloatField(default=0,null=True)
+    fourmixed_latency_1 = models.IntegerField(default=0)
+    fourmixed_accuracy_2 = models.FloatField(default=0,null=True)
+    fourmixed_latency_2 = models.IntegerField(default=0)
+    fourmixed_accuracy_3 = models.FloatField(default=0,null=True)
+    fourmixed_latency_3 = models.IntegerField(default=0)
+    # five mixed stats
+    fivemixed_accuracy_1 = models.FloatField(default=0,null=True)
+    fivemixed_latency_1 = models.IntegerField(default=0)
+    fivemixed_accuracy_2 = models.FloatField(default=0,null=True)
+    fivemixed_latency_2 = models.IntegerField(default=0)
+    fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
+    fivemixed_latency_3 = models.IntegerField(default=0)
     amount_correct = models.IntegerField(default=0)
 
+    def  __str__(self):
+        return self.test.link
+
+class Stimulus_Type(models.Model):
+    stimulus_type = models.CharField(max_length=15, default='')
+    
+    def  __str__(self):
+        return self.stimulus_type
+
 class Stimulus(models.Model):
-    order = models.IntegerField(default=0)
     stimulus_content = models.CharField(max_length=6)
-    stimulus_type = models.CharField(max_length=15,default='')
+    stimulus_type = models.ForeignKey(Stimulus_Type, on_delete=models.CASCADE, default=1)
+
+    def  __str__(self):
+        return self.stimulus_content + " " + self.stimulus_type.stimulus_type
+
 
 class Response(models.Model):
+    response = models.CharField(max_length=5, default='')
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     time_submitted = models.DateTimeField(null=True)
     response_posistion = models.IntegerField(default=0)
@@ -63,9 +92,32 @@ class Response(models.Model):
 
 class Aggreagate(models.Model):
     age_group = models.CharField(max_length=10)
-    avg_latency1 = models.IntegerField(default=0)
-    avg_latency2 = models.IntegerField(default=0)
-    avg_latency3 = models.IntegerField(default=0)
-    avg_latency4 = models.IntegerField(default=0)
-    avg_latency5 = models.IntegerField(default=0)
-    avg_latency6 = models.IntegerField(default=0)
+
+    # avg four didget stats
+    avg_fourdigit_accuracy_1 = models.FloatField(default=0,null=True)
+    avg_fourdigit_latency_1 = models.IntegerField(default=0)
+    avg_fourdigit_accuracy_2 = models.FloatField(default=0,null=True)
+    avg_fourdigit_latency_2 = models.IntegerField(default=0)
+    avg_fourdigit_accuracy_3 = models.FloatField(default=0,null=True)
+    avg_fourdigit_latency_3 = models.IntegerField(default=0)
+    # avg five didgit stats
+    avg_fivedigit_accuracy_1 = models.FloatField(default=0,null=True)
+    avg_fivedigit_latency_1 = models.IntegerField(default=0)
+    avg_fivedigit_accuracy_2 = models.FloatField(default=0,null=True)
+    avg_fivedigit_latency_2 = models.IntegerField(default=0)
+    avg_fivedigit_accuracy_3 = models.FloatField(default=0,null=True)
+    avg_fivedigit_latency_3 = models.IntegerField(default=0)
+    # avg four mixed stats
+    avg_fourmixed_accuracy_1 = models.FloatField(default=0,null=True)
+    avg_fourmixed_latency_1 = models.IntegerField(default=0)
+    avg_fourmixed_accuracy_2 = models.FloatField(default=0,null=True)
+    avg_fourmixed_latency_2 = models.IntegerField(default=0)
+    avg_fourmixed_accuracy_3 = models.FloatField(default=0,null=True)
+    avg_fourmixed_latency_3 = models.IntegerField(default=0)
+    # avg five mixed stats
+    avg_fivemixed_accuracy_1 = models.FloatField(default=0,null=True)
+    avg_fivemixed_latency_1 = models.IntegerField(default=0)
+    avg_fivemixed_accuracy_2 = models.FloatField(default=0,null=True)
+    avg_fivemixed_latency_2 = models.IntegerField(default=0)
+    avg_fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
+    avg_fivemixed_latency_3 = models.IntegerField(default=0)
