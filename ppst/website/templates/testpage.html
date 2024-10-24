@@ -17,7 +17,7 @@
         </select>
         <input type="submit" value="Submit">
     </form>
-    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span test</h2><br><br>
+    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span Test</h2><br><br>
     <p id="demo_vid"></p>
     <p id="P"></p>
     <p id="submit_p"></p>
@@ -189,7 +189,7 @@
             speak(titleText);
             speak(welcomeText);
             var paragraph = document.getElementById("P");
-            paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+            paragraph.textContent = "Please turn the volume on your machine up. This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
             paragraph.style.fontSize = getFontSize();
             document.getElementById("demo_vid").appendChild(paragraph);
             speak(paragraph.textContent);
@@ -300,7 +300,6 @@
             console.log(percentage);
         }
         
-
         let currentIndex = 0;
         function displayTest(testString) {
             const testDiv = document.getElementById("test");
@@ -330,9 +329,9 @@
         const demosTest2 = "46723"; // demo2
         const demosTest3 = "6E5T";  // demo3 mixed
         const demosTest4 = "4H7A3"; // demo4 mixed
-        const test1 = "89512"; /* Num test 1 5 digit */ const test1_ans = "12589";
-        const test2 = "73406"; /* Num test 2 5 digit */ const test2_ans = "64307";
-        const test3 = "95231"; /* Num test 3 5 digit */ const test3_ans = "12359";
+        const test1 = "89512"; /* Num test 1 5 digit */ 
+        const test2 = "73406"; /* Num test 2 5 digit */ 
+        const test3 = "95231"; /* Num test 3 5 digit */ 
         const test4 = "2463";  // Num test 1 4 digit
         const test5 = "9067";  // Num test 2 4 digit
         const test6 = "8105";  // Num test 3 4 digit
@@ -343,6 +342,9 @@
         const test11 = "HY42"; // Mix test 2 4 digit
         const test12 = "P5L8"; // Mix test 3 4 digit
         
+        const test1_ans = "12589";
+        const test2_ans = "64307";
+        const test3_ans = "12359";
         const test4_ans = "2346";
         const test5_ans = "0679";
         const test6_ans = "0158";
@@ -355,5 +357,4 @@
 
     </script>
 </body>
-
 </html>
