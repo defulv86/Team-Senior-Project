@@ -29,22 +29,18 @@
                 <li><a href="#section4">Benefits</a></li>
             </ul>
         </div>
+        
+        <!-- Checks if the user is authenticated and a superuser -->
+         {% if user.is_authenticated %}
+         {% if user.is_superuser %}
+         <a href="{% url 'admin:index' %}" class="login-button">Admin Panel</a>
+         {% else %}
+         <a href="{% url 'dashboard' %}" class="login-button">Dashboard</a>
+         {% endif %}
+         {% else %}
+         <a href="{% url 'register' %}" class="login-button">Sign In</a>
+         {% endif %}
 
-        <!-- Checks for User Permission Levels for Displaying Button Type -->
-        {% if user.is_authenticated %}
-
-        {% with user.userprofile as profile %}
-        {% if profile.permission_level == 1 %}
-        <a href="{% url 'dashboard' %}" class="login-button">Dashboard</a>
-
-        {% elif profile.permission_level == 2 %}
-        <a href="{% url 'admin:index' %}" class="login-button">Admin Panel</a>
-        {% endif %}
-
-        {% endwith %}
-        {% else %}
-        <a href="{% url 'register' %}" class="login-button">Sign In</a>
-        {% endif %}
     </nav>
 
     <!-- Section 1: Introduction -->

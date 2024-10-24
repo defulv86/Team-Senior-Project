@@ -3,29 +3,6 @@ import random
 import string
 from django.contrib.auth.models import User
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    permission_level = models.IntegerField(default = 1)
-
-    def __str__(self):
-        return f"{self.user.username} - Permission Level: {self.permission_level}"
-
-class User(models.Model):
-    uname = models.CharField(max_length=50)
-    email = models.EmailField(max_length=200)
-    passwd = models.CharField(max_length=50)
-    creation_date = models.DateTimeField(auto_now=True)
-    last_login = models.DateTimeField(blank=True, null=True)
-    permission_lvl = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.uname
-
-    @property
-    def is_authenticated(self):
-        # Always return True for authenticated users
-        return True
-
 def generate_link():
     random_string = ''.join(random.choices(string.ascii_letters, k=6))
     link = f"ppst.com/{random_string}"

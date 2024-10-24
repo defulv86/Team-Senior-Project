@@ -78,7 +78,6 @@ WSGI_APPLICATION = 'ppst.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Ensure this remains if you're overriding backends
-    'website.backends.CustomUserBackend'
 ]
 
 # Database

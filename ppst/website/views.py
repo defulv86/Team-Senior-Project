@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile
 from .forms import RegistrationForm
 
 def home(request):
@@ -13,25 +12,20 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    if request.user.userprofile.permission_level == 1:
-        return render(request, 'dashboard.html')
-    else:
+    if request.user.is_superuser:
         messages.error(request, "You do not have permission to access this page.")
         return redirect('home')
 
+    else:
+        return render(request, 'dashboard.html')
+
 @login_required
 def admin(request):
-    if request.user.userprofile.permission_level == 2:
+    if request.user.is_superuser:
         return render(request, 'admin.html')
     else:
         messages.error(request, "You do not have permission to access this page.")
         return redirect('home')
-
-def promote_to_admin(user):
-    user.userprofile.permission_level = 2
-    user.userprofile.save()
-    user.is_staff = True
-    user.save()
 
 def register(request):
     if request.method == 'POST':
@@ -49,16 +43,17 @@ def register(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('uname')
+        username = request.POST.get('username')
         password = request.POST.get('passwd')
+
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('home')  # Redirect to a success page
         else:
-            messages.error(request, "Invalid username or password.")
-    
+            messages.error(request, 'Invalid username or password.')
+
     return render(request, 'login.html')
 
 def logout_view(request):
