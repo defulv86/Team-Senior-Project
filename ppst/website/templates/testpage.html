@@ -8,9 +8,18 @@
 </head>
 
 <body>
-    <h3 id="title">Online Philadelphia Pointing Span Test</h3><br><br>
+    <h3 id="title">Online Philadelphia Pointing Span Test</h3>
+    <form id="changeFont" name="changeFont">
+        Change Font Size: <select name="fontSize" id="fontSize">
+            <option value="16px">16px</option>
+            <option value="24px">24px</option>
+            <option value="32px">32px</option>
+        </select>
+        <input type="submit" value="Submit">
+    </form>
     <h2 id="Welcome">Welcome to your Philadelphia Pointing Span test</h2><br><br>
     <p id="demo_vid"></p>
+    <p id="P"></p>
     <p id="submit_p"></p>
 
     <div class="center" id="test" style="display: none;">
@@ -148,6 +157,22 @@
         <button onclick="submit()">Submit</button>
     </div>
     <script>
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var selectedFontSize = document.getElementById("fontSize").value;
+            changeFontSize(selectedFontSize);
+        });
+        
+        function changeFontSize(size) {
+            document.getElementById("P").style.fontSize = size;
+        }
+
+        function getFontSize() {
+            return document.getElementById("fontSize").value;
+        }
+        
         function speak(text) { //allows  text to be spoken
             var utterance = new SpeechSynthesisUtterance(text);
             window.speechSynthesis.speak(utterance);
@@ -163,9 +188,9 @@
             var welcomeText = document.getElementById("Welcome").textContent;
             speak(titleText);
             speak(welcomeText);
-            var paragraph = document.createElement("P");
+            var paragraph = document.getElementById("P");
             paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
-            paragraph.style.fontSize = "25px";
+            paragraph.style.fontSize = getFontSize();
             document.getElementById("demo_vid").appendChild(paragraph);
             speak(paragraph.textContent);
             document.getElementById("playDemo").style.display = "none"; // Hides button
@@ -203,9 +228,9 @@
             document.getElementById("submit").style.display = "block";
         }
         function submit() { // sends user to submission page and hides submit button
-            var paragraph = document.createElement("P");
+            var paragraph = document.getElementById("P");
             paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them. You can now exit this screen.";
-            paragraph.style.fontSize = "25px";
+            paragraph.style.fontSize = getFontSize();
             document.getElementById("submit_p").appendChild(paragraph);
             speak(paragraph.textContent);
             // remove any and all buttons
