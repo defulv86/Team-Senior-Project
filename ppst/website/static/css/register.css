@@ -1,0 +1,129 @@
+html {
+    background-color: #f0f4f8;
+    height: 100%;
+}
+
+h1 {
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    scroll-behavior: smooth;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.left-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.title {
+    position: absolute;
+    top: 100;
+    left: 100;
+    right: 120;
+    text-align: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 26px;
+}
+
+.register-form {
+    max-width: 400px;
+    /* Adjust max width as needed */
+    margin: 0 auto;
+    /* Center the form */
+    padding: 20px;
+    /* Add some padding for aesthetics */
+}
+
+.register-form input {
+    width: 100%;
+    /* Make inputs fill the width of the form */
+    max-width: 300px;
+    /* Optional: limit the max width of the inputs */
+    margin: 10px 0;
+    /* Add vertical spacing between inputs */
+    padding: 10px;
+    /* Add padding inside the inputs */
+    border: 1px solid #ccc;
+    /* Optional: add border for styling */
+    border-radius: 5px;
+    /* Optional: add rounded corners */
+}
+
+.register-form input::placeholder {
+    color: #999;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.register-form h2 {
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.register-form label {
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.right-column {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.new-line {
+    flex-basis: 10px;
+    height: 0;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #004075;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.image-container {
+    flex: 1;
+    position: relative;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.account-link {
+    color: lightgrey;
+    /* Light grey color */
+    font-size: 12px;
+    /* Smaller text size */
+    margin-top: 10px;
+    /* Space above the link */
+}

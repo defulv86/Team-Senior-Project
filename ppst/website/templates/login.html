@@ -1,43 +1,53 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  {% load static %}
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
-  rel="stylesheet">
+    <!-- Meta Tags for Character Set and Viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS file -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
-      <div class="left-column">
-        <div class="image-container">
-          <img src="{% static 'images/login.jpg' %}" alt="Description of image" class="login-image">
+        <div class="left-column">
+            <div class="image-container">
+                <img src="{% static 'images/login.jpg' %}" alt="Description of image" class="login-image">
+            </div>
+            <div class="title">
+                <h1>Online Philadelphia Pointing Span Test (PPST)</h1>
+            </div>
         </div>
-        <div class="title">
-          <h1>Online Philadelphia Pointing Span Test (PPST)</h1>
+        <div class="right-column">
+            <div class="login-form">
+                <h2>Get Started Now</h2>
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <label for="uname">Username</label>
+                    <input type="text" id="uname" name="uname" placeholder="Enter your username" required>
+                    <div class="new-line"></div>
+
+                    <label for="passwd">Password</label>
+                    <input type="password" id="passwd" name="passwd" placeholder="Enter your password" required>
+                    <div class="new-line"></div>
+
+                    <!-- Display error messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="error-message">{{ message }}</div>
+                    <div class="new-line"></div>
+                    {% endfor %}
+                    {% endif %}
+                    <button type="submit">Login</button>
+                </form>
+            </div>
         </div>
-      </div>
-      <div class="right-column">
-        <div class="login-form">
-          <h2>Get Started Now</h2>
-          <form method="post">
-            {% csrf_token %}
-            <label for="uname">Username</label>
-            <input type="text" id="uname" name="uname" placeholder="Enter your username" required>
-            <div class="new-line"></div>
-            <label for="passwd">Password</label>
-            <input type="password" id="passwd" name="passwd" placeholder="Enter your password" required>
-            <div class="new-line"></div>
-             <!-- Display error message if it exists -->
-            {% if error_message %}
-                <div class="error-message">{{ error_message }}</div>
-                <div class="new-line"></div>
-            {% endif %}
-            <button type="submit">Login</button>
-          </form>
-        </div>
-      </div>
     </div>
-  </body>
-  </html>
+</body>

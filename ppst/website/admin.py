@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import User, Test, Result, Response, Stimulus, Aggreagate, Stimulus_Type
+from .models import User, Test, Result, Response, Stimulus, Aggreagate, Stimulus_Type, UserProfile
+
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'permission_level')  # Adjust fields as needed
+
+admin.site.register(UserProfile, UserProfileAdmin)
 
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('last_login',)

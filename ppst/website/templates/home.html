@@ -29,7 +29,22 @@
                 <li><a href="#section4">Benefits</a></li>
             </ul>
         </div>
-        <a href="/login" class="login-button">Log In</a>
+
+        <!-- Checks for User Permission Levels for Displaying Button Type -->
+        {% if user.is_authenticated %}
+
+        {% with user.userprofile as profile %}
+        {% if profile.permission_level == 1 %}
+        <a href="{% url 'dashboard' %}" class="login-button">Dashboard</a>
+
+        {% elif profile.permission_level == 2 %}
+        <a href="{% url 'admin:index' %}" class="login-button">Admin Panel</a>
+        {% endif %}
+
+        {% endwith %}
+        {% else %}
+        <a href="{% url 'register' %}" class="login-button">Sign In</a>
+        {% endif %}
     </nav>
 
     <!-- Section 1: Introduction -->
@@ -82,7 +97,7 @@
                 Experience a new standard in patient care with our innovative solution tailored for healthcare excellence.
             </p>
 
-            <a href="/login" class="sign-up-button">Sign Up Today to Access These Features</a>
+            <a href="/register" class="sign-up-button">Sign Up Today to Access These Features</a>
         </div>
         <div class="services-image-container">
             <img src="{% static 'images/spreadsheet-img.jpg' %}"

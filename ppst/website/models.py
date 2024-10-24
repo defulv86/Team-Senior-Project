@@ -1,6 +1,14 @@
 from django.db import models
 import random
 import string
+from django.contrib.auth.models import User
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    permission_level = models.IntegerField(default = 1)
+
+    def __str__(self):
+        return f"{self.user.username} - Permission Level: {self.permission_level}"
 
 class User(models.Model):
     uname = models.CharField(max_length=50)

@@ -1,0 +1,76 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta Tags for Character Set and Viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS file -->
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
+        rel="stylesheet">
+    <title>Create Your Account</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-column">
+            <div class="image-container">
+                <img src="{% static 'images/login.jpg' %}" alt="Description of image" class="register-image">
+            </div>
+            <div class="title">
+                <h1>Online Philadelphia Pointing Span Test (PPST)</h1>
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="register-form">
+                <h2>Create Your Account</h2>
+                <form method="post" action="{% url 'register' %}">
+                    {% csrf_token %}
+
+                    <label for="id_username">Username</label>
+                    <input type="text" id="id_username" name="username" placeholder="Enter your username" required>
+                    {% if form.username.errors %}
+                    <div class="error-message">{{ form.username.errors }}</div>
+                    {% endif %}
+
+                    <div class="new-line"></div>
+
+                    <label for="id_email">Email</label>
+                    <div class="new-line"></div>
+                    <input type="email" id="id_email" name="email" placeholder="Enter your email" required>
+                    {% if form.email.errors %}
+                    <div class="error-message">{{ form.email.errors }}</div>
+                    {% endif %}
+
+                    <label for="id_password">Password</label>
+                    <input type="password" id="id_password" name="password" placeholder="Enter your password" required>
+                    {% if form.password.errors %}
+                    <div class="error-message">{{ form.password.errors }}</div>
+                    {% endif %}
+
+                    <label for="id_confirm_password">Confirm Password</label>
+                    <input type="password" id="id_confirm_password" name="confirm_password"
+                        placeholder="Confirm your password" required>
+                    {% if form.confirm_password.errors %}
+                    <div class="error-message">{{ form.confirm_password.errors }}</div>
+                    {% endif %}
+
+                    <div class="account-link">
+                        <p>Already have an account? <a href="/login">Sign in here.</a></p>
+                    </div>
+
+                    <button type="submit">Register</button>
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
