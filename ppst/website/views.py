@@ -138,3 +138,33 @@ def get_user_tickets(request):
         tickets = Ticket.objects.filter(user=request.user).values('category', 'description', 'created_at')
         return JsonResponse(list(tickets), safe=False)
     return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+@login_required
+def update_account(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+
+        user = request.user
+
+        # Check current password
+        if not user.check_password(current_password):
+            return JsonResponse({'error': 'Current password is incorrect.'}, status=400)
+
+        # Update user details
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        
+        # Update password if a new one is provided
+        if new_password:
+            user.set_password(new_password)
+            update_session_auth_hash(request, user)  # Keep user logged in after password change
+        
+        user.save()  # Save the updated user information
+        return JsonResponse({'message': 'Account updated successfully!'}, status=200)
+
+    return JsonResponse({'error': 'Invalid request.'}, status=400)
