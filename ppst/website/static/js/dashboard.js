@@ -1,4 +1,4 @@
-// dashboard.js
+// Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
     
@@ -26,31 +26,111 @@ function loadContent(section) {
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
             <h2>Support</h2>
-            <p>Need help? Here you can find resources, contact support, and get answers to frequently asked questions.</p>
+            <div id="support-section">
+                <div id="create-ticket">
+                    <h3>Create a Support Ticket</h3>
+                    <form id="ticketForm">
+                        <label for="category">Category:</label>
+                        <select id="category" required>
+                            <option value="general">General Issue</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="account">Account Management</option>
+                            <option value="bug/error">Bug/Error Report</option>
+                        </select>
+                        <label for="description">Issue Description:</label>
+                        <textarea id="description" rows="4" required></textarea>
+                        <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                    </form>
+                    <div id="error-message" style="color: red; display: none;"></div>
+                </div>
+                <div id="ticket-list">
+                    <h3>Your Tickets</h3>
+                    <ul id="ticket-items"></ul>
+                </div>
+            </div>
         `;
+        loadUserTickets();
     }
 }
 
-// Function to display the test buttons based on the results
-function retrieveTestResults() {
-    const dynamicContent = document.getElementById('dynamic-content');
-    dynamicContent.innerHTML += `<h3>Patient's Test Results:</h3>`; // Add a heading for the results
+// Function to submit a ticket
+function submitTicket() {
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value;
+    const errorMessage = document.getElementById('error-message');
 
-    // Assume tests is a global variable set in the template
-    tests.forEach(test => {
-        let colorClass = '';
-        if (test.status === 'complete') {
-            colorClass = 'green-button';
-        } else if (test.status === 'in_progress' || test.status === 'not_started') {
-            colorClass = 'gray-button';
-        } else if (test.status === 'invalid') {
-            colorClass = 'red-button';
+    // Ensure the form is not empty
+    if (!category || !description) {
+        errorMessage.textContent = 'Please fill in all required fields.';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    // Create form data object instead of sending JSON
+    const formData = new FormData();
+    formData.append('category', category);
+    formData.append('description', description);
+
+    // Submit the ticket via AJAX
+    fetch('/submit_ticket/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken') // Ensure CSRF protection
+        },
+        body: formData // Send form data
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            errorMessage.textContent = data.error;
+            errorMessage.style.display = 'block';
+        } else {
+            errorMessage.style.display = 'none';
+            loadUserTickets(); // Reload tickets
+            document.getElementById('ticketForm').reset(); // Clear the form
         }
-
-        // Create a button for each test with the appropriate color class
-        dynamicContent.innerHTML += `<button class="${colorClass}">${test.id} Test Results</button>`;
-    });
+    })
+    .catch(error => console.error('Error:', error));
 }
+
+// Function to load the user's tickets
+function loadUserTickets() {
+    const ticketList = document.getElementById('ticket-items');
+    ticketList.innerHTML = ''; // Clear the current list
+
+    // Fetch the user's tickets
+    fetch('/get_user_tickets/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.length === 0) {
+            ticketList.innerHTML = '<li>No tickets found.</li>';
+        } else {
+            data.forEach(ticket => {
+                const ticketItem = document.createElement('li');
+                ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                ticketList.appendChild(ticketItem);
+            });
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// CSRF token helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 
 function createTest() {
     const testContent = document.getElementById('test-content');
@@ -68,33 +148,75 @@ function generateTestLink() {
     const linkContainer = document.getElementById('generated-link');
 
     if (age) {
-        // Simulate generating a unique test link
-        const testLink = `localhost:8000/testpage/${Math.random().toString(36).substr(2, 9)}`;
-        linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                   <a href="${testLink}" target="_blank">${testLink}</a>`;
+        fetch('/create_test/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'), // CSRF Token
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ age: age })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const testLink = data.test_link;
+            linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
+                                       <a href="${testLink}" target="_blank">${testLink}</a>`;
+        })
+        .catch(error => console.error('Error:', error));
     } else {
         linkContainer.innerHTML = `<p style="color: red;">Invalid: Please enter a valid age.</p>`;
     }
 }
-
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `
-        <h2>Retrieve Patient Test Results</h2>
-        <ul class="test-list">
-            <li class="completed">Retrieve Test ID a35OLw08s4 Test Results</li>
-            <li class="invalid">Retrieve Test ID B5mDbS0d3s Test Results</li>
-            <li class="completed">Retrieve Test ID f454fd5ds3s Test Results</li>
-            <li class="completed">Retrieve Test ID Gp84rfB8SW Test Results</li>
-            <li class="incomplete">Retrieve Test ID b6Ds29c9I6 Test Results</li>
-            <li class="incomplete">Retrieve Test ID 65w45hG5ifc Test Results</li>
-        </ul>
-    `;
+    testContent.innerHTML = '<h2>Retrieve Patient Test Results</h2>';
+
+    fetch('/get_test_results/')
+    .then(response => response.json())
+    .then(data => {
+        data.tests.forEach(test => {
+            let colorClass = 'gray-button';  // Default to in-progress
+            if (test.status === 'complete') {
+                colorClass = 'blue-button';
+            } else if (test.status === 'invalid') {
+                colorClass = 'red-button';
+            }
+
+            testContent.innerHTML += `
+                <button class="${colorClass}" onclick="viewTestResults(${test.id})">
+                    Test ID ${test.id} Results
+                </button><br>`;
+        });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
-
-function goBack() {
-    loadContent('tests');
+function viewTestResults(testId) {
+    fetch(`/test_results/${testId}/`)
+    .then(response => response.json())
+    .then(data => {
+        const testContent = document.getElementById('test-content');
+        testContent.innerHTML = `
+            <h2>Test Results for ID ${testId}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.results.map(result => `
+                        <tr>
+                            <td>${result.metric}</td>
+                            <td>${result.value}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <button onclick="goBack()">Back to Tests</button>
+        `;
+    });
 }
 
 // Enable dragging for the notification popout
