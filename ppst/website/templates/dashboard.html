@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medical Personnel Dashboard</title>
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <script src="{% static 'js/sidebar.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}" defer></script>
 </head>
 <body>
     <div class="container">
@@ -15,10 +15,10 @@
                 <img src="{% static 'images/logo.png' %}" alt="Logo">
             </div>
             <ul class="menu">
-                <li><a href="#">My Account</a></li>
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Tests</a></li>
-                <li><a href="#">Support</a></li>
+                <li><a href="#myaccount" onclick="loadContent('account')">My Account</a></li>
+                <li><a href="#dashboard" onclick="loadContent('dashboard')">Dashboard</a></li>
+                <li><a href="#tests" onclick="loadContent('tests')">Tests</a></li>
+                <li><a href="#support" onclick="loadContent('support')">Support</a></li>
             </ul>
         </div>
 
@@ -28,15 +28,39 @@
             <div class="top-bar">
                 <div class="title">Medical Personnel Dashboard</div>
                 <div class="top-right">
-                    <a href="#"><i class="fa fa-bell"></i> Notifications</a>
-                    <!-- Logout link -->
+                    <a href="#" onclick="toggleNotifications(event)"><i class="fa fa-bell"></i> Notifications</a>
                     <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
                 </div>
             </div>
 
             <!-- Welcome Message -->
             <div class="welcome-message">
-                <h1>Welcome back, {{ user.first_name }}!</h1>
+                {% if user.is_authenticated %}
+                    <h1>Welcome back, {{ user.username }}!</h1>
+                {% else %}
+                    <h1>Welcome back, Guest!</h1>
+                {% endif %}
+            </div>
+
+            <!-- Content Area -->
+            <div id="dynamic-content">
+                <!-- Content for My Account, Dashboard, Tests, etc. will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Notification Popout -->
+        <div id="notification-popout" class="notification-popout">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button onclick="closeNotifications()" class="close-btn">&times;</button>
+            </div>
+            <div class="notification-body" id="notification-body">
+                <!-- Notifications will be dynamically loaded here -->
+                <p>No new notifications.</p>
+            </div>
+            <div class="notification-footer">
+                <button onclick="markAllRead()">Read All</button>
+                <button onclick="clearNotifications()">Clear</button>
             </div>
         </div>
     </div>
