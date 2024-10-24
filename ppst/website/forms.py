@@ -1,6 +1,7 @@
 # forms.py
 from django import forms
 from django.contrib.auth.models import User
+from .models import Ticket
 from .validate import validate_org_email
 
 class RegistrationForm(forms.ModelForm):
@@ -36,3 +37,22 @@ class RegistrationForm(forms.ModelForm):
 
         if password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
+
+class TicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ['category', 'description']
+        
+        widgets = {
+            'category': forms.Select(attrs={'required': True}),
+            'description': forms.Textarea(attrs={'required': True}),
+        }
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        category = cleaned_data.get("category")
+        description = cleaned_data.get("description")
+        
+        if not category or not description:
+            raise forms.ValidationError("Both category and description are required!")
+        return cleaned_data

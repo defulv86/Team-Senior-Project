@@ -186,21 +186,79 @@
             document.getElementById("d12t4").style.display = "none";
             document.getElementById("test").style.display = "block";
             displayTest(demosTest2)
-            document.getElementById("d12t4").style.display = "block"; // if else buttons for each test
+            document.getElementById("d12t4").style.display = "block";
             //show take test
-            document.getElementById("demoTest2").style.display = "none"; // change to demoTest
-            document.getElementById("takeTest").style.display = "block"; // change to demoTest
+            document.getElementById("demoTest2").style.display = "none";
+            document.getElementById("takeTest").style.display = "block";
         }
         function takeTest() { // sends user to test page and hides video/demo button 
-            document.getElementById("d12t4").style.display = "none"; // if else buttons for each test
+            document.getElementById("d12t4").style.display = "none";
             document.getElementById("takeTest").style.display = "none";
             document.getElementById("demoTest2").style.display = "none";
             document.getElementById("test").style.display = "block";
             //display specific test
             displayTest(test1);
             // display corresponding buttons
-            document.getElementById("t136").style.display = "block"; // if else buttons for each test
+            document.getElementById("t136").style.display = "block";
             document.getElementById("submit").style.display = "block";
+        }
+        let userInput = "";
+        function choice(value) { //takes selected num/let and adds to answer when submitted
+            //send buttons that were clicked to list to be saved
+            userInput += value;
+        }
+        function compareAnswers(testX) {
+            let correctAnswer;
+            switch (test1) {
+                case 1:
+                    correctAnswer = test1_ans;
+                    break;
+                case 2:
+                    correctAnswer = test2_ans;
+                    break;
+                case 3:
+                    correctAnswer = test3_ans;
+                    break;
+                case 4:
+                    correctAnswer = test4_ans;
+                    break;
+                case 5:
+                    correctAnswer = test5_ans;
+                    break;
+                case 6:
+                    correctAnswer = test6_ans;
+                    break;
+                case 7:
+                    correctAnswer = test7_ans;
+                    break;
+                case 8:
+                    correctAnswer = test8_ans;
+                    break;
+                case 9:
+                    correctAnswer = test9_ans;
+                    break;
+                case 10:
+                    correctAnswer = test10_ans;
+                    break;
+                case 11:
+                    correctAnswer = test11_ans;
+                    break;
+                case 12:
+                    correctAnswer = test12_ans;
+                    break;
+                default:
+                    console.error("Invalid test number");
+                    return;
+            }
+
+            let correctCount = 0;
+            for (let i = 0; i < userInput.length; i++) {
+                if (userInput[i] === correctAnswer[i]) {
+                    correctCount++;
+                }
+            }
+            let percentage = (correctCount / correctAnswer.length) * 100;
+            return  percentage;
         }
         function submit() { // sends user to submission page and hides submit button
             var paragraph = document.createElement("P");
@@ -209,17 +267,14 @@
             document.getElementById("submit_p").appendChild(paragraph);
             speak(paragraph.textContent);
             // remove any and all buttons
-            document.getElementById("t136").style.display =  "none";
+            document.getElementById("t136").style.display = "none";
             document.getElementById("submit").style.display = "none";
             document.getElementById("test").style.display = "none";
-            // send data to DB -> DB() 
+            // send percentage to DB
+            compareAnswers(test1);
+            console.log(percentage);
         }
-        function choice() { //takes selected num/let and adds to answer when submitted
-
-        }
-        function DB() {//send data to DB
-
-        }
+        
 
         let currentIndex = 0;
         function displayTest(testString) {
@@ -245,14 +300,14 @@
                 }
             }, 2000); //slow or speed test up /down
         }
-
+        //d12t4 = used for demo 1, 2 and test 4
         const demosTest1 = "6254";  // demo1
         const demosTest2 = "46723"; // demo2
         const demosTest3 = "6E5T";  // demo3 mixed
         const demosTest4 = "4H7A3"; // demo4 mixed
-        const test1 = "89512"; // Num test 1 5 digit
-        const test2 = "73406"; // Num test 2 5 digit
-        const test3 = "95231"; // Num test 3 5 digit
+        const test1 = "89512"; /* Num test 1 5 digit */ const test1_ans = "12589";
+        const test2 = "73406"; /* Num test 2 5 digit */ const test2_ans = "64307";
+        const test3 = "95231"; /* Num test 3 5 digit */ const test3_ans = "12359";
         const test4 = "2463";  // Num test 1 4 digit
         const test5 = "9067";  // Num test 2 4 digit
         const test6 = "8105";  // Num test 3 4 digit
@@ -262,8 +317,17 @@
         const test10 = "6F9A"; // Mix test 1 4 digit
         const test11 = "HY42"; // Mix test 2 4 digit
         const test12 = "P5L8"; // Mix test 3 4 digit
-        //answers 
         
+        const test4_ans = "2346";
+        const test5_ans = "0679";
+        const test6_ans = "0158";
+        const test7_ans = "469JK";
+        const test8_ans = "037SV";
+        const test9_ans = "034ER";
+        const test10_ans = "69AF";
+        const test11_ans = "24HY";
+        const test12_ans = "58LP";
+
     </script>
 </body>
 
