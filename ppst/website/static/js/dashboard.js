@@ -5,7 +5,26 @@ function loadContent(section) {
     if (section === 'account') {
         dynamicContent.innerHTML = `
             <h2>My Account</h2>
-            <p>Manage your account details, such as changing your password, updating your email, or editing your profile information.</p>
+            <form id="account-form">
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" name="first_name" required>
+                <br>
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" name="last_name" required>
+                <br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <br>
+                <label for="current-password">Current Password:</label>
+                <input type="password" id="current-password" name="current_password" required>
+                <br>
+                <label for="new-password">New Password:</label>
+                <input type="password" id="new-password" name="new_password">
+                <br>
+                <button type="button" onclick="saveAccountChanges()">Save Changes</button>
+            </form>
+            <div id="account-message" style="color: green;"></div>
+            <div id="account-error-message" style="color: red; display: none;"></div>
         `;
     } else if (section === 'dashboard') {
         dynamicContent.innerHTML = `
@@ -218,6 +237,46 @@ function viewTestResults(testId) {
         `;
     });
 }
+
+function saveAccountChanges() {
+    const firstName = document.getElementById('first-name').value;
+    const lastName = document.getElementById('last-name').value;
+    const email = document.getElementById('email').value;
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const accountMessage = document.getElementById('account-message');
+    const accountErrorMessage = document.getElementById('account-error-message');
+
+    // Create form data object
+    const formData = new FormData();
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('email', email);
+    formData.append('current_password', currentPassword);
+    formData.append('new_password', newPassword);
+
+    fetch('/update_account/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            accountErrorMessage.textContent = data.error;
+            accountErrorMessage.style.display = 'block';
+            accountMessage.style.display = 'none';
+        } else {
+            accountMessage.textContent = 'Account updated successfully!';
+            accountMessage.style.display = 'block';
+            accountErrorMessage.style.display = 'none';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 
 // Enable dragging for the notification popout
 let isDragging = false;
