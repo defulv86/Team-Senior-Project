@@ -16,7 +16,6 @@ class TestResponse(admin.ModelAdmin):
     readonly_fields = ('time_submitted',)
 
 admin.site.register(Stimulus)
-admin.site.register(Stimulus_Type)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Result)
 admin.site.register(Response, TestResponse)
