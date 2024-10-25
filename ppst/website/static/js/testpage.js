@@ -32,10 +32,14 @@ function playDemo() { // shows demo video and speaks/shows instructions
     speak(welcomeText);
 
     var paragraph = document.createElement("P");
-    paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+    paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span Test. Once you are prepared to proceed, click the button below to take the two demo test. Then you will be prompted to take the actual test.";
     paragraph.style.fontSize = "25px";
     paragraph = document.getElementById("P");
-    paragraph.textContent = "Please turn the volume on your machine up. This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+    paragraph.textContent = "Please turn the volume on your machine up. This is a demo video for the Philadelphia Pointing Span Test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+    paragraph.style.color =  "#0077b3";
+    paragraph.style.fontFamily = "Open Sans";
+    paragraph.style.fontWeight = "bold";
+    paragraph.classList.add("centered-text");
     paragraph.style.fontSize = getFontSize();
 
     document.getElementById("demo_vid").appendChild(paragraph);
@@ -137,8 +141,12 @@ function compareAnswers(testX) {
 
 function submit() { // sends user to submission page and hides submit button
     var paragraph = document.getElementById("P");
-    paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them. You can now exit this screen.";
+    paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span Test. Your health provider has been notified and the results will be available to them. You may now exit this screen.";
     paragraph.style.fontSize = getFontSize();
+    paragraph.style.fontSize = "30px";
+    paragraph.style.color =  "black";
+    paragraph.style.fontFamily = "Open Sans";
+    paragraph.classList.add("centered-text");
     document.getElementById("submit_p").appendChild(paragraph);
     speak(paragraph.textContent);
     document.getElementById("t136").style.display = "none";

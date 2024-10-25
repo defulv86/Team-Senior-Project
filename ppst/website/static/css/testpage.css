@@ -1,27 +1,51 @@
 h2{
     text-align: center;
-    color: blue;
+    color: #0077b3;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 40px;
+    font-weight: bold;
 }
+
+h3{
+    font-family: 'Open Sans', sans-serif;
+    font-size: 18.72px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 p{
     text-align: center;
 }
 
 .button-container {
     display: flex; 
-    justify-content: center; 
+    justify-content: center;
+    margin-top: 100px;
 }
 
 button{
-    color: aliceblue;
-    background-color: blue;
+    color: white;
+    background-color: #0077B3;
+    border: none;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: bold;
     height: 50px;
     width:  100px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px; 
+}
+
+button:hover {
+    background-color: #0056b3;
 }
 
 .center{
     top: 50%;
     position: relative;
     text-align: center;
+    justify-content: space-between;
+    
 }
 
 .testButton{
@@ -31,4 +55,18 @@ button{
     width: 75px;
     position: relative;
     text-align: center;
+    margin-top: 150px;
 }
+
+#test span{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+  .centered-text{
+    width: 50%; /* Adjust the width percentage as needed */
+    margin: 0 auto;
+    padding: 20px; /* Adjust the padding values as needed */
+    text-align: center;
+  }
