@@ -4,12 +4,16 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
+    rel="stylesheet">
     <title> Test Page</title>
 </head>
 
 <body>
     <h3 id="title">Online Philadelphia Pointing Span Test</h3><br><br>
-    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span test</h2><br><br>
+    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span Test.</h2><br><br>
     <p id="demo_vid"></p>
     <p id="submit_p"></p>
 
@@ -164,8 +168,12 @@
             speak(titleText);
             speak(welcomeText);
             var paragraph = document.createElement("P");
-            paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+            paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span Test. Once you are prepared to proceed, click the button below to take the two demo test. Then you will be prompted to take the actual test.";
             paragraph.style.fontSize = "25px";
+            paragraph.style.color =  "#0077b3";
+            paragraph.style.fontFamily = "Open Sans";
+            paragraph.style.fontWeight = "bold";
+            paragraph.classList.add("centered-text");
             document.getElementById("demo_vid").appendChild(paragraph);
             speak(paragraph.textContent);
             document.getElementById("playDemo").style.display = "none"; // Hides button
@@ -187,9 +195,11 @@
             document.getElementById("test").style.display = "block";
             displayTest(demosTest2)
             document.getElementById("d12t4").style.display = "block"; // if else buttons for each test
+            
             //show take test
             document.getElementById("demoTest2").style.display = "none"; // change to demoTest
             document.getElementById("takeTest").style.display = "block"; // change to demoTest
+
         }
         function takeTest() { // sends user to test page and hides video/demo button 
             document.getElementById("d12t4").style.display = "none"; // if else buttons for each test
@@ -204,8 +214,11 @@
         }
         function submit() { // sends user to submission page and hides submit button
             var paragraph = document.createElement("P");
-            paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them. You can now exit this screen.";
-            paragraph.style.fontSize = "25px";
+            paragraph.textContent = "You have successfully completed your Philadelphia Pointing Span Test. Your health provider has been notified of your unpdated test status. The results will be available to for your health provider's review for further medical evaluation. You may now exit this screen.";
+            paragraph.style.fontSize = "30px";
+            paragraph.style.color =  "black";
+            paragraph.style.fontFamily = "Open Sans";
+            paragraph.classList.add("centered-text");
             document.getElementById("submit_p").appendChild(paragraph);
             speak(paragraph.textContent);
             // remove any and all buttons
@@ -214,6 +227,7 @@
             document.getElementById("test").style.display = "none";
             // send data to DB -> DB() 
         }
+        
         function choice() { //takes selected num/let and adds to answer when submitted
 
         }
