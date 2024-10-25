@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "user": 1,
-            "link": "ppst.com/AtWrHX",
+            "link": "AtWrHX",
             "created_at": "2024-10-25T04:48:12.351Z",
             "started_at": null,
             "finished_at": null,
@@ -16,7 +16,7 @@
         "pk": 2,
         "fields": {
             "user": 1,
-            "link": "ppst.com/zyfyhH",
+            "link": "zyfyhH",
             "created_at": "2024-10-25T04:48:09.537Z",
             "started_at": null,
             "finished_at": null,
@@ -28,7 +28,7 @@
         "pk": 1,
         "fields": {
             "user": 1,
-            "link": "ppst.com/AtWrHX",
+            "link": "AtWrHX",
             "created_at": "2024-10-25T04:48:12.351Z",
             "started_at": null,
             "finished_at": null,
@@ -40,7 +40,7 @@
         "pk": 2,
         "fields": {
             "user": 1,
-            "link": "ppst.com/AbCDef",
+            "link": "AbCDef",
             "created_at": "2024-10-25T05:12:30.123Z",
             "started_at": "2024-10-25T05:15:00.000Z",
             "finished_at": null,
@@ -52,7 +52,7 @@
         "pk": 3,
         "fields": {
             "user": 1,
-            "link": "ppst.com/XyZ123",
+            "link": "XyZ123",
             "created_at": "2024-10-25T06:00:45.456Z",
             "started_at": null,
             "finished_at": "2024-10-25T06:05:00.000Z",
@@ -64,7 +64,7 @@
         "pk": 4,
         "fields": {
             "user": 1,
-            "link": "ppst.com/dxjogr",
+            "link": "dxjogr",
             "created_at": "2024-10-25T07:30:00.789Z",
             "started_at": "2024-10-25T07:35:00.000Z",
             "finished_at": "2024-10-25T07:40:00.000Z",
@@ -76,7 +76,7 @@
         "pk": 5,
         "fields": {
             "user": 1,
-            "link": "ppst.com/isnidx",
+            "link": "isnidx",
             "created_at": "2024-10-25T08:10:15.111Z",
             "started_at": null,
             "finished_at": null,
@@ -88,7 +88,7 @@
         "pk": 6,
         "fields": {
             "user": 1,
-            "link": "ppst.com/nivons",
+            "link": "nivons",
             "created_at": "2024-10-25T09:00:00.321Z",
             "started_at": "2024-10-25T09:05:00.000Z",
             "finished_at": "2024-10-25T09:10:00.000Z",
@@ -100,7 +100,7 @@
         "pk": 7,
         "fields": {
             "user": 1,
-            "link": "ppst.com/okofn",
+            "link": "okofn",
             "created_at": "2024-10-25T10:00:00.654Z",
             "started_at": null,
             "finished_at": null,
@@ -112,7 +112,7 @@
         "pk": 8,
         "fields": {
             "user": 1,
-            "link": "ppst.com/mofro",
+            "link": "mofro",
             "created_at": "2024-10-25T11:00:00.987Z",
             "started_at": null,
             "finished_at": "2024-10-25T11:10:00.000Z",
