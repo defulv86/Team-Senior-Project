@@ -55,15 +55,15 @@ def create_test(request):
         data = json.loads(request.body)
         age = data.get('age')
 
-        if age:
-            # Create the test object
-            test = Test.objects.create(user=request.user, age=age)
-            
-            # Build the full URL using the test link
-            test_url = request.build_absolute_uri(f"/testpage/{test.link}")
-            return JsonResponse({'test_link': test_url})
-        else:
-            return JsonResponse({'error': 'Invalid age'}, status=400)
+        if not age or int(age) < 18:
+            return JsonResponse({'error': 'Invalid age: Age must be 18 or older to create a test.'}, status=400)
+
+        # Create the test object
+        test = Test.objects.create(user=request.user, age=age)
+        
+        # Build the full URL using the test link
+        test_url = request.build_absolute_uri(f"/testpage/{test.link}")
+        return JsonResponse({'test_link': test_url})
 
 def test_page_view(request, link):
     # Fetch the test associated with the given link
