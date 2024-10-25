@@ -55,15 +55,15 @@ def create_test(request):
         data = json.loads(request.body)
         age = data.get('age')
 
-        if age:
-            # Create the test object with a unique link
-            test = Test.objects.create(user=request.user, age=age, link=get_random_string(8))
-            
-            # Build the full URL using the test link
-            test_url = request.build_absolute_uri(f"/testpage/{test.link}")
-            return JsonResponse({'test_link': test_url})
-        else:
-            return JsonResponse({'error': 'Invalid age'}, status=400)
+        if not age or int(age) < 18:
+            return JsonResponse({'error': 'Invalid age: Age must be 18 or older to create a test.'}, status=400)
+
+        # Create the test object
+        test = Test.objects.create(user=request.user, age=age)
+        
+        # Build the full URL using the test link
+        test_url = request.build_absolute_uri(f"/testpage/{test.link}")
+        return JsonResponse({'test_link': test_url})
 
 from .models import Stimulus
 def test_page_view(request, link):
@@ -232,11 +232,25 @@ def update_account(request):
         user.email = email
         
         # Update password if a new one is provided
-        if new_password:
+        if new_password:  # Only update if new password is given
             user.set_password(new_password)
             update_session_auth_hash(request, user)  # Keep user logged in after password change
-        
+
         user.save()  # Save the updated user information
         return JsonResponse({'message': 'Account updated successfully!'}, status=200)
 
     return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+# Additional view to get user information for pre-filling the form
+@login_required
+def get_user_info(request):
+    if request.method == 'GET':
+        user = request.user
+        user_info = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+        }
+        return JsonResponse(user_info)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)

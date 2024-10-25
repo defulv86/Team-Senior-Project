@@ -15,4 +15,5 @@ urlpatterns = [
     path('get_test_results/', views.get_test_results, name='get_test_results'),  # Get user's tests results
     path('test_results/<int:test_id>/', views.test_results, name='test_results'),  # Specific test results
     path('update_account/', views.update_account, name='update_account'),
+    path('get_user_info/', views.get_user_info, name='get_user_info'),
 ]

@@ -1,5 +1,13 @@
 from django.contrib import admin
-from website.models import Test, Result, Response, Stimulus, Aggreagate, Stimulus_Type, Ticket
+from .models import User, Test, Result, Response, Stimulus, Aggreagate, Stimulus_Type, Notification, Ticket
+
+class UserAdmin(admin.ModelAdmin):
+    readonly_fields = ('last_login',)
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:  # If obj is None, it means we're creating a new object
+            fields.remove('last_login')  # Hide the field during creation
+        return fields
 
 class TestAdmin(admin.ModelAdmin):
     readonly_fields = ('link','created_at','started_at','finished_at')
@@ -13,10 +21,6 @@ admin.site.register(Test, TestAdmin)
 admin.site.register(Result)
 admin.site.register(Response, TestResponse)
 admin.site.register(Aggreagate)
-
-class TicketAdmin(admin.ModelAdmin):
-    list_display = ('user', 'category', 'description', 'created_at')
-    list_filter = ('category', 'created_at')
-
-admin.site.register(Ticket, TicketAdmin)
-
+admin.site.register(Stimulus_Type)
+admin.site.register(Notification)
+admin.site.register(Ticket)
