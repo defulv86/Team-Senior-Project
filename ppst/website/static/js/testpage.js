@@ -3,7 +3,6 @@ let currentStimulusIndex = 0;
 let responseLatency = 0;
 let startTime;
 let response = ''; // Store the response from the keyboard
-let testID = 1;
 
 function flashStimulus(stimulus) {
     const stimulusDiv = document.getElementById('stimulus');
@@ -127,5 +126,41 @@ function startTest() {
         });
 }
 
+document.getElementById('start-test').addEventListener('click', function () {
+    document.getElementById('introduction').style.display = 'none';
+    startTest();
+});
 
-window.onload = startTest;
+let voices = [];
+
+// Function to populate the voice dropdown
+function populateVoices() {
+    voices = window.speechSynthesis.getVoices();
+}
+
+// Load voices when the voices are changed
+window.speechSynthesis.onvoiceschanged = populateVoices;
+
+// Function to speak the text
+function speakText() {
+    const textElement = document.getElementById('text-to-speak');
+    const text = textElement.innerText; // Get the text content
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop any ongoing speech
+
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.voice = voices[0]; // Choose the first available voice
+        speech.lang = 'en-US'; // Set the language
+        speech.volume = 1; // Volume from 0 to 1
+        speech.rate = 1; // Speed of speech
+        speech.pitch = 1; // Pitch of voice
+
+        window.speechSynthesis.speak(speech);
+    } else {
+        alert('Sorry, your browser does not support text-to-speech.');
+    }
+}
+
+document.getElementById('speak-button').addEventListener('click', speakText);
+document.addEventListener('DOMContentLoaded', populateVoices);

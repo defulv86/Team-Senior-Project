@@ -7,45 +7,67 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>PPST Test</title>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Philadelphia Pointing Span Test</h1>
-        <input type="hidden" id="test-link" value="{{ test.link }}">
-        <div id="stimulus"></div>
-        <div id="response-section">
-            <h2>Enter Your Answer:</h2>
-            <div id="digit-keyboard">
-                <button class="key" data-value="6">6</button>
-                <button class="key" data-value="2">2</button>
-                <button class="key" data-value="4">4</button>
-                <button class="key" data-value="1">1</button>
-                <button class="key" data-value="5">5</button>
-                <button class="key" data-value="3">3</button>
-            </div>
 
-            <div id="alphanumeric-keyboard" style="display: none;">
-                <button class="key" data-value="R">R</button>
-                <button class="key" data-value="K">K</button>
-                <button class="key" data-value="F">F</button>
-                <button class="key" data-value="P">P</button>
-                <button class="key" data-value="Y">Y</button>
-                <button class="key" data-value="L">L</button>
-                <button class="key" data-value="1">1</button>
-                <button class="key" data-value="2">2</button>
-                <button class="key" data-value="3">3</button>
-                <button class="key" data-value="4">4</button>
-                <button class="key" data-value="5">5</button>
-                <button class="key" data-value="6">6</button>
-            </div>
+    <div id="introduction">
+        <h1>Welcome to the Philadelphia Pointing Span Test</h1>
+        <h2>This is a demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to
+            proceed, click the button below to begin taking the test. <i class="fas fa-volume-up" id="speak-button"
+            style="font-size: 30px; cursor: pointer;"></i> </h2>
 
-            <button id="submit-response" class="btn btn-primary mt-3">Submit</button>
+        <div id="text-to-speak" style="display:none;"> Welcome to the Philadelphia Pointing Span Test. This is a
+            demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to proceed, click
+            the button below to begin taking the test.
         </div>
+
+        <div class="video-container">
+            <video width="640" height="360" controls>
+                <source src="{% static 'images\PPSTTestIntoVid.mp4' %}" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <button id="start-test">Start Test</button>
+        </div>
+
+    </div>
+
+    <input type="hidden" id="test-link" value="{{ test.link }}">
+    <div id="stimulus"></div>
+    <div id="response-section">
+        <h2>Enter Your Answer:</h2>
+        <div id="digit-keyboard">
+            <button class="key" data-value="6">6</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="3">3</button>
+        </div>
+
+        <div id="alphanumeric-keyboard" style="display: none;">
+            <button class="key" data-value="R">R</button>
+            <button class="key" data-value="K">K</button>
+            <button class="key" data-value="F">F</button>
+            <button class="key" data-value="P">P</button>
+            <button class="key" data-value="Y">Y</button>
+            <button class="key" data-value="L">L</button>
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="3">3</button>
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="6">6</button>
+        </div>
+
+        <button id="submit-response" class="btn btn-primary mt-3">Submit</button>
     </div>
 
     <script src="{% static 'js/testpage.js' %}"></script>
-    </body>
+</body>
 
 </html>
