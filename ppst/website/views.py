@@ -145,11 +145,25 @@ def update_account(request):
         user.email = email
         
         # Update password if a new one is provided
-        if new_password:
+        if new_password:  # Only update if new password is given
             user.set_password(new_password)
             update_session_auth_hash(request, user)  # Keep user logged in after password change
-        
+
         user.save()  # Save the updated user information
         return JsonResponse({'message': 'Account updated successfully!'}, status=200)
 
     return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+# Additional view to get user information for pre-filling the form
+@login_required
+def get_user_info(request):
+    if request.method == 'GET':
+        user = request.user
+        user_info = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+        }
+        return JsonResponse(user_info)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
