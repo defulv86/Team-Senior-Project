@@ -24,7 +24,7 @@ function playDemo() { // shows demo video and speaks/shows instructions
     video.width = 420;
     video.height = 300;
     video.controls = true;
-    video.src = "{% static 'images/PPSTTestIntoVid.mp4' %}";
+    video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
     var titleText = document.getElementById("title").textContent;
     var welcomeText = document.getElementById("Welcome").textContent;

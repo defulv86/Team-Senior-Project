@@ -166,7 +166,7 @@ function generateTestLink() {
     const age = document.getElementById('patient-age').value;
     const linkContainer = document.getElementById('generated-link');
 
-    if (age) {
+    if (age && age >= 18) {
         fetch('/create_test/', {
             method: 'POST',
             headers: {
@@ -177,13 +177,17 @@ function generateTestLink() {
         })
         .then(response => response.json())
         .then(data => {
-            const testLink = data.test_link;
-            linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                       <a href="${testLink}" target="_blank">${testLink}</a>`;
+            if (data.error) {
+                linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            } else {
+                const testLink = data.test_link;
+                linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
+                                           <a href="${testLink}" target="_blank">${testLink}</a>`;
+            }
         })
         .catch(error => console.error('Error:', error));
     } else {
-        linkContainer.innerHTML = `<p style="color: red;">Invalid: Please enter a valid age.</p>`;
+        linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
     }
 }
 function retrieveTestResults() {
