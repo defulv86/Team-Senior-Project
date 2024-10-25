@@ -32,10 +32,10 @@ function playDemo() { // shows demo video and speaks/shows instructions
     speak(welcomeText);
 
     var paragraph = document.createElement("P");
-    paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span Test. Once you are prepared to proceed, click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+    paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
     paragraph.style.fontSize = "25px";
     paragraph = document.getElementById("P");
-    paragraph.textContent = "Please turn the volume on your machine up. This is a demo video for the Philadelphia Pointing Span Test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
+    paragraph.textContent = "Please turn the volume on your device up. This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
     paragraph.style.color =  "#0077b3";
     paragraph.style.fontFamily = "Open Sans";
     paragraph.style.fontWeight = "bold";
