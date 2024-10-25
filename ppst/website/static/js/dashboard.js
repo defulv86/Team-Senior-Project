@@ -26,6 +26,9 @@ function loadContent(section) {
             <div id="account-message" style="color: green;"></div>
             <div id="account-error-message" style="color: red; display: none;"></div>
         `;
+
+        // calling getUserInfo() to populate the form with user info, such as first name, last name, and email.
+        getUserInfo();
     } else if (section === 'dashboard') {
         dynamicContent.innerHTML = `
             <h2>Dashboard</h2>
@@ -150,7 +153,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-
+// Function that creates a new test with a given age of 18 or older and stores it into the backend as a link.
 function createTest() {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
@@ -161,12 +164,12 @@ function createTest() {
         <div id="generated-link"></div>
     `;
 }
-
+// Function that serves as a helper to generate a test link in the createTest function.
 function generateTestLink() {
     const age = document.getElementById('patient-age').value;
     const linkContainer = document.getElementById('generated-link');
 
-    if (age) {
+    if (age && age >= 18) {
         fetch('/create_test/', {
             method: 'POST',
             headers: {
@@ -177,13 +180,17 @@ function generateTestLink() {
         })
         .then(response => response.json())
         .then(data => {
-            const testLink = data.test_link;
-            linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                       <a href="${testLink}" target="_blank">${testLink}</a>`;
+            if (data.error) {
+                linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            } else {
+                const testLink = data.test_link;
+                linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
+                                           <a href="${testLink}" target="_blank">${testLink}</a>`;
+            }
         })
         .catch(error => console.error('Error:', error));
     } else {
-        linkContainer.innerHTML = `<p style="color: red;">Invalid: Please enter a valid age.</p>`;
+        linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
     }
 }
 function retrieveTestResults() {
@@ -209,7 +216,7 @@ function retrieveTestResults() {
     })
     .catch(error => console.error('Error:', error));
 }
-
+// Function to view test results for a completed test.
 function viewTestResults(testId) {
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
@@ -237,7 +244,7 @@ function viewTestResults(testId) {
         `;
     });
 }
-
+// Function to save account changes for the user.
 function saveAccountChanges() {
     const firstName = document.getElementById('first-name').value;
     const lastName = document.getElementById('last-name').value;
@@ -276,6 +283,30 @@ function saveAccountChanges() {
     })
     .catch(error => console.error('Error:', error));
 }
+// Function to get user information
+function getUserInfo() {
+    fetch('/get_user_info/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF protection, if needed
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error(data.error);
+        } else {
+            // Populate the fields with user info
+            document.getElementById('first-name').value = data.first_name || '';
+            document.getElementById('last-name').value = data.last_name || '';
+            document.getElementById('email').value = data.email || '';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching user info:', error);
+    });
+}
+
 
 
 // Enable dragging for the notification popout
