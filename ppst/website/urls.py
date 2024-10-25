@@ -1,5 +1,4 @@
-from django.contrib.auth import views as auth_views
-from django.urls import path, include
+from django.urls import path
 from . import views
 
 urlpatterns = [
@@ -7,5 +6,12 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
-    path('testpage/', views.testpage, name='testpage'),
+    path('submit_ticket/', views.submit_ticket, name='submit_ticket'),
+    path('get_user_tickets/', views.get_user_tickets, name='get_user_tickets'),
+    path('create_test/', views.create_test, name='create_test'),  # Create test endpoint
+    path('testpage/<str:link>/', views.test_page_view, name='testpage'),  # New URL for taking the test
+    path('get_test_results/', views.get_test_results, name='get_test_results'),  # Get user's tests results
+    path('test_results/<int:test_id>/', views.test_results, name='test_results'),  # Specific test results
+    path('update_account/', views.update_account, name='update_account'),
+    path('get_user_info/', views.get_user_info, name='get_user_info'),
 ]

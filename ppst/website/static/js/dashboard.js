@@ -1,12 +1,34 @@
-// dashboard.js
+// Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
     
     if (section === 'account') {
         dynamicContent.innerHTML = `
             <h2>My Account</h2>
-            <p>Manage your account details, such as changing your password, updating your email, or editing your profile information.</p>
+            <form id="account-form">
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" name="first_name" required>
+                <br>
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" name="last_name" required>
+                <br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <br>
+                <label for="current-password">Current Password:</label>
+                <input type="password" id="current-password" name="current_password" required>
+                <br>
+                <label for="new-password">New Password:</label>
+                <input type="password" id="new-password" name="new_password">
+                <br>
+                <button type="button" onclick="saveAccountChanges()">Save Changes</button>
+            </form>
+            <div id="account-message" style="color: green;"></div>
+            <div id="account-error-message" style="color: red; display: none;"></div>
         `;
+
+        // calling getUserInfo() to populate the form with user info, such as first name, last name, and email.
+        getUserInfo();
     } else if (section === 'dashboard') {
         dynamicContent.innerHTML = `
             <h2>Dashboard</h2>
@@ -26,32 +48,112 @@ function loadContent(section) {
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
             <h2>Support</h2>
-            <p>Need help? Here you can find resources, contact support, and get answers to frequently asked questions.</p>
+            <div id="support-section">
+                <div id="create-ticket">
+                    <h3>Create a Support Ticket</h3>
+                    <form id="ticketForm">
+                        <label for="category">Category:</label>
+                        <select id="category" required>
+                            <option value="general">General Issue</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="account">Account Management</option>
+                            <option value="bug/error">Bug/Error Report</option>
+                        </select>
+                        <label for="description">Issue Description:</label>
+                        <textarea id="description" rows="4" required></textarea>
+                        <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                    </form>
+                    <div id="error-message" style="color: red; display: none;"></div>
+                </div>
+                <div id="ticket-list">
+                    <h3>Your Tickets</h3>
+                    <ul id="ticket-items"></ul>
+                </div>
+            </div>
         `;
+        loadUserTickets();
     }
 }
 
-// Function to display the test buttons based on the results
-function retrieveTestResults() {
-    const dynamicContent = document.getElementById('dynamic-content');
-    dynamicContent.innerHTML += `<h3>Patient's Test Results:</h3>`; // Add a heading for the results
+// Function to submit a ticket
+function submitTicket() {
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value;
+    const errorMessage = document.getElementById('error-message');
 
-    // Assume tests is a global variable set in the template
-    tests.forEach(test => {
-        let colorClass = '';
-        if (test.status === 'complete') {
-            colorClass = 'green-button';
-        } else if (test.status === 'in_progress' || test.status === 'not_started') {
-            colorClass = 'gray-button';
-        } else if (test.status === 'invalid') {
-            colorClass = 'red-button';
+    // Ensure the form is not empty
+    if (!category || !description) {
+        errorMessage.textContent = 'Please fill in all required fields.';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    // Create form data object instead of sending JSON
+    const formData = new FormData();
+    formData.append('category', category);
+    formData.append('description', description);
+
+    // Submit the ticket via AJAX
+    fetch('/submit_ticket/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken') // Ensure CSRF protection
+        },
+        body: formData // Send form data
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            errorMessage.textContent = data.error;
+            errorMessage.style.display = 'block';
+        } else {
+            errorMessage.style.display = 'none';
+            loadUserTickets(); // Reload tickets
+            document.getElementById('ticketForm').reset(); // Clear the form
         }
-
-        // Create a button for each test with the appropriate color class
-        dynamicContent.innerHTML += `<button class="${colorClass}">${test.id} Test Results</button>`;
-    });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
+// Function to load the user's tickets
+function loadUserTickets() {
+    const ticketList = document.getElementById('ticket-items');
+    ticketList.innerHTML = ''; // Clear the current list
+
+    // Fetch the user's tickets
+    fetch('/get_user_tickets/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.length === 0) {
+            ticketList.innerHTML = '<li>No tickets found.</li>';
+        } else {
+            data.forEach(ticket => {
+                const ticketItem = document.createElement('li');
+                ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                ticketList.appendChild(ticketItem);
+            });
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// CSRF token helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Function that creates a new test with a given age of 18 or older and stores it into the backend as a link.
 function createTest() {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
@@ -62,40 +164,150 @@ function createTest() {
         <div id="generated-link"></div>
     `;
 }
-
+// Function that serves as a helper to generate a test link in the createTest function.
 function generateTestLink() {
     const age = document.getElementById('patient-age').value;
     const linkContainer = document.getElementById('generated-link');
 
-    if (age) {
-        // Simulate generating a unique test link
-        const testLink = `localhost:8000/testpage/${Math.random().toString(36).substr(2, 9)}`;
-        linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                   <a href="${testLink}" target="_blank">${testLink}</a>`;
+    if (age && age >= 18) {
+        fetch('/create_test/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'), // CSRF Token
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ age: age })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            } else {
+                const testLink = data.test_link;
+                linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
+                                           <a href="${testLink}" target="_blank">${testLink}</a>`;
+            }
+        })
+        .catch(error => console.error('Error:', error));
     } else {
-        linkContainer.innerHTML = `<p style="color: red;">Invalid: Please enter a valid age.</p>`;
+        linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
     }
 }
-
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `
-        <h2>Retrieve Patient Test Results</h2>
-        <ul class="test-list">
-            <li class="completed">Retrieve Test ID a35OLw08s4 Test Results</li>
-            <li class="invalid">Retrieve Test ID B5mDbS0d3s Test Results</li>
-            <li class="completed">Retrieve Test ID f454fd5ds3s Test Results</li>
-            <li class="completed">Retrieve Test ID Gp84rfB8SW Test Results</li>
-            <li class="incomplete">Retrieve Test ID b6Ds29c9I6 Test Results</li>
-            <li class="incomplete">Retrieve Test ID 65w45hG5ifc Test Results</li>
-        </ul>
-    `;
+    testContent.innerHTML = '<h2>Retrieve Patient Test Results</h2>';
+
+    fetch('/get_test_results/')
+    .then(response => response.json())
+    .then(data => {
+        data.tests.forEach(test => {
+            let colorClass = 'gray-button';  // Default to in-progress
+            if (test.status === 'complete') {
+                colorClass = 'blue-button';
+            } else if (test.status === 'invalid') {
+                colorClass = 'red-button';
+            }
+
+            testContent.innerHTML += `
+                <button class="${colorClass}" onclick="viewTestResults(${test.id})">
+                    Test ID ${test.id} Results
+                </button><br>`;
+        });
+    })
+    .catch(error => console.error('Error:', error));
+}
+// Function to view test results for a completed test.
+function viewTestResults(testId) {
+    fetch(`/test_results/${testId}/`)
+    .then(response => response.json())
+    .then(data => {
+        const testContent = document.getElementById('test-content');
+        testContent.innerHTML = `
+            <h2>Test Results for ID ${testId}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.results.map(result => `
+                        <tr>
+                            <td>${result.metric}</td>
+                            <td>${result.value}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <button onclick="goBack()">Back to Tests</button>
+        `;
+    });
+}
+// Function to save account changes for the user.
+function saveAccountChanges() {
+    const firstName = document.getElementById('first-name').value;
+    const lastName = document.getElementById('last-name').value;
+    const email = document.getElementById('email').value;
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const accountMessage = document.getElementById('account-message');
+    const accountErrorMessage = document.getElementById('account-error-message');
+
+    // Create form data object
+    const formData = new FormData();
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('email', email);
+    formData.append('current_password', currentPassword);
+    formData.append('new_password', newPassword);
+
+    fetch('/update_account/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            accountErrorMessage.textContent = data.error;
+            accountErrorMessage.style.display = 'block';
+            accountMessage.style.display = 'none';
+        } else {
+            accountMessage.textContent = 'Account updated successfully!';
+            accountMessage.style.display = 'block';
+            accountErrorMessage.style.display = 'none';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+// Function to get user information
+function getUserInfo() {
+    fetch('/get_user_info/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF protection, if needed
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error(data.error);
+        } else {
+            // Populate the fields with user info
+            document.getElementById('first-name').value = data.first_name || '';
+            document.getElementById('last-name').value = data.last_name || '';
+            document.getElementById('email').value = data.email || '';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching user info:', error);
+    });
 }
 
 
-function goBack() {
-    loadContent('tests');
-}
 
 // Enable dragging for the notification popout
 let isDragging = false;
