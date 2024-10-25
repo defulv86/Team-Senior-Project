@@ -1,205 +1,131 @@
-const form = document.querySelector('form');
+let stimuli = [];
+let currentStimulusIndex = 0;
+let responseLatency = 0;
+let startTime;
+let response = ''; // Store the response from the keyboard
+let testID = 1;
 
-form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    var selectedFontSize = document.getElementById("fontSize").value;
-    changeFontSize(selectedFontSize);
+function flashStimulus(stimulus) {
+    const stimulusDiv = document.getElementById('stimulus');
+    const digitKeyboard = document.getElementById('digit-keyboard');
+    const alphanumericKeyboard = document.getElementById('alphanumeric-keyboard');
+    const responseSection = document.getElementById('response-section');
+
+    // Hide both keyboards and the response section initially
+    digitKeyboard.style.display = 'none';
+    alphanumericKeyboard.style.display = 'none';
+    responseSection.style.display = 'none'; // Hide the response section
+
+    const stimulusContent = stimulus.stimulus_content;
+    let currentCharIndex = 0;
+
+    // Function to show the next character
+    const showNextChar = () => {
+        if (currentCharIndex < stimulusContent.length) {
+            stimulusDiv.textContent = stimulusContent[currentCharIndex];
+            currentCharIndex++;
+            setTimeout(showNextChar, 1000); // Show next character after 1 second
+        } else {
+            // Clear the stimulus and show the keyboard
+            stimulusDiv.textContent = '';
+            if (stimulus.stimulus_type.includes('Digit')) {
+                digitKeyboard.style.display = 'flex';
+            } else if (stimulus.stimulus_type.includes('Mixed')) {
+                alphanumericKeyboard.style.display = 'flex';
+            }
+            responseSection.style.display = 'block'; // Show the response section again
+        }
+    };
+
+    // Start showing characters
+    showNextChar();
+}
+
+// Add event listeners for keyboard buttons
+document.querySelectorAll('.key').forEach(key => {
+    key.addEventListener('click', () => {
+        if (key.dataset.value === 'C') {
+            response = '';  // Clear input
+        } else {
+            response += key.dataset.value;  // Append clicked key value
+        }
+        console.log(response); // For debugging
+    });
 });
 
-function changeFontSize(size) {
-    document.getElementById("P").style.fontSize = size;
+function nextStimulus() {
+    if (currentStimulusIndex < stimuli.length) {
+        startTime = new Date().getTime();
+        flashStimulus(stimuli[currentStimulusIndex]);
+        currentStimulusIndex++;
+        response = ''; // Reset response for next stimulus
+    } else {
+        document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
+        document.getElementById('response-section').style.display = 'none';
+    }
 }
 
-function getFontSize() {
-    return document.getElementById("fontSize").value;
-}
-
-function speak(text) { // allows text to be spoken
-    var utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-}
-
-function playDemo() { // shows demo video and speaks/shows instructions
-    var video = document.createElement("VIDEO");
-    video.width = 420;
-    video.height = 300;
-    video.controls = true;
-    video.src = "{% static 'images/PPSTTestIntoVid.mp4' %}";
-    document.getElementById("demo_vid").appendChild(video); // shows video
-    var titleText = document.getElementById("title").textContent;
-    var welcomeText = document.getElementById("Welcome").textContent;
-    speak(titleText);
-    speak(welcomeText);
-
-    var paragraph = document.createElement("P");
-    paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
-    paragraph.style.fontSize = "25px";
-    paragraph = document.getElementById("P");
-    paragraph.textContent = "Please turn the volume on your machine up. This is a demo video for the Philadelphia Pointing Span test. Once you are prepared to proceed click the button below to take the two demo test. Then you will be prompted to take the actual test.";
-    paragraph.style.fontSize = getFontSize();
-
-    document.getElementById("demo_vid").appendChild(paragraph);
-    speak(paragraph.textContent);
-    document.getElementById("playDemo").style.display = "none"; // Hides button
-    document.getElementById("demoTest1").style.display = "block"; // shows demo1 video
-}
-
-function demoTest1() {
-    // show demo test1
-    document.getElementById("demo_vid").style.display = "none";
-    document.getElementById("test").style.display = "block";
-    displayTest(demosTest1);
-    // show buttons
-    document.getElementById("d12t4").style.display = "block"; // if else buttons for each test
-    document.getElementById("demoTest1").style.display = "none"; // change to demoTest
-    document.getElementById("demoTest2").style.display = "block"; // change to demoTest
-}
-
-function demoTest2() {
-    // show demo test2
-    document.getElementById("d12t4").style.display = "none";
-    document.getElementById("test").style.display = "block";
-    displayTest(demosTest2);
-    document.getElementById("d12t4").style.display = "block";
-    // show take test
-    document.getElementById("demoTest2").style.display = "none";
-    document.getElementById("takeTest").style.display = "block";
-}
-
-function takeTest() { // sends user to test page and hides video/demo button 
-    document.getElementById("d12t4").style.display = "none";
-    document.getElementById("takeTest").style.display = "none";
-    document.getElementById("demoTest2").style.display = "none";
-    document.getElementById("test").style.display = "block";
-    displayTest(test1);
-    document.getElementById("t136").style.display = "block";
-    document.getElementById("submit").style.display = "block";
-}
-
-let userInput = "";
-function choice(value) { // takes selected num/let and adds to answer when submitted
-    userInput += value;
-}
-
-function compareAnswers(testX) {
-    let correctAnswer;
-    switch (test1) {
-        case 1:
-            correctAnswer = test1_ans;
-            break;
-        case 2:
-            correctAnswer = test2_ans;
-            break;
-        case 3:
-            correctAnswer = test3_ans;
-            break;
-        case 4:
-            correctAnswer = test4_ans;
-            break;
-        case 5:
-            correctAnswer = test5_ans;
-            break;
-        case 6:
-            correctAnswer = test6_ans;
-            break;
-        case 7:
-            correctAnswer = test7_ans;
-            break;
-        case 8:
-            correctAnswer = test8_ans;
-            break;
-        case 9:
-            correctAnswer = test9_ans;
-            break;
-        case 10:
-            correctAnswer = test10_ans;
-            break;
-        case 11:
-            correctAnswer = test11_ans;
-            break;
-        case 12:
-            correctAnswer = test12_ans;
-            break;
-        default:
-            console.error("Invalid test number");
-            return;
+document.getElementById('submit-response').addEventListener('click', () => {
+    if (!response) {
+        alert('Please enter a response before submitting.');
+        return;
     }
 
-    let correctCount = 0;
-    for (let i = 0; i < userInput.length; i++) {
-        if (userInput[i] === correctAnswer[i]) {
-            correctCount++;
-        }
+    const currentStimulus = stimuli[currentStimulusIndex - 1];
+    const maxLength = currentStimulus.stimulus_content.length;
+
+    // Truncate response if it exceeds the maximum length
+    if (response.length > maxLength) {
+        response = response.substring(0, maxLength);
     }
-    let percentage = (correctCount / correctAnswer.length) * 100;
-    return percentage;
+
+    fetch('/submit-response/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            link: testLink,
+            response_text: response, // The response input from the user
+            stimulus_id: currentStimulus.id, // Use the correct stimulus ID
+            response_position: currentStimulusIndex // Current position in the stimulus sequence
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Error:', response.statusText);
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(() => {
+            response = ''; // Reset response after submission
+            nextStimulus();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            alert('An error occurred while submitting your response. Please try again.');
+        });
+});
+
+function startTest() {
+    testLink = document.getElementById('test-link').value; // Retrieve the test link
+
+    fetch('/get-stimuli/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            stimuli = data; // Use the newly ordered stimuli
+            nextStimulus();
+        })
+        .catch(error => {
+            console.error('Error fetching stimuli:', error);
+        });
 }
 
-function submit() { // sends user to submission page and hides submit button
-    var paragraph = document.getElementById("P");
-    paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span test. Your health provider has been notified and the results will be available to them. You can now exit this screen.";
-    paragraph.style.fontSize = getFontSize();
-    document.getElementById("submit_p").appendChild(paragraph);
-    speak(paragraph.textContent);
-    document.getElementById("t136").style.display = "none";
-    document.getElementById("submit").style.display = "none";
-    document.getElementById("test").style.display = "none";
-    compareAnswers(test1);
-    console.log(percentage);
-}
 
-let currentIndex = 0;
-function displayTest(testString) {
-    const testDiv = document.getElementById("test");
-    testDiv.innerHTML = "";
-    currentIndex = 0;
-
-    const interval = setInterval(() => {
-        if (currentIndex < testString.length) {
-            const letter = document.createElement("span");
-            letter.textContent = testString[currentIndex];
-            letter.style.fontSize = "90px"; // font size
-            testDiv.appendChild(letter);
-            speak(testString[currentIndex]);  // speak the letter or number
-
-            setTimeout(() => {
-                testDiv.removeChild(letter);
-            }, 1000);
-
-            currentIndex++;
-        } else {
-            clearInterval(interval);
-        }
-    }, 2000); // slow or speed test up /down
-}
-
-// d12t4 = used for demo 1, 2 and test 4
-const demosTest1 = "6254";  // demo1
-const demosTest2 = "46723"; // demo2
-const demosTest3 = "6E5T";  // demo3 mixed
-const demosTest4 = "4H7A3"; // demo4 mixed
-const test1 = "89512"; /* Num test 1 5 digit */ 
-const test2 = "73406"; /* Num test 2 5 digit */ 
-const test3 = "95231"; /* Num test 3 5 digit */ 
-const test4 = "2463";  // Num test 1 4 digit
-const test5 = "9067";  // Num test 2 4 digit
-const test6 = "8105";  // Num test 3 4 digit
-const test7 = "946KJ"; // Mix test 1 5 digit
-const test8 = "S370V"; // Mix test 2 5 digit
-const test9 = "30RE4"; // Mix test 3 5 digit
-const test10 = "6F9A"; // Mix test 1 4 digit
-const test11 = "HY42"; // Mix test 2 4 digit
-const test12 = "P5L8"; // Mix test 3 4 digit
-
-const test1_ans = "12589";
-const test2_ans = "64307";
-const test3_ans = "12359";
-const test4_ans = "2346";
-const test5_ans = "0679";
-const test6_ans = "0158";
-const test7_ans = "469JK";
-const test8_ans = "037SV";
-const test9_ans = "034ER";
-const test10_ans = "69AF";
-const test11_ans = "24HY";
-const test12_ans = "58LP";
+window.onload = startTest;

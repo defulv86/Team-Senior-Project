@@ -8,9 +8,9 @@ from .models import Ticket, Test, Result
 import json
 
 def home(request):
-    all_users = User.objects.all
+    all_users = User.objects.all()  # Call the method to get all users
     return render(request, 'home.html', {
-        'all':all_users
+        'all': all_users
     })
 
 def login_view(request):
@@ -34,8 +34,6 @@ def login_view(request):
     
     return render(request, 'login.html', {'error_message': error_message})
 
-
-
 def logout_view(request):
     auth_logout(request)  # Logs out the user
     return redirect('login')  # Redirects to the login page after logout
@@ -48,6 +46,8 @@ def dashboard(request):
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
 
+from django.utils.crypto import get_random_string  # For generating unique links
+
 @csrf_exempt
 @login_required
 def create_test(request):
@@ -56,8 +56,8 @@ def create_test(request):
         age = data.get('age')
 
         if age:
-            # Create the test object
-            test = Test.objects.create(user=request.user, age=age)
+            # Create the test object with a unique link
+            test = Test.objects.create(user=request.user, age=age, link=get_random_string(8))
             
             # Build the full URL using the test link
             test_url = request.build_absolute_uri(f"/testpage/{test.link}")
@@ -65,13 +65,51 @@ def create_test(request):
         else:
             return JsonResponse({'error': 'Invalid age'}, status=400)
 
+from .models import Stimulus
 def test_page_view(request, link):
-    # Fetch the test associated with the given link
-    test = get_object_or_404(Test, link=link)
-    
-    # Here you can render the test page with the test data
-    return render(request, 'testpage.html', {'test': test})
+    try:
+        test = Test.objects.get(link=link)
+        stimuli = Stimulus.objects.all()
+        return render(request, 'testpage.html', {'test': test, 'stimuli': stimuli})
+    except Test.DoesNotExist:
+        return render(request, '404.html')
 
+
+from .models import Response
+
+@csrf_exempt
+def submit_response(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            link = data['link']  # Get the link from the request data
+            stimulus_id = data['stimulus_id']
+            response_text = data['response_text']  # Match the field name to the JSON data
+            response_position = data['response_position']
+
+            # Fetch the Test instance using the provided link
+            test = Test.objects.get(link=link)
+
+            # Create and save the Response instance
+            response_instance = Response(
+                response=response_text,
+                test=test,
+                stimulus=Stimulus.objects.get(id=stimulus_id),
+                response_position=response_position
+            )
+            response_instance.save()
+
+            return JsonResponse({'status': 'success'})
+
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing field: {str(e)}'}, status=400)
+        except Test.DoesNotExist:
+            return JsonResponse({'error': 'Test not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request.'}, status=400)
+    
 @login_required
 def get_test_results(request):
     tests = Test.objects.filter(user=request.user)
@@ -81,6 +119,55 @@ def get_test_results(request):
     } for test in tests]
 
     return JsonResponse({'tests': test_data})
+
+def get_stimuli(request):
+    stimuli = Stimulus.objects.select_related('stimulus_type').all()
+    
+    # Organizing question presentation by type
+    ordered_stimuli = {
+        '4_Span_Digit_Pr': [],
+        '5_Span_Digit_Pr': [],
+        '4_Span_Digit': [],
+        '5_Span_Digit': [],
+        '4_Span_Mixed_Pr': [],
+        '5_Span_Mixed_Pr': [],
+        '4_Span_Mixed': [],
+        '5_Span_Mixed': []
+    }
+    
+    for stimulus in stimuli:
+        if stimulus.stimulus_type.stimulus_type == '4_Span_Digit':
+            ordered_stimuli['4_Span_Digit'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Digit':
+            ordered_stimuli['5_Span_Digit'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '4_Span_Mixed':
+            ordered_stimuli['4_Span_Mixed'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Mixed':
+            ordered_stimuli['5_Span_Mixed'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '4_Span_Digit_Pr':
+            ordered_stimuli['4_Span_Digit_Pr'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Digit_Pr':
+            ordered_stimuli['5_Span_Digit_Pr'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '4_Span_Mixed_Pr':
+            ordered_stimuli['4_Span_Mixed_Pr'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Mixed_Pr':
+            ordered_stimuli['5_Span_Mixed_Pr'].append(stimulus)
+
+    final_stimuli = (
+        ordered_stimuli['4_Span_Digit_Pr'] +
+        ordered_stimuli['5_Span_Digit_Pr'] +
+        ordered_stimuli['4_Span_Digit'] +
+        ordered_stimuli['5_Span_Digit'] +
+        ordered_stimuli['4_Span_Mixed_Pr'] +
+        ordered_stimuli['5_Span_Mixed_Pr'] +
+        ordered_stimuli['4_Span_Mixed'] +
+        ordered_stimuli['5_Span_Mixed']
+    )
+
+    # Convert to a list of dictionaries for JSON response
+    response_data = [{'id': stim.id, 'stimulus_content': stim.stimulus_content, 'stimulus_type': stim.stimulus_type.stimulus_type} for stim in final_stimuli]
+    
+    return JsonResponse(response_data, safe=False)
 
 
 @login_required

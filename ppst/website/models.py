@@ -9,15 +9,15 @@ def generate_link():
     return random_string  # Only return the random string
 
 class Test(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    link = models.CharField(default=generate_link ,max_length=100, null=True)
-    created_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    link = models.CharField(max_length=8, unique=True, default=generate_link)
+    created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     age = models.IntegerField(default=0)
-    
+
     def __str__(self):
-        return self.link
+        return f"Test for {self.user.username} ({self.link})"
 
 class Result(models.Model):
     test = models.ForeignKey(Test,on_delete=models.CASCADE)
@@ -54,26 +54,33 @@ class Result(models.Model):
     def  __str__(self):
         return self.test.link
 
+from django.db import models
+
 class Stimulus_Type(models.Model):
     stimulus_type = models.CharField(max_length=15, default='')
-    
-    def  __str__(self):
+
+    def __str__(self):
         return self.stimulus_type
 
 class Stimulus(models.Model):
     stimulus_content = models.CharField(max_length=6)
     stimulus_type = models.ForeignKey(Stimulus_Type, on_delete=models.CASCADE, default=1)
 
-    def  __str__(self):
-        return self.stimulus_content + " " + self.stimulus_type.stimulus_type
+    def __str__(self):
+        return f"{self.stimulus_content} ({self.stimulus_type})"
 
+from django.utils import timezone
 
 class Response(models.Model):
     response = models.CharField(max_length=5, default='')
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
-    time_submitted = models.DateTimeField(null=True)
-    response_posistion = models.IntegerField(default=0)
-    stimulus = models.ForeignKey(Stimulus, on_delete=models.CASCADE, default=1)
+    time_submitted = models.DateTimeField(default=timezone.now)  # Set default to current time
+    response_position = models.IntegerField(default=0)
+    stimulus = models.ForeignKey(Stimulus, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Response: {self.response} for {self.stimulus} in Test {self.test.link}"
+
 
 class Aggreagate(models.Model):
     age_group = models.CharField(max_length=10)
