@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'website',
 ]
+AUTHENTICATION_BACKENDS = [
+    'website.backends.CustomUserBackend'
+]
 
 
 MIDDLEWARE = [
@@ -77,8 +80,7 @@ WSGI_APPLICATION = 'ppst.wsgi.application'
 
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Ensure this remains if you're overriding backends
-    'website.backends.CustomUserBackend'
+    'django.contrib.auth.backends.ModelBackend' 
 ]
 
 # Database

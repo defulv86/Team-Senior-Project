@@ -1,0 +1,58 @@
+[
+    {
+        "model": "website.stimulus",
+        "pk": 1,
+        "fields": {
+            "stimulus_content": "6542",
+            "stimulus_type": 1
+        }
+    },
+    {
+        "model": "website.stimulus",
+        "pk": 2,
+        "fields": {
+            "stimulus_content": "2462",
+            "stimulus_type": 1
+        }
+    },
+    {
+        "model": "website.stimulus",
+        "pk": 3,
+        "fields": {
+            "stimulus_content": "6734",
+            "stimulus_type": 1
+        }
+    },
+    {
+        "model": "website.stimulus",
+        "pk": 4,
+        "fields": {
+            "stimulus_content": "4F2D",
+            "stimulus_type": 2
+        }
+    },
+    {
+        "model": "website.stimulus",
+        "pk": 5,
+        "fields": {
+            "stimulus_content": "6F3N1",
+            "stimulus_type": 4
+        }
+    },
+    {
+        "model": "website.stimulus",
+        "pk": 6,
+        "fields": {
+            "stimulus_content": "4J9O2",
+            "stimulus_type": 4
+        }
+    },
+    {
+        "model": "website.stimulus",
+        "pk": 7,
+        "fields": {
+            "stimulus_content": "8593",
+            "stimulus_type": 1
+        }
+    }
+]

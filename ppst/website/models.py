@@ -1,30 +1,15 @@
 from django.db import models
 import random
 import string
+from django.contrib.auth.models import User
 
-class User(models.Model):
-    uname = models.CharField(max_length=50)
-    email = models.EmailField(max_length=200)
-    passwd = models.CharField(max_length=50)
-    creation_date = models.DateTimeField(auto_now=True)
-    last_login = models.DateTimeField(blank=True, null=True)
-    permission_lvl = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.uname
-
-    @property
-    def is_authenticated(self):
-        # Always return True for authenticated users
-        return True
 
 def generate_link():
     random_string = ''.join(random.choices(string.ascii_letters, k=6))
-    link = f"ppst.com/{random_string}"
-    return link
+    return random_string  # Only return the random string
 
 class Test(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     link = models.CharField(default=generate_link ,max_length=100, null=True)
     created_at = models.DateTimeField(auto_now=True)
     started_at = models.DateTimeField(null=True)
@@ -87,8 +72,11 @@ class Response(models.Model):
     response = models.CharField(max_length=5, default='')
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     time_submitted = models.DateTimeField(null=True)
-    response_posistion = models.IntegerField(default=0)
+    response_position = models.IntegerField(default=0)
     stimulus = models.ForeignKey(Stimulus, on_delete=models.CASCADE, default=1)
+    
+    def  __str__(self):
+        return self.test.link + " Response number: " + str(self.response_position)
 
 class Aggreagate(models.Model):
     age_group = models.CharField(max_length=10)
@@ -121,3 +109,31 @@ class Aggreagate(models.Model):
     avg_fivemixed_latency_2 = models.IntegerField(default=0)
     avg_fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
     avg_fivemixed_latency_3 = models.IntegerField(default=0)
+
+    def  __str__(self):
+        return "Age Group: " + self.age_group
+
+
+# Ticket model.
+class Ticket(models.Model):
+    CATEGORY_CHOICES = [
+        ('general', 'General Issue'),
+        ('technical', 'Technical'),
+        ('account', 'Account Management'),
+        ('bug/error', 'Bug/Error Report'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Ticket {self.id} - {self.category} by {self.user.username}"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    header = models.CharField(max_length=50)
+    message = models.CharField(max_length=100)
+    time_created = models.DateTimeField(auto_now=True)
+    is_dismissed = models.BooleanField(default=False)
