@@ -3,7 +3,7 @@
         "model": "website.notification",
         "pk": 1,
         "fields": {
-            "user": 1,
+            "test": 1,
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink1 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T09:00:00.000Z",
@@ -14,7 +14,7 @@
         "model": "website.notification",
         "pk": 2,
         "fields": {
-            "user": 1,
+            "test": 2,
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink2 has been successfully completed.",
             "time_created": "2024-10-25T09:15:00.000Z",
@@ -25,7 +25,7 @@
         "model": "website.notification",
         "pk": 3,
         "fields": {
-            "user": 1,
+            "test": 3,
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink3 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T09:30:00.000Z",
@@ -36,7 +36,7 @@
         "model": "website.notification",
         "pk": 4,
         "fields": {
-            "user": 1,
+            "test": 4,
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink4 has been successfully completed.",
             "time_created": "2024-10-25T09:45:00.000Z",
@@ -47,7 +47,7 @@
         "model": "website.notification",
         "pk": 5,
         "fields": {
-            "user": 1,
+            "test": 5,
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink5 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T10:00:00.000Z",
@@ -58,7 +58,7 @@
         "model": "website.notification",
         "pk": 6,
         "fields": {
-            "user": 1,
+            "test": 6,
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink6 has been successfully completed.",
             "time_created": "2024-10-25T10:15:00.000Z",
@@ -69,7 +69,7 @@
         "model": "website.notification",
         "pk": 7,
         "fields": {
-            "user": 1,
+            "test": 7,
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink7 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T10:30:00.000Z",
@@ -80,7 +80,7 @@
         "model": "website.notification",
         "pk": 8,
         "fields": {
-            "user": 1,
+            "test": 8,
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink8 has been successfully completed.",
             "time_created": "2024-10-25T10:45:00.000Z",
