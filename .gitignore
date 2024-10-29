@@ -5,3 +5,4 @@ ppst/website/__pycache__
 virtual.zip
 **/migrations/*
 !**/migrations/__init__.py
+ppst/db.sqlite3
