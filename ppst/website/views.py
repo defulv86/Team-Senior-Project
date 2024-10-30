@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from .models import Ticket, Test, Result
+from .models import Ticket, Test, Result, Notification
 import json
 
 def home(request):
@@ -166,4 +166,14 @@ def get_user_info(request):
         }
         return JsonResponse(user_info)
 
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# @login_required
+def get_user_notifications(request):
+    if request.method == 'GET':
+        tests = Test.objects.filter(user=request.user)
+        notifications = Notification.objects.filter(test__in=tests, is_dismissed=False).values('message', 'time_created').order_by('-time_created')
+        print(list(tests))
+        return JsonResponse(list(notifications), safe=False)
+    
     return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -17,7 +17,7 @@ class Test(models.Model):
     age = models.IntegerField(default=0)
     
     def __str__(self):
-        return self.link
+        return self.link + " " + self.user.username
 
 class Result(models.Model):
     test = models.ForeignKey(Test,on_delete=models.CASCADE)
@@ -135,7 +135,7 @@ class Notification(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE, default=1)
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
-    time_created = models.DateTimeField(auto_now=True)
+    time_created = models.DateTimeField(auto_now_add=True)
     is_dismissed = models.BooleanField(default=False)
 
     def  __str__(self):
