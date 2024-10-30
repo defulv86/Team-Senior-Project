@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from website.models import Ticket, Test, Notification, Aggreagate, Response, Result, Stimulus, Stimulus_Type
+from website.models import Ticket, Test, Notification, Aggregate, Response, Result, Stimulus, Stimulus_Type
 from django.utils import timezone
 from datetime import datetime
 
@@ -8,7 +8,7 @@ User.objects.all().delete()
 Test.objects.all().delete()
 Ticket.objects.all().delete()
 Notification.objects.all().delete()
-Aggreagate.objects.all().delete()
+Aggregate.objects.all().delete()
 Response.objects.all().delete()
 Result.objects.all().delete()
 Stimulus.objects.all().delete()
@@ -52,7 +52,7 @@ aggregates_data = [
 ]
 
 for aggregate_data in aggregates_data:
-    Aggreagate.objects.create(**aggregate_data)
+    Aggregate.objects.create(**aggregate_data)
 
 
 # Results data

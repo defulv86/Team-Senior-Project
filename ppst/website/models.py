@@ -78,7 +78,7 @@ class Response(models.Model):
     def  __str__(self):
         return self.test.link + " Response number: " + str(self.response_position)
 
-class Aggreagate(models.Model):
+class Aggregate(models.Model):
     min_age = models.IntegerField()
     max_age = models.IntegerField()
 
