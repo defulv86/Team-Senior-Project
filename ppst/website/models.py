@@ -60,8 +60,9 @@ class Response(models.Model):
     def  __str__(self):
         return self.test.link + " Response number: " + str(self.response_position)
 
-class Aggreagate(models.Model):
-    age_group = models.CharField(max_length=10)
+class Aggregate(models.Model):
+    min_age = models.IntegerField()
+    max_age = models.IntegerField()
 
     # avg four didget stats
     avg_fourdigit_accuracy_1 = models.FloatField(default=0,null=True)
@@ -92,8 +93,8 @@ class Aggreagate(models.Model):
     avg_fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
     avg_fivemixed_latency_3 = models.IntegerField(default=0)
 
-    def  __str__(self):
-        return "Age Group: " + self.age_group
+    def __str__(self):
+        return f"Age Group: {self.min_age}-{self.max_age}"
 
 
 # Ticket model.

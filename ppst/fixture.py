@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from website.models import Ticket, Test, Notification, Aggreagate, Response, Result, Stimulus, Stimulus_Type
+from website.models import Ticket, Test, Notification, Aggregate, Response, Result, Stimulus, Stimulus_Type
 from django.utils import timezone
 from datetime import datetime
 
@@ -8,7 +8,7 @@ User.objects.all().delete()
 Test.objects.all().delete()
 Ticket.objects.all().delete()
 Notification.objects.all().delete()
-Aggreagate.objects.all().delete()
+Aggregate.objects.all().delete()
 Response.objects.all().delete()
 Result.objects.all().delete()
 Stimulus.objects.all().delete()
@@ -46,13 +46,13 @@ Notification.objects.create(
 
 # Aggregates data
 aggregates_data = [
-    {"age_group": "50-60", "avg_fourdigit_accuracy_1": 0.0, "avg_fourdigit_latency_1": 0, "avg_fourdigit_accuracy_2": 0.0, "avg_fourdigit_latency_2": 0, "avg_fourdigit_accuracy_3": 0.0, "avg_fourdigit_latency_3": 0, "avg_fivedigit_accuracy_1": 0.0, "avg_fivedigit_latency_1": 0, "avg_fivedigit_accuracy_2": 0.0, "avg_fivedigit_latency_2": 0, "avg_fivedigit_accuracy_3": 0.0, "avg_fivedigit_latency_3": 0, "avg_fourmixed_accuracy_1": 0.0, "avg_fourmixed_latency_1": 0, "avg_fourmixed_accuracy_2": 0.0, "avg_fourmixed_latency_2": 0, "avg_fourmixed_accuracy_3": 0.0, "avg_fourmixed_latency_3": 0, "avg_fivemixed_accuracy_1": 0.0, "avg_fivemixed_latency_1": 0, "avg_fivemixed_accuracy_2": 0.0, "avg_fivemixed_latency_2": 0, "avg_fivemixed_accuracy_3": 0.0, "avg_fivemixed_latency_3": 0},
-    {"age_group": "60-70", "avg_fourdigit_accuracy_1": 0.75, "avg_fourdigit_latency_1": 150, "avg_fourdigit_accuracy_2": 0.68, "avg_fourdigit_latency_2": 160, "avg_fourdigit_accuracy_3": 0.72, "avg_fourdigit_latency_3": 155, "avg_fivedigit_accuracy_1": 0.65, "avg_fivedigit_latency_1": 200, "avg_fivedigit_accuracy_2": 0.70, "avg_fivedigit_latency_2": 180, "avg_fivedigit_accuracy_3": 0.67, "avg_fivedigit_latency_3": 190, "avg_fourmixed_accuracy_1": 0.80, "avg_fourmixed_latency_1": 140, "avg_fourmixed_accuracy_2": 0.78, "avg_fourmixed_latency_2": 145, "avg_fourmixed_accuracy_3": 0.82, "avg_fourmixed_latency_3": 135, "avg_fivemixed_accuracy_1": 0.60, "avg_fivemixed_latency_1": 210, "avg_fivemixed_accuracy_2": 0.63, "avg_fivemixed_latency_2": 205, "avg_fivemixed_accuracy_3": 0.62, "avg_fivemixed_latency_3": 215},
-    {"age_group": "70-80", "avg_fourdigit_accuracy_1": 0.70, "avg_fourdigit_latency_1": 160, "avg_fourdigit_accuracy_2": 0.65, "avg_fourdigit_latency_2": 170, "avg_fourdigit_accuracy_3": 0.69, "avg_fourdigit_latency_3": 165, "avg_fivedigit_accuracy_1": 0.58, "avg_fivedigit_latency_1": 220, "avg_fivedigit_accuracy_2": 0.62, "avg_fivedigit_latency_2": 215, "avg_fivedigit_accuracy_3": 0.60, "avg_fivedigit_latency_3": 225, "avg_fourmixed_accuracy_1": 0.75, "avg_fourmixed_latency_1": 155, "avg_fourmixed_accuracy_2": 0.77, "avg_fourmixed_latency_2": 150, "avg_fourmixed_accuracy_3": 0.74, "avg_fourmixed_latency_3": 160, "avg_fivemixed_accuracy_1": 0.55, "avg_fivemixed_latency_1": 230, "avg_fivemixed_accuracy_2": 0.57, "avg_fivemixed_latency_2": 240, "avg_fivemixed_accuracy_3": 0.54, "avg_fivemixed_latency_3": 235}
+    {"min_age": 50, "max_age": 60, "avg_fourdigit_accuracy_1": 0.0, "avg_fourdigit_latency_1": 0, "avg_fourdigit_accuracy_2": 0.0, "avg_fourdigit_latency_2": 0, "avg_fourdigit_accuracy_3": 0.0, "avg_fourdigit_latency_3": 0, "avg_fivedigit_accuracy_1": 0.0, "avg_fivedigit_latency_1": 0, "avg_fivedigit_accuracy_2": 0.0, "avg_fivedigit_latency_2": 0, "avg_fivedigit_accuracy_3": 0.0, "avg_fivedigit_latency_3": 0, "avg_fourmixed_accuracy_1": 0.0, "avg_fourmixed_latency_1": 0, "avg_fourmixed_accuracy_2": 0.0, "avg_fourmixed_latency_2": 0, "avg_fourmixed_accuracy_3": 0.0, "avg_fourmixed_latency_3": 0, "avg_fivemixed_accuracy_1": 0.0, "avg_fivemixed_latency_1": 0, "avg_fivemixed_accuracy_2": 0.0, "avg_fivemixed_latency_2": 0, "avg_fivemixed_accuracy_3": 0.0, "avg_fivemixed_latency_3": 0},
+    {"min_age": 60, "max_age": 70, "avg_fourdigit_accuracy_1": 0.75, "avg_fourdigit_latency_1": 150, "avg_fourdigit_accuracy_2": 0.68, "avg_fourdigit_latency_2": 160, "avg_fourdigit_accuracy_3": 0.72, "avg_fourdigit_latency_3": 155, "avg_fivedigit_accuracy_1": 0.65, "avg_fivedigit_latency_1": 200, "avg_fivedigit_accuracy_2": 0.70, "avg_fivedigit_latency_2": 180, "avg_fivedigit_accuracy_3": 0.67, "avg_fivedigit_latency_3": 190, "avg_fourmixed_accuracy_1": 0.80, "avg_fourmixed_latency_1": 140, "avg_fourmixed_accuracy_2": 0.78, "avg_fourmixed_latency_2": 145, "avg_fourmixed_accuracy_3": 0.82, "avg_fourmixed_latency_3": 135, "avg_fivemixed_accuracy_1": 0.60, "avg_fivemixed_latency_1": 210, "avg_fivemixed_accuracy_2": 0.63, "avg_fivemixed_latency_2": 205, "avg_fivemixed_accuracy_3": 0.62, "avg_fivemixed_latency_3": 215},
+    {"min_age": 70, "max_age": 80, "avg_fourdigit_accuracy_1": 0.70, "avg_fourdigit_latency_1": 160, "avg_fourdigit_accuracy_2": 0.65, "avg_fourdigit_latency_2": 170, "avg_fourdigit_accuracy_3": 0.69, "avg_fourdigit_latency_3": 165, "avg_fivedigit_accuracy_1": 0.58, "avg_fivedigit_latency_1": 220, "avg_fivedigit_accuracy_2": 0.62, "avg_fivedigit_latency_2": 215, "avg_fivedigit_accuracy_3": 0.60, "avg_fivedigit_latency_3": 225, "avg_fourmixed_accuracy_1": 0.75, "avg_fourmixed_latency_1": 155, "avg_fourmixed_accuracy_2": 0.77, "avg_fourmixed_latency_2": 150, "avg_fourmixed_accuracy_3": 0.74, "avg_fourmixed_latency_3": 160, "avg_fivemixed_accuracy_1": 0.55, "avg_fivemixed_latency_1": 230, "avg_fivemixed_accuracy_2": 0.57, "avg_fivemixed_latency_2": 240, "avg_fivemixed_accuracy_3": 0.54, "avg_fivemixed_latency_3": 235}
 ]
 
 for aggregate_data in aggregates_data:
-    Aggreagate.objects.create(**aggregate_data)
+    Aggregate.objects.create(**aggregate_data)
 
 
 # Results data

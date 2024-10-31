@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Test, Result, Response, Stimulus, Aggreagate, Stimulus_Type, Notification, Ticket
+from .models import User, Test, Result, Response, Stimulus, Aggregate, Stimulus_Type, Notification, Ticket
 
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('last_login',)
@@ -19,7 +19,7 @@ admin.site.register(Stimulus)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Result)
 admin.site.register(Response, TestResponse)
-admin.site.register(Aggreagate)
+admin.site.register(Aggregate)
 admin.site.register(Stimulus_Type)
 admin.site.register(Notification)
 admin.site.register(Ticket)
