@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from .models import Ticket, Test, Result, Aggregate
+from .models import Ticket, Test, Result, Aggregate, Stimulus, Response
 from dateutil import parser
 from django.utils import timezone
 import json
@@ -67,7 +67,7 @@ def create_test(request):
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
         return JsonResponse({'test_link': test_url})
 
-from .models import Stimulus
+
 def test_page_view(request, link):
     try:
         test = Test.objects.get(link=link)
@@ -77,7 +77,6 @@ def test_page_view(request, link):
         return render(request, '404.html')
 
 
-from .models import Response
 
 @csrf_exempt
 def submit_response(request):
@@ -259,39 +258,52 @@ def test_results(request, test_id):
     
     # Full list of relevant fields for comparisons
     metrics = [
-        'fourdigit_accuracy_1', 'fourdigit_latency_1', 
-        'fourdigit_accuracy_2', 'fourdigit_latency_2',
-        'fourdigit_accuracy_3', 'fourdigit_latency_3',
-        'fivedigit_accuracy_1', 'fivedigit_latency_1',
-        'fivedigit_accuracy_2', 'fivedigit_latency_2',
-        'fivedigit_accuracy_3', 'fivedigit_latency_3',
-        'fourmixed_accuracy_1', 'fourmixed_latency_1',
-        'fourmixed_accuracy_2', 'fourmixed_latency_2',
-        'fourmixed_accuracy_3', 'fourmixed_latency_3',
-        'fivemixed_accuracy_1', 'fivemixed_latency_1',
-        'fivemixed_accuracy_2', 'fivemixed_latency_2',
-        'fivemixed_accuracy_3', 'fivemixed_latency_3'
+        'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+        'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+        'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+        'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
-    
+
     for metric in metrics:
-        user_value = getattr(result, metric, None)
+        # Retrieve the patient's accuracy and latency for each metric
+        user_accuracy = result.character_accuracies.get(metric)
+        user_latency = result.character_latencies.get(metric)
         
-        # Retrieve the corresponding aggregate value
-        avg_value = getattr(age_group, f"avg_{metric}", None) if age_group else None
-        
-        # Only add if both values are available
-        if user_value is not None and avg_value is not None:
-            comparison = "above average" if user_value > avg_value else "below average"
+        # Retrieve the average values from the Aggregate model JSON fields
+        avg_accuracy = age_group.average_accuracies.get(metric) if age_group else None
+        avg_latency = age_group.average_latencies.get(metric) if age_group else None
+
+        # Only add if both values are available for accuracy and latency
+        if user_accuracy is not None and avg_accuracy is not None:
+            comparison = "above average" if user_accuracy > avg_accuracy else "below average"
             test_results.append({
-                "metric": metric,
-                "value": user_value,
-                "average": avg_value,
+                "metric": f"{metric}_accuracy",
+                "value": user_accuracy,
+                "average": avg_accuracy,
+                "comparison": comparison
+            })
+        
+        if user_latency is not None and avg_latency is not None:
+            comparison = "above average" if user_latency > avg_latency else "below average"
+            test_results.append({
+                "metric": f"{metric}_latency",
+                "value": user_latency,
+                "average": avg_latency,
                 "comparison": comparison
             })
 
     # Prepare aggregate data for a separate table
     aggregate_results = [
-        {"metric": metric, "average": getattr(age_group, f"avg_{metric}", None)}
+        {
+            "metric": f"{metric}_accuracy",
+            "average": age_group.average_accuracies.get(metric) if age_group else None
+        }
+        for metric in metrics
+    ] + [
+        {
+            "metric": f"{metric}_latency",
+            "average": age_group.average_latencies.get(metric) if age_group else None
+        }
         for metric in metrics
     ]
 
@@ -304,7 +316,6 @@ def test_results(request, test_id):
         "aggregate_results": aggregate_results,
         "amount_correct": amount_correct
     })
-
 
 
 # Handle ticket submission (for non-staff users)

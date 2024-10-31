@@ -228,13 +228,13 @@ let isViewingTest = false;
 
 function viewTestResults(testId) {
     const testContent = document.getElementById('test-content');
-    isViewingTest = true; // Set to true when viewing specific test results
-    toggleTestButtons(); // Hide the test buttons when viewing test results
+    isViewingTest = true;
+    toggleTestButtons();
+
     // Fetch the test results for the selected test ID
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
     .then(data => {
-        // Display specific test results
         const testResultsTable = `
             <div class="table-container">
                 <h2>Test Results for ID ${testId}</h2>
@@ -264,10 +264,9 @@ function viewTestResults(testId) {
             </div>
         `;
 
-        // Display aggregate results for the age group
         const aggregateTable = `
             <div class="table-container">
-                <h3>Aggregate Results for Age Group 50-59</h3>
+                <h3>Aggregate Results for Age Group</h3>
                 <table class="results-table">
                     <thead>
                         <tr>
@@ -287,7 +286,7 @@ function viewTestResults(testId) {
             </div>
         `;
 
-        // Display results, add a "Back to Test Results" button, and add "Export to Spreadsheet" button
+        // Render results and provide navigation buttons
         testContent.innerHTML = testResultsTable + aggregateTable + `
             <button onclick="retrieveTestResults()">Back to Test Results</button>
             <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
