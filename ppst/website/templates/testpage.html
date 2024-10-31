@@ -5,7 +5,6 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
     <title> Test Page</title>
-    <title> Test Page</title>
 </head>
 
 <body>
@@ -33,7 +32,6 @@
     </div>
 
     <div class="center" id="d12t4" style="display: none;">
-    <div class="center" id="d12t4" style="display: none;">
         <button class="testButton" , onclick="choice">1</button>
         <button class="testButton" , onclick="choice">2</button>
         <button class="testButton" , onclick="choice">3</button>
@@ -82,11 +80,6 @@
         <button class="testButton" , onclick="choice">0</button>
         <button class="testButton" , onclick="choice">0</button>
     </div>
-    <div class="center" id="dem3" style="display: none;">
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">6</button>
     <div class="center" id="dem3" style="display: none;">
         <button class="testButton" , onclick="choice">3</button>
         <button class="testButton" , onclick="choice">4</button>
@@ -232,16 +225,6 @@
     <div class="center" id="takeTest" style="display: none;">
         <button onclick="takeTest()">Take the test</button>
     </div>
-    <div class="center" id="t12" style="display: none;">
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">7</button>
-        <button class="testButton" , onclick="choice">8</button>
-        <button class="testButton" , onclick="choice">L</button>
-        <button class="testButton" , onclick="choice">N</button>
-        <button class="testButton" , onclick="choice">P</button>
-        <button class="testButton" , onclick="choice">R</button>
-    </div>
 
     <div class="center" id="demoTest1" style="display: none;">
         <button onclick="demoTest1()">Demo Test 1</button>
@@ -347,8 +330,7 @@
             document.getElementById("demoTest2").style.display = "none";
             document.getElementById("takeTest").style.display = "block";
         }
-        function takeTest() { // sends user to test page and hides video/demo button 
-            document.getElementById("d12t4").style.display = "none";
+
         function takeTest() { // sends user to test page and hides video/demo button 
             document.getElementById("d12t4").style.display = "none";
             document.getElementById("takeTest").style.display = "none";
@@ -438,31 +420,7 @@
             // send percentage to DB
             compareAnswers(test1);
             console.log(percentage);
-        }
-        
-        let currentIndex = 0;
-        function displayTest(testString) {
-            const testDiv = document.getElementById("test");
-            testDiv.innerHTML = "";
-            currentIndex = 0;
-
-            const interval = setInterval(() => {
-                if (currentIndex < testString.length) {
-                    const letter = document.createElement("span");
-                    letter.textContent = testString[currentIndex];
-                    letter.style.fontSize = "90px"; //font size 
-                    testDiv.appendChild(letter);
-                    speak(testString[currentIndex]);  //speak the letter or number
-
-                    setTimeout(() => {
-                        testDiv.removeChild(letter);
-                    }, 1000);
-
-            // send percentage to DB
-            compareAnswers(test1);
-            console.log(percentage);
-        }
-        
+        }     
 
         let currentIndex = 0;
         function displayTest(testString) {
