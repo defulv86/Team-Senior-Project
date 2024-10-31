@@ -1,8 +1,7 @@
 let stimuli = [];
 let currentStimulusIndex = 0;
-let responseLatency = 0;
-let startTime;
 let response = ''; // Store the response from the keyboard
+const timestamps = [];
 
 function flashStimulus(stimulus) {
     const stimulusDiv = document.getElementById('stimulus');
@@ -27,6 +26,10 @@ function flashStimulus(stimulus) {
         } else {
             // Clear the stimulus and show the keyboard
             stimulusDiv.textContent = '';
+
+            const keyboardShowTime = new Date().toISOString();
+            timestamps.push(keyboardShowTime);
+
             if (stimulus.stimulus_type.includes('Digit')) {
                 digitKeyboard.style.display = 'flex';
             } else if (stimulus.stimulus_type.includes('Mixed')) {
@@ -43,11 +46,8 @@ function flashStimulus(stimulus) {
 // Add event listeners for keyboard buttons
 document.querySelectorAll('.key').forEach(key => {
     key.addEventListener('click', () => {
-        if (key.dataset.value === 'C') {
-            response = '';  // Clear input
-        } else {
-            response += key.dataset.value;  // Append clicked key value
-        }
+        response += key.dataset.value;  // Append clicked key value
+        timestamps.push(new Date().toISOString()); // Capture timestamp for each character entered
         console.log(response); // For debugging
     });
 });
@@ -58,10 +58,24 @@ function nextStimulus() {
         flashStimulus(stimuli[currentStimulusIndex]);
         currentStimulusIndex++;
         response = ''; // Reset response for next stimulus
+        timestamps.length = 0; // Clear timestamps for the next stimulus
     } else {
         document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
         document.getElementById('response-section').style.display = 'none';
     }
+}
+
+function get_correct_answer(stimulus) {
+    if (stimulus.stimulus_type.includes('Digit')) {
+        // Sort digits in numerical order
+        return stimulus.stimulus_content.split('').sort((a, b) => a - b).join('');
+    } else if (stimulus.stimulus_type.includes('Mixed')) {
+        // Sort digits numerically and letters alphabetically
+        const digits = stimulus.stimulus_content.split('').filter(char => !isNaN(char)).sort();
+        const letters = stimulus.stimulus_content.split('').filter(char => isNaN(char)).sort();
+        return digits.concat(letters).join('');
+    }
+    return '';
 }
 
 document.getElementById('submit-response').addEventListener('click', () => {
@@ -73,10 +87,11 @@ document.getElementById('submit-response').addEventListener('click', () => {
     const currentStimulus = stimuli[currentStimulusIndex - 1];
     const maxLength = currentStimulus.stimulus_content.length;
 
-    // Truncate response if it exceeds the maximum length
-    if (response.length > maxLength) {
-        response = response.substring(0, maxLength);
-    }
+    const correctAnswer = get_correct_answer(currentStimulus);
+
+    // Calculate character accuracies and latencies
+    const characterLatencies = [];
+    const accuracies = [];
 
     fetch('/submit-response/', {
         method: 'POST',
@@ -85,9 +100,13 @@ document.getElementById('submit-response').addEventListener('click', () => {
         },
         body: JSON.stringify({
             link: testLink,
-            response_text: response, // The response input from the user
-            stimulus_id: currentStimulus.id, // Use the correct stimulus ID
-            response_position: currentStimulusIndex // Current position in the stimulus sequence
+            response_text: response,
+            stimulus_id: currentStimulus.id,
+            response_position: currentStimulusIndex,
+            character_latencies: characterLatencies, // Send latencies to the backend
+            accuracies: accuracies, // Send accuracies to the backend
+            expected_stimulus: correctAnswer, // Send the expected stimulus for accuracy checks
+            timestamps: timestamps
         })
     })
         .then(response => {
@@ -99,12 +118,21 @@ document.getElementById('submit-response').addEventListener('click', () => {
         })
         .then(() => {
             response = ''; // Reset response after submission
+            timestamps.length = 0; // Clear the timestamps for the next response
             nextStimulus();
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
             alert('An error occurred while submitting your response. Please try again.');
         });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('response-input').addEventListener('input', (event) => {
+        response = event.target.value; // Update the response variable
+        const firstCharacterTime = new Date().toISOString();
+        timestamps.push(firstCharacterTime);
+    });
 });
 
 function startTest() {

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from .models import Ticket, Test, Result
+from dateutil import parser
 import json
 
 def home(request):
@@ -82,15 +83,22 @@ def submit_response(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            link = data['link']  # Get the link from the request data
+            link = data['link']
             stimulus_id = data['stimulus_id']
-            response_text = data['response_text']  # Match the field name to the JSON data
+            response_text = data['response_text']
             response_position = data['response_position']
+            character_latencies = data.get('character_latencies', [])
+            timestamps = data.get('timestamps', [])
+            expected_stimulus = data['expected_stimulus']
+
+            print("Timestamps:", timestamps)
+            if not isinstance(timestamps, list):
+                return JsonResponse({'error': 'Timestamps must be a list.'}, status=400)
 
             # Fetch the Test instance using the provided link
             test = Test.objects.get(link=link)
 
-            # Create and save the Response instance
+            # Save the response instance
             response_instance = Response(
                 response=response_text,
                 test=test,
@@ -98,6 +106,52 @@ def submit_response(request):
                 response_position=response_position
             )
             response_instance.save()
+
+            # Initialize latencies and accuracies lists
+            accuracies = []
+            character_latencies = []
+
+            if timestamps:
+                # Reference time should be when the keyboard was shown
+                reference_timestamp = timestamps[0]  # Keyboard show time
+                # Ensure the first character timestamp is the second element (index 1)
+                if len(timestamps) > 1:
+                    first_character_timestamp = timestamps[1]  # First character time
+                else:
+                    return JsonResponse({'error': 'Not enough timestamps available.'}, status=400)
+
+                character_latencies = []
+
+                # Calculate latency for the first character based on its timestamp
+                latency = (parser.isoparse(first_character_timestamp) - 
+                    parser.isoparse(reference_timestamp)).total_seconds() * 1000  # Convert to milliseconds
+                character_latencies.append(latency)
+
+                # Now calculate latencies for subsequent characters
+                for index in range(2, len(response_text)):
+                    current_timestamp = timestamps[index]  # Use the timestamp for the current character
+        
+                # Calculate latency
+                    latency = (parser.isoparse(current_timestamp) - 
+                        parser.isoparse(first_character_timestamp)).total_seconds() * 1000  # From first character time
+                    character_latencies.append(latency)
+
+            else:
+                return JsonResponse({'error': 'No timestamps available.'}, status=400)
+
+            # Save latencies and accuracies in the Results table
+            result, created = Result.objects.get_or_create(test=test)
+
+            # Store latencies and accuracies for this response position
+            if response_position not in result.character_latencies:
+                result.character_latencies[response_position] = []
+            result.character_latencies[response_position].extend(character_latencies)
+
+            if response_position not in result.character_accuracies:
+                result.character_accuracies[response_position] = []
+            result.character_accuracies[response_position].extend(accuracies)
+
+            result.save()  # Save the updated Result
 
             return JsonResponse({'status': 'success'})
 
@@ -109,7 +163,7 @@ def submit_response(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request.'}, status=400)
-    
+
 @login_required
 def get_test_results(request):
     tests = Test.objects.filter(user=request.user)
