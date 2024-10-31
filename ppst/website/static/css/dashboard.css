@@ -14,14 +14,21 @@ body {
 .container {
     display: flex;
     width: 100%;
+    margin-left: 200px; /* Matches sidebar width */
 }
 
+
 .sidebar {
+    position: fixed; /* Fixes the sidebar position */
+    top: 0;
+    left: 0;
     width: 200px;
+    height: 100vh; /* Full height of the viewport */
     background-color: #00a0e3;
     display: flex;
     flex-direction: column;
     padding-top: 20px;
+    overflow-y: auto; /* Allows sidebar content to scroll if it overflows */
 }
 
 .sidebar .logo {
@@ -53,6 +60,8 @@ body {
 .content {
     flex: 1;
     padding: 20px;
+    overflow-y: auto; /* Allows scrolling within the content area */
+    max-height: 100vh; /* Restrict content area height to viewport */
 }
 
 .top-bar {
@@ -212,4 +221,5 @@ body {
 .results-table .below-average {
     color: red;
     font-weight: bold;
-}
+}   
+
