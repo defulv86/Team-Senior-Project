@@ -65,11 +65,40 @@ Notification.objects.create(
 )
 
 
-# Aggregates data
 aggregates_data = [
-    {"min_age": 50, "max_age": 59, "avg_fourdigit_accuracy_1": 0.79, "avg_fourdigit_latency_1": 140, "avg_fourdigit_accuracy_2": 0.74, "avg_fourdigit_latency_2": 150, "avg_fourdigit_accuracy_3": 0.70, "avg_fourdigit_latency_3": 160, "avg_fivedigit_accuracy_1": 0.68, "avg_fivedigit_latency_1": 190, "avg_fivedigit_accuracy_2": 0.71, "avg_fivedigit_latency_2": 175, "avg_fivedigit_accuracy_3": 0.65, "avg_fivedigit_latency_3": 190, "avg_fourmixed_accuracy_1": 0.76, "avg_fourmixed_latency_1": 120, "avg_fourmixed_accuracy_2": 0.80, "avg_fourmixed_latency_2": 155, "avg_fourmixed_accuracy_3": 0.84, "avg_fourmixed_latency_3": 125, "avg_fivemixed_accuracy_1": 0.65, "avg_fivemixed_latency_1": 185, "avg_fivemixed_accuracy_2": 0.71, "avg_fivemixed_latency_2": 195, "avg_fivemixed_accuracy_3": 0.72, "avg_fivemixed_latency_3": 200},
-    {"min_age": 60, "max_age": 69, "avg_fourdigit_accuracy_1": 0.75, "avg_fourdigit_latency_1": 150, "avg_fourdigit_accuracy_2": 0.68, "avg_fourdigit_latency_2": 160, "avg_fourdigit_accuracy_3": 0.72, "avg_fourdigit_latency_3": 155, "avg_fivedigit_accuracy_1": 0.65, "avg_fivedigit_latency_1": 200, "avg_fivedigit_accuracy_2": 0.70, "avg_fivedigit_latency_2": 180, "avg_fivedigit_accuracy_3": 0.67, "avg_fivedigit_latency_3": 190, "avg_fourmixed_accuracy_1": 0.80, "avg_fourmixed_latency_1": 140, "avg_fourmixed_accuracy_2": 0.78, "avg_fourmixed_latency_2": 145, "avg_fourmixed_accuracy_3": 0.82, "avg_fourmixed_latency_3": 135, "avg_fivemixed_accuracy_1": 0.60, "avg_fivemixed_latency_1": 210, "avg_fivemixed_accuracy_2": 0.63, "avg_fivemixed_latency_2": 205, "avg_fivemixed_accuracy_3": 0.62, "avg_fivemixed_latency_3": 215},
-    {"min_age": 70, "max_age": 79, "avg_fourdigit_accuracy_1": 0.70, "avg_fourdigit_latency_1": 160, "avg_fourdigit_accuracy_2": 0.65, "avg_fourdigit_latency_2": 170, "avg_fourdigit_accuracy_3": 0.69, "avg_fourdigit_latency_3": 165, "avg_fivedigit_accuracy_1": 0.58, "avg_fivedigit_latency_1": 220, "avg_fivedigit_accuracy_2": 0.62, "avg_fivedigit_latency_2": 215, "avg_fivedigit_accuracy_3": 0.60, "avg_fivedigit_latency_3": 225, "avg_fourmixed_accuracy_1": 0.75, "avg_fourmixed_latency_1": 155, "avg_fourmixed_accuracy_2": 0.77, "avg_fourmixed_latency_2": 150, "avg_fourmixed_accuracy_3": 0.74, "avg_fourmixed_latency_3": 160, "avg_fivemixed_accuracy_1": 0.55, "avg_fivemixed_latency_1": 230, "avg_fivemixed_accuracy_2": 0.57, "avg_fivemixed_latency_2": 240, "avg_fivemixed_accuracy_3": 0.54, "avg_fivemixed_latency_3": 235}
+    {
+        "min_age": 50,
+        "max_age": 59,
+        "average_latencies": {
+            "fourdigit_1": 140,
+            "fourdigit_2": 150,
+            "fourdigit_3": 160,
+            "fivedigit_1": 190,
+            "fivedigit_2": 175,
+            "fivedigit_3": 190,
+            "fourmixed_1": 120,
+            "fourmixed_2": 155,
+            "fourmixed_3": 125,
+            "fivemixed_1": 185,
+            "fivemixed_2": 195,
+            "fivemixed_3": 200
+        },
+        "average_accuracies": {
+            "fourdigit_1": 0.79,
+            "fourdigit_2": 0.74,
+            "fourdigit_3": 0.70,
+            "fivedigit_1": 0.68,
+            "fivedigit_2": 0.71,
+            "fivedigit_3": 0.65,
+            "fourmixed_1": 0.76,
+            "fourmixed_2": 0.80,
+            "fourmixed_3": 0.84,
+            "fivemixed_1": 0.65,
+            "fivemixed_2": 0.71,
+            "fivemixed_3": 0.72
+        }
+    },
+    # Add more dictionaries for other age groups as needed
 ]
 
 for aggregate_data in aggregates_data:
@@ -78,22 +107,13 @@ for aggregate_data in aggregates_data:
 
 
 
+# Results data
 results_data = [
     {
-        "test": completed_test, 
-        "fourdigit_accuracy_1": 0.82, "fourdigit_latency_1": 130,
-        "fourdigit_accuracy_2": 0.78, "fourdigit_latency_2": 140,
-        "fourdigit_accuracy_3": 0.75, "fourdigit_latency_3": 150,
-        "fivedigit_accuracy_1": 0.69, "fivedigit_latency_1": 185,
-        "fivedigit_accuracy_2": 0.73, "fivedigit_latency_2": 165,
-        "fivedigit_accuracy_3": 0.68, "fivedigit_latency_3": 180,
-        "fourmixed_accuracy_1": 0.79, "fourmixed_latency_1": 115,
-        "fourmixed_accuracy_2": 0.81, "fourmixed_latency_2": 145,
-        "fourmixed_accuracy_3": 0.85, "fourmixed_latency_3": 130,
-        "fivemixed_accuracy_1": 0.67, "fivemixed_latency_1": 180,
-        "fivemixed_accuracy_2": 0.74, "fivemixed_latency_2": 190,
-        "fivemixed_accuracy_3": 0.73, "fivemixed_latency_3": 195,
-        "amount_correct": 10  # Set within the range of actual test questions
+        "test": completed_test,
+        "character_latencies": {0: [150, 140, 130], 1: [160, 155, 150], 2: [140, 135, 130]},  # Example latencies by position
+        "character_accuracies": {0: [1, 0, 1], 1: [1, 1, 0], 2: [0, 1, 1]},  # Example accuracies by position
+        "amount_correct": 10
     }
 ]
 

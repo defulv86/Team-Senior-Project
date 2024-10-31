@@ -100,37 +100,20 @@ class Aggregate(models.Model):
     min_age = models.IntegerField()
     max_age = models.IntegerField()
 
-    # avg four didget stats
-    avg_fourdigit_accuracy_1 = models.FloatField(default=0,null=True)
-    avg_fourdigit_latency_1 = models.IntegerField(default=0)
-    avg_fourdigit_accuracy_2 = models.FloatField(default=0,null=True)
-    avg_fourdigit_latency_2 = models.IntegerField(default=0)
-    avg_fourdigit_accuracy_3 = models.FloatField(default=0,null=True)
-    avg_fourdigit_latency_3 = models.IntegerField(default=0)
-    # avg five didgit stats
-    avg_fivedigit_accuracy_1 = models.FloatField(default=0,null=True)
-    avg_fivedigit_latency_1 = models.IntegerField(default=0)
-    avg_fivedigit_accuracy_2 = models.FloatField(default=0,null=True)
-    avg_fivedigit_latency_2 = models.IntegerField(default=0)
-    avg_fivedigit_accuracy_3 = models.FloatField(default=0,null=True)
-    avg_fivedigit_latency_3 = models.IntegerField(default=0)
-    # avg four mixed stats
-    avg_fourmixed_accuracy_1 = models.FloatField(default=0,null=True)
-    avg_fourmixed_latency_1 = models.IntegerField(default=0)
-    avg_fourmixed_accuracy_2 = models.FloatField(default=0,null=True)
-    avg_fourmixed_latency_2 = models.IntegerField(default=0)
-    avg_fourmixed_accuracy_3 = models.FloatField(default=0,null=True)
-    avg_fourmixed_latency_3 = models.IntegerField(default=0)
-    # avg five mixed stats
-    avg_fivemixed_accuracy_1 = models.FloatField(default=0,null=True)
-    avg_fivemixed_latency_1 = models.IntegerField(default=0)
-    avg_fivemixed_accuracy_2 = models.FloatField(default=0,null=True)
-    avg_fivemixed_latency_2 = models.IntegerField(default=0)
-    avg_fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
-    avg_fivemixed_latency_3 = models.IntegerField(default=0)
+    # Store average latencies and accuracies for different metrics in JSON format
+    average_latencies = models.JSONField(default=dict, blank=True)  # e.g., {'fourdigit_1': 140, 'fivedigit_1': 190, ...}
+    average_accuracies = models.JSONField(default=dict, blank=True)  # e.g., {'fourdigit_1': 0.79, 'fivedigit_1': 0.68, ...}
 
     def __str__(self):
         return f"Age Group: {self.min_age}-{self.max_age}"
+
+    def get_metric_average(self, metric_name):
+        """
+        Retrieve the average accuracy and latency for a specified metric, if available.
+        """
+        accuracy = self.average_accuracies.get(metric_name)
+        latency = self.average_latencies.get(metric_name)
+        return {"accuracy": accuracy, "latency": latency}
 
 
 # Ticket model.
