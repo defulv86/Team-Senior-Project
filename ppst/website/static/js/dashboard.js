@@ -195,8 +195,11 @@ function generateTestLink() {
 }
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = '<h2>Retrieve Patient Test Results</h2>';
+    testContent.innerHTML = `
+        <h2>Retrieve Patient Test Results</h2>
+    `;
 
+    // Load test results
     fetch('/get_test_results/')
     .then(response => response.json())
     .then(data => {
@@ -220,14 +223,19 @@ function retrieveTestResults() {
     .catch(error => console.error('Error:', error));
 }
 
-// Function to view test results for a completed test.
+// Track if we're in test viewing mode
+let isViewingTest = false;
+
 function viewTestResults(testId) {
+    const testContent = document.getElementById('test-content');
+    isViewingTest = true; // Set to true when viewing specific test results
+    toggleTestButtons(); // Hide the test buttons when viewing test results
+
+    // Fetch the test results for the selected test ID
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
     .then(data => {
-        const testContent = document.getElementById('test-content');
-
-        // Table for specific test results
+        // Display specific test results
         const testResultsTable = `
             <div class="table-container">
                 <h2>Test Results for ID ${testId}</h2>
@@ -257,7 +265,6 @@ function viewTestResults(testId) {
             </div>
         `;
 
-        // Table for aggregate results of the age group
         const aggregateTable = `
             <div class="table-container">
                 <h3>Aggregate Results for Age Group 50-59</h3>
@@ -280,11 +287,27 @@ function viewTestResults(testId) {
             </div>
         `;
 
-        // Display both tables
-        testContent.innerHTML = testResultsTable + aggregateTable + `<button onclick="goBack()">Back to Tests</button>`;
+        testContent.innerHTML = testResultsTable + aggregateTable + `
+            <button onclick="backToTestResults()">Back to Test Results</button>
+        `;
     })
     .catch(error => console.error('Error:', error));
 }
+
+function backToTestResults() {
+    isViewingTest = false; // Reset when going back
+    toggleTestButtons(); // Show the test buttons again
+    retrieveTestResults(); // Reload the test results list
+}
+
+// Function to toggle visibility of test buttons
+function toggleTestButtons() {
+    const testButtons = document.querySelector('.test-buttons');
+    if (testButtons) {
+        testButtons.style.display = isViewingTest ? 'none' : 'block';
+    }
+}
+
 
 
 // Function to save account changes for the user.
