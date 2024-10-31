@@ -14,14 +14,21 @@ body {
 .container {
     display: flex;
     width: 100%;
+    margin-left: 200px; /* Matches sidebar width */
 }
 
+
 .sidebar {
+    position: fixed; /* Fixes the sidebar position */
+    top: 0;
+    left: 0;
     width: 200px;
+    height: 100vh; /* Full height of the viewport */
     background-color: #00a0e3;
     display: flex;
     flex-direction: column;
     padding-top: 20px;
+    overflow-y: auto; /* Allows sidebar content to scroll if it overflows */
 }
 
 .sidebar .logo {
@@ -53,6 +60,8 @@ body {
 .content {
     flex: 1;
     padding: 20px;
+    overflow-y: auto; /* Allows scrolling within the content area */
+    max-height: 100vh; /* Restrict content area height to viewport */
 }
 
 .top-bar {
@@ -154,7 +163,7 @@ body {
 }
 
 .completed {
-    background-color: #00bfff; /* Blue for completed */
+    background-color: #0099ff; /* Blue for completed */
     color: white;
 }
 
@@ -167,3 +176,50 @@ body {
     background-color: #ff4c4c; /* Red for invalid */
     color: white;
 }
+
+/* Table styling for test results and aggregate results */
+.table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.table-container h2, .table-container h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+}
+
+.results-table th, .results-table td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.results-table th {
+    background-color: #00a0e3;
+    color: white;
+    font-weight: bold;
+}
+
+.results-table td {
+    color: #333;
+}
+
+.results-table .above-average {
+    color: green;
+    font-weight: bold;
+}
+
+.results-table .below-average {
+    color: red;
+    font-weight: bold;
+}   
+

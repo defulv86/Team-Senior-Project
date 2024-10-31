@@ -123,6 +123,32 @@ document.getElementById('submit-response').addEventListener('click', () => {
         });
 });
 
+function playDemo() { // shows demo video and speaks/shows instructions
+    var video = document.createElement("VIDEO");
+    video.width = 420; 
+    video.height = 300; video.controls = true;
+    video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
+    document.getElementById("demo_vid").appendChild(video); // shows video
+    var titleText = document.getElementById("title").textContent;
+    var welcomeText = document.getElementById("Welcome").textContent;
+    speak(titleText);
+    speak(welcomeText);
+
+    var paragraph = document.getElementById("P");
+    paragraph.style.color =  "#0077b3";
+    paragraph.style.fontFamily = "Open Sans";
+    paragraph.style.fontWeight = "bold";
+    paragraph.classList.add("centered-text");
+    paragraph.style.fontSize = "25px"; // This is here so that the font size has an initial value declared. After this point, getFontSize() does all the work.
+    paragraph.textContent = "Please turn the volume on your device up. This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
+    paragraph.style.fontSize = getFontSize();
+    document.getElementById("demo_vid").appendChild(paragraph);
+    speak(paragraph.textContent);
+    document.getElementById("playDemo").style.display = "none"; // Hides button
+    document.getElementById("demoTest1").style.display = "block"; // shows demo1 video 
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('response-input').addEventListener('input', (event) => {
         response = event.target.value; // Update the response variable
@@ -160,14 +186,17 @@ function populateVoices() {
     voices = window.speechSynthesis.getVoices();
 }
 
+
 window.speechSynthesis.onvoiceschanged = populateVoices;
+
 
 function speakText() {
     const textElement = document.getElementById('text-to-speak');
     const text = textElement.innerText;
-
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+
+
 
         const speech = new SpeechSynthesisUtterance(text);
         speech.voice = voices[0];

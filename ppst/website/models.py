@@ -2,6 +2,8 @@ from django.db import models
 import random
 import string
 from django.contrib.auth.models import User
+from datetime import timedelta
+from django.utils import timezone
 
 
 def generate_link():
@@ -9,17 +11,51 @@ def generate_link():
     return random_string  # Only return the random string
 
 class Test(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    link = models.CharField(max_length=8, unique=True, default=generate_link)
-    created_at = models.DateTimeField(auto_now_add=True)
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('invalid', 'Invalid')
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    link = models.CharField(default=generate_link, max_length=100, null=True)
+    created_at = models.DateTimeField(auto_now=True)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     age = models.IntegerField(default=0)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    def check_status(self):
+        """Update the status based on test conditions."""
+        if self.is_invalid:
+            self.status = 'invalid'
+        elif self.finished_at:
+            self.status = 'completed'
+        else:
+            self.status = 'pending'
+        self.save()
+
+    @property
+    def is_invalid(self):
+        """Determine if a test should be invalid based on conditions."""
+        one_week_later = self.created_at + timedelta(weeks=1)
+        has_expired = timezone.now() > one_week_later
+        was_exited = self.started_at is not None and self.finished_at is None
+        return has_expired or was_exited
 
     def __str__(self):
-        return f"Test for {self.user.username} ({self.link})"
+        return f"Test Link: {self.link}, Patient's Age: {self.age}, Status: {self.status}"
 
-from django.db import models
+    def get_test_details(self):
+        """Returns test details as a dictionary."""
+        return {
+            "link": self.link,
+            "age": self.age,
+            "created_at": self.created_at,
+            "started_at": self.started_at,
+            "finished_at": self.finished_at,
+            "status": self.status
+        }
 
 class Result(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
