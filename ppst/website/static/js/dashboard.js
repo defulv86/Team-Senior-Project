@@ -201,49 +201,92 @@ function retrieveTestResults() {
     .then(response => response.json())
     .then(data => {
         data.tests.forEach(test => {
-            let colorClass = 'gray-button';  // Default to in-progress
-            if (test.status === 'complete') {
-                colorClass = 'blue-button';
+            let colorClass = 'incomplete';  // Default to in-progress (gray)
+            let onclickAttr = '';  // Default to no click event
+
+            if (test.status === 'completed') {
+                colorClass = 'completed';  // Blue button for completed
+                onclickAttr = `onclick="viewTestResults(${test.id})"`;  // Make clickable
             } else if (test.status === 'invalid') {
-                colorClass = 'red-button';
+                colorClass = 'invalid';  // Red button for invalid
             }
 
             testContent.innerHTML += `
-                <button class="${colorClass}" onclick="viewTestResults(${test.id})">
+                <button class="${colorClass}" ${onclickAttr}>
                     Test ID ${test.id} Results
                 </button><br>`;
         });
     })
     .catch(error => console.error('Error:', error));
 }
+
 // Function to view test results for a completed test.
 function viewTestResults(testId) {
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
     .then(data => {
         const testContent = document.getElementById('test-content');
-        testContent.innerHTML = `
-            <h2>Test Results for ID ${testId}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${data.results.map(result => `
+
+        // Table for specific test results
+        const testResultsTable = `
+            <div class="table-container">
+                <h2>Test Results for ID ${testId}</h2>
+                <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
+                <table class="results-table">
+                    <thead>
                         <tr>
-                            <td>${result.metric}</td>
-                            <td>${result.value}</td>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Average</th>
+                            <th>Comparison</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            <button onclick="goBack()">Back to Tests</button>
+                    </thead>
+                    <tbody>
+                        ${data.test_results.map(result => `
+                            <tr>
+                                <td>${result.metric.replace(/_/g, ' ')}</td>
+                                <td>${result.value}</td>
+                                <td>${result.average || "N/A"}</td>
+                                <td class="${result.comparison === 'above average' ? 'above-average' : 'below-average'}">
+                                    ${result.comparison}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
         `;
-    });
+
+        // Table for aggregate results of the age group
+        const aggregateTable = `
+            <div class="table-container">
+                <h3>Aggregate Results for Age Group 50-59</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.aggregate_results.map(result => `
+                            <tr>
+                                <td>${result.metric.replace("avg_", "").replace(/_/g, ' ')}</td>
+                                <td>${result.average}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        // Display both tables
+        testContent.innerHTML = testResultsTable + aggregateTable + `<button onclick="goBack()">Back to Tests</button>`;
+    })
+    .catch(error => console.error('Error:', error));
 }
+
+
 // Function to save account changes for the user.
 function saveAccountChanges() {
     const firstName = document.getElementById('first-name').value;

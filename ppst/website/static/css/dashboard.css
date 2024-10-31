@@ -154,7 +154,7 @@ body {
 }
 
 .completed {
-    background-color: #00bfff; /* Blue for completed */
+    background-color: #0099ff; /* Blue for completed */
     color: white;
 }
 
@@ -166,4 +166,50 @@ body {
 .invalid {
     background-color: #ff4c4c; /* Red for invalid */
     color: white;
+}
+
+/* Table styling for test results and aggregate results */
+.table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.table-container h2, .table-container h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+}
+
+.results-table th, .results-table td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.results-table th {
+    background-color: #00a0e3;
+    color: white;
+    font-weight: bold;
+}
+
+.results-table td {
+    color: #333;
+}
+
+.results-table .above-average {
+    color: green;
+    font-weight: bold;
+}
+
+.results-table .below-average {
+    color: red;
+    font-weight: bold;
 }

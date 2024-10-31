@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from .models import Ticket, Test, Result
+from .models import Ticket, Test, Result, Aggregate
 import json
 
 def home(request):
@@ -75,28 +75,81 @@ def test_page_view(request, link):
 @login_required
 def get_test_results(request):
     tests = Test.objects.filter(user=request.user)
-    test_data = [{
-        'id': test.id,
-        'status': 'complete' if test.finished_at else 'in_progress',
-    } for test in tests]
+    
+    # Update the status for each test based on conditions
+    test_data = []
+    for test in tests:
+        test.check_status()  # Ensure the status is up-to-date
+        test_data.append({
+            'id': test.id,
+            'link': test.link,
+            'age': test.age,
+            'created_at': test.created_at,
+            'started_at': test.started_at,
+            'finished_at': test.finished_at,
+            'status': test.status,
+        })
 
     return JsonResponse({'tests': test_data})
 
-
-@login_required
 def test_results(request, test_id):
-    try:
-        test = Test.objects.get(id=test_id, user=request.user)
-        if not test.finished_at:
-            return JsonResponse({'error': 'Test is not completed'}, status=400)
+    test = get_object_or_404(Test, id=test_id)
+    result = Result.objects.filter(test=test).first()  # Assuming a single Result per test
 
-        results = Result.objects.filter(test=test).values('fourdigit_accuracy_1', 'fourdigit_latency_1', 
-                                                          'fivedigit_accuracy_1', 'fivedigit_latency_1')
-        result_data = [{'metric': key, 'value': value} for result in results for key, value in result.items()]
-        return JsonResponse({'results': result_data})
+    # Fetch the aggregate data for the relevant age group
+    age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
 
-    except Test.DoesNotExist:
-        return JsonResponse({'error': 'Test not found'}, status=404)
+    # Prepare test results with comparison to aggregate data
+    test_results = []
+    
+    # Full list of relevant fields for comparisons
+    metrics = [
+        'fourdigit_accuracy_1', 'fourdigit_latency_1', 
+        'fourdigit_accuracy_2', 'fourdigit_latency_2',
+        'fourdigit_accuracy_3', 'fourdigit_latency_3',
+        'fivedigit_accuracy_1', 'fivedigit_latency_1',
+        'fivedigit_accuracy_2', 'fivedigit_latency_2',
+        'fivedigit_accuracy_3', 'fivedigit_latency_3',
+        'fourmixed_accuracy_1', 'fourmixed_latency_1',
+        'fourmixed_accuracy_2', 'fourmixed_latency_2',
+        'fourmixed_accuracy_3', 'fourmixed_latency_3',
+        'fivemixed_accuracy_1', 'fivemixed_latency_1',
+        'fivemixed_accuracy_2', 'fivemixed_latency_2',
+        'fivemixed_accuracy_3', 'fivemixed_latency_3'
+    ]
+    
+    for metric in metrics:
+        user_value = getattr(result, metric, None)
+        
+        # Retrieve the corresponding aggregate value
+        avg_value = getattr(age_group, f"avg_{metric}", None) if age_group else None
+        
+        # Only add if both values are available
+        if user_value is not None and avg_value is not None:
+            comparison = "above average" if user_value > avg_value else "below average"
+            test_results.append({
+                "metric": metric,
+                "value": user_value,
+                "average": avg_value,
+                "comparison": comparison
+            })
+
+    # Prepare aggregate data for a separate table
+    aggregate_results = [
+        {"metric": metric, "average": getattr(age_group, f"avg_{metric}", None)}
+        for metric in metrics
+    ]
+
+    # Use `amount_correct` directly for the correct answers count
+    amount_correct = result.amount_correct if result else 0
+
+    return JsonResponse({
+        "test_id": test_id,
+        "test_results": test_results,
+        "aggregate_results": aggregate_results,
+        "amount_correct": amount_correct
+    })
+
 
 
 # Handle ticket submission (for non-staff users)
