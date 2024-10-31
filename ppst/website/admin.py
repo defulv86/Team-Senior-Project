@@ -11,9 +11,9 @@ class UserAdmin(admin.ModelAdmin):
 
 class TestAdmin(admin.ModelAdmin):
     list_display = ('id', 'administered_by', 'age', 'status', 'link', 'created_at', 'started_at', 'finished_at')
-    list_filter = ('status', 'user')
+    list_filter = ('status', 'user', 'age')
     readonly_fields = ('link', 'created_at', 'started_at', 'finished_at')
-    search_fields = ('user__username', 'status')
+    search_fields = ('user__username', 'status', 'age')
     ordering = ('-created_at',)
 
     def administered_by(self, obj):
