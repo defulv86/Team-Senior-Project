@@ -87,69 +87,72 @@ def submit_response(request):
             stimulus_id = data['stimulus_id']
             response_text = data['response_text']
             response_position = data['response_position']
-            character_latencies = data.get('character_latencies', [])
             timestamps = data.get('timestamps', [])
             expected_stimulus = data['expected_stimulus']
 
-            print("Timestamps:", timestamps)
             if not isinstance(timestamps, list):
                 return JsonResponse({'error': 'Timestamps must be a list.'}, status=400)
 
             # Fetch the Test instance using the provided link
             test = Test.objects.get(link=link)
+            stimulus = Stimulus.objects.get(id=stimulus_id)
 
             # Save the response instance
             response_instance = Response(
                 response=response_text,
                 test=test,
-                stimulus=Stimulus.objects.get(id=stimulus_id),
+                stimulus=stimulus,
                 response_position=response_position
             )
             response_instance.save()
 
-            # Initialize latencies and accuracies lists
-            accuracies = []
+            # Calculate latencies for characters based on timestamps
             character_latencies = []
-
             if timestamps:
-                # Reference time should be when the keyboard was shown
-                reference_timestamp = timestamps[0]  # Keyboard show time
-                # Ensure the first character timestamp is the second element (index 1)
-                if len(timestamps) > 1:
-                    first_character_timestamp = timestamps[1]  # First character time
-                else:
-                    return JsonResponse({'error': 'Not enough timestamps available.'}, status=400)
-
-                character_latencies = []
-
-                # Calculate latency for the first character based on its timestamp
-                latency = (parser.isoparse(first_character_timestamp) - 
-                    parser.isoparse(reference_timestamp)).total_seconds() * 1000  # Convert to milliseconds
-                character_latencies.append(latency)
-
-                # Now calculate latencies for subsequent characters
-                for index in range(2, len(response_text)):
-                    current_timestamp = timestamps[index]  # Use the timestamp for the current character
-        
-                # Calculate latency
-                    latency = (parser.isoparse(current_timestamp) - 
-                        parser.isoparse(first_character_timestamp)).total_seconds() * 1000  # From first character time
-                    character_latencies.append(latency)
-
+                reference_timestamp = timestamps[0]
+                
+                for index in range(1, len(timestamps)):
+                    if index < len(response_text) + 1:
+                        current_timestamp = timestamps[index]
+                        latency = (parser.isoparse(current_timestamp) - 
+                            parser.isoparse(reference_timestamp)).total_seconds() * 1000  # Convert to milliseconds
+                        character_latencies.append(latency)
+            
+                        reference_timestamp = current_timestamp
             else:
                 return JsonResponse({'error': 'No timestamps available.'}, status=400)
 
-            # Save latencies and accuracies in the Results table
+            # Determine expected number of latencies based on the expected stimulus
+            if stimulus.stimulus_type.stimulus_type.startswith('4_Span'):
+                expected_count = 4
+            elif stimulus.stimulus_type.stimulus_type.startswith('5_Span'):
+                expected_count = 5
+            else:
+                expected_count = len(expected_stimulus)
+
+            # Truncate character_latencies to expected_count
+            character_latencies = character_latencies[:expected_count]
+
+            # Calculate accuracy for each character
+            accuracy = []
+            for i in range(min(len(response_text), len(expected_stimulus))):
+                if response_text[i] == expected_stimulus[i]:
+                    accuracy.append(1.0)  # Correct character
+                else:
+                    accuracy.append(0.0)  # Incorrect character
+
+            # Save latencies and accuracy in the Results table
             result, created = Result.objects.get_or_create(test=test)
 
-            # Store latencies and accuracies for this response position
+            # Store latencies for this response position
             if response_position not in result.character_latencies:
                 result.character_latencies[response_position] = []
             result.character_latencies[response_position].extend(character_latencies)
 
+            # Store accuracies for this response position
             if response_position not in result.character_accuracies:
                 result.character_accuracies[response_position] = []
-            result.character_accuracies[response_position].extend(accuracies)
+            result.character_accuracies[response_position].extend(accuracy)
 
             result.save()  # Save the updated Result
 

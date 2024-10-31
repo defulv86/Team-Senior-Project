@@ -85,11 +85,7 @@ document.getElementById('submit-response').addEventListener('click', () => {
     }
 
     const currentStimulus = stimuli[currentStimulusIndex - 1];
-    const maxLength = currentStimulus.stimulus_content.length;
-
     const correctAnswer = get_correct_answer(currentStimulus);
-
-    // Calculate character accuracies and latencies
     const characterLatencies = [];
     const accuracies = [];
 
@@ -104,7 +100,7 @@ document.getElementById('submit-response').addEventListener('click', () => {
             stimulus_id: currentStimulus.id,
             response_position: currentStimulusIndex,
             character_latencies: characterLatencies, // Send latencies to the backend
-            accuracies: accuracies, // Send accuracies to the backend
+            character_accuracies: accuracies, // Send accuracies to the backend
             expected_stimulus: correctAnswer, // Send the expected stimulus for accuracy checks
             timestamps: timestamps
         })
@@ -146,7 +142,7 @@ function startTest() {
             return response.json();
         })
         .then(data => {
-            stimuli = data; // Use the newly ordered stimuli
+            stimuli = data;
             nextStimulus();
         })
         .catch(error => {
@@ -160,29 +156,25 @@ document.getElementById('start-test').addEventListener('click', function () {
 });
 
 let voices = [];
-
-// Function to populate the voice dropdown
 function populateVoices() {
     voices = window.speechSynthesis.getVoices();
 }
 
-// Load voices when the voices are changed
 window.speechSynthesis.onvoiceschanged = populateVoices;
 
-// Function to speak the text
 function speakText() {
     const textElement = document.getElementById('text-to-speak');
-    const text = textElement.innerText; // Get the text content
+    const text = textElement.innerText;
 
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Stop any ongoing speech
+        window.speechSynthesis.cancel();
 
         const speech = new SpeechSynthesisUtterance(text);
-        speech.voice = voices[0]; // Choose the first available voice
-        speech.lang = 'en-US'; // Set the language
-        speech.volume = 1; // Volume from 0 to 1
-        speech.rate = 1; // Speed of speech
-        speech.pitch = 1; // Pitch of voice
+        speech.voice = voices[0];
+        speech.lang = 'en-US';
+        speech.volume = 1;
+        speech.rate = 1;
+        speech.pitch = 1;
 
         window.speechSynthesis.speak(speech);
     } else {
