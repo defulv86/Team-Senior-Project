@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from .models import Ticket, Test, Result
 from dateutil import parser
+from django.utils import timezone
 import json
 
 def home(request):
@@ -102,7 +103,8 @@ def submit_response(request):
                 response=response_text,
                 test=test,
                 stimulus=stimulus,
-                response_position=response_position
+                response_position=response_position,
+                time_submitted=timezone.now()
             )
             response_instance.save()
 
@@ -141,6 +143,11 @@ def submit_response(request):
                 else:
                     accuracy.append(0.0)  # Incorrect character
 
+            # Increment amount correct based on the accuracy
+            amount_correct = 0
+            if len(response_text) == expected_count and all(a == 1.0 for a in accuracy):
+                amount_correct += 1
+
             # Save latencies and accuracy in the Results table
             result, created = Result.objects.get_or_create(test=test)
 
@@ -153,6 +160,8 @@ def submit_response(request):
             if response_position not in result.character_accuracies:
                 result.character_accuracies[response_position] = []
             result.character_accuracies[response_position].extend(accuracy)
+
+            result.amount_correct = (result.amount_correct or 0) + amount_correct
 
             result.save()  # Save the updated Result
 
