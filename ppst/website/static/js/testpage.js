@@ -21,9 +21,7 @@ function speak(text) { // allows text to be spoken
 
 function playDemo() { // shows demo video and speaks/shows instructions
     var video = document.createElement("VIDEO");
-    video.width = 420;
-    video.height = 300;
-    video.controls = true;
+    video.width = 420; video.height = 300; video.controls = true;
     video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
     var titleText = document.getElementById("title").textContent;
@@ -32,20 +30,17 @@ function playDemo() { // shows demo video and speaks/shows instructions
     speak(welcomeText);
 
     var paragraph = document.createElement("P");
-    paragraph.textContent = "This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
-    paragraph.style.fontSize = "25px";
-    paragraph = document.getElementById("P");
-    paragraph.textContent = "Please turn the volume on your device up. This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
     paragraph.style.color =  "#0077b3";
     paragraph.style.fontFamily = "Open Sans";
     paragraph.style.fontWeight = "bold";
     paragraph.classList.add("centered-text");
-    paragraph.style.fontSize = getFontSize();
-
+    paragraph.style.fontSize = "25px";
+    paragraph.textContent = "Please turn the volume on your device up. This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
+    //paragraph.style.fontSize = getFontSize();
     document.getElementById("demo_vid").appendChild(paragraph);
     speak(paragraph.textContent);
     document.getElementById("playDemo").style.display = "none"; // Hides button
-    document.getElementById("demoTest1").style.display = "block"; // shows demo1 video
+    document.getElementById("demoTest1").style.display = "block"; // shows demo1 video 
 }
 
 function demoTest1() {
@@ -152,8 +147,6 @@ function submit() { // sends user to submission page and hides submit button
     document.getElementById("t136").style.display = "none";
     document.getElementById("submit").style.display = "none";
     document.getElementById("test").style.display = "none";
-    compareAnswers(test1);
-    console.log(percentage);
 }
 
 let currentIndex = 0;
