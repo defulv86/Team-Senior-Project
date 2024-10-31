@@ -21,7 +21,8 @@ function speak(text) { // allows text to be spoken
 
 function playDemo() { // shows demo video and speaks/shows instructions
     var video = document.createElement("VIDEO");
-    video.width = 420; video.height = 300; video.controls = true;
+    video.width = 420; 
+    video.height = 300; video.controls = true;
     video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
     var titleText = document.getElementById("title").textContent;
@@ -29,14 +30,14 @@ function playDemo() { // shows demo video and speaks/shows instructions
     speak(titleText);
     speak(welcomeText);
 
-    var paragraph = document.createElement("P");
+    var paragraph = document.getElementById("P");
     paragraph.style.color =  "#0077b3";
     paragraph.style.fontFamily = "Open Sans";
     paragraph.style.fontWeight = "bold";
     paragraph.classList.add("centered-text");
-    paragraph.style.fontSize = "25px";
+    paragraph.style.fontSize = "25px"; // This is here so that the font size has an initial value declared. After this point, getFontSize() does all the work.
     paragraph.textContent = "Please turn the volume on your device up. This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
-    //paragraph.style.fontSize = getFontSize();
+    paragraph.style.fontSize = getFontSize();
     document.getElementById("demo_vid").appendChild(paragraph);
     speak(paragraph.textContent);
     document.getElementById("playDemo").style.display = "none"; // Hides button
@@ -82,41 +83,41 @@ function choice(value) { // takes selected num/let and adds to answer when submi
 
 function compareAnswers(testX) {
     let correctAnswer;
-    switch (test1) {
-        case 1:
+    switch (testX) {
+        case test1:
             correctAnswer = test1_ans;
             break;
-        case 2:
+        case test2:
             correctAnswer = test2_ans;
             break;
-        case 3:
+        case test3:
             correctAnswer = test3_ans;
             break;
-        case 4:
+        case test4:
             correctAnswer = test4_ans;
             break;
-        case 5:
+        case test5:
             correctAnswer = test5_ans;
             break;
-        case 6:
+        case test6:
             correctAnswer = test6_ans;
             break;
-        case 7:
+        case test7:
             correctAnswer = test7_ans;
             break;
-        case 8:
+        case test8:
             correctAnswer = test8_ans;
             break;
-        case 9:
+        case test9:
             correctAnswer = test9_ans;
             break;
-        case 10:
+        case test10:
             correctAnswer = test10_ans;
             break;
-        case 11:
+        case test11:
             correctAnswer = test11_ans;
             break;
-        case 12:
+        case test12:
             correctAnswer = test12_ans;
             break;
         default:
@@ -138,7 +139,6 @@ function submit() { // sends user to submission page and hides submit button
     var paragraph = document.getElementById("P");
     paragraph.textContent = "Thank you for successfully completing the Philadelphia Pointing Span Test. Your health provider has been notified and the results will be available to them. You may now exit this screen.";
     paragraph.style.fontSize = getFontSize();
-    paragraph.style.fontSize = "30px";
     paragraph.style.color =  "black";
     paragraph.style.fontFamily = "Open Sans";
     paragraph.classList.add("centered-text");
