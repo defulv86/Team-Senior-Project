@@ -230,7 +230,6 @@ function viewTestResults(testId) {
     const testContent = document.getElementById('test-content');
     isViewingTest = true; // Set to true when viewing specific test results
     toggleTestButtons(); // Hide the test buttons when viewing test results
-
     // Fetch the test results for the selected test ID
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
@@ -265,6 +264,7 @@ function viewTestResults(testId) {
             </div>
         `;
 
+        // Display aggregate results for the age group
         const aggregateTable = `
             <div class="table-container">
                 <h3>Aggregate Results for Age Group 50-59</h3>
@@ -287,8 +287,10 @@ function viewTestResults(testId) {
             </div>
         `;
 
+        // Display results, add a "Back to Test Results" button, and add "Export to Spreadsheet" button
         testContent.innerHTML = testResultsTable + aggregateTable + `
-            <button onclick="backToTestResults()">Back to Test Results</button>
+            <button onclick="retrieveTestResults()">Back to Test Results</button>
+            <button onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
         `;
     })
     .catch(error => console.error('Error:', error));
@@ -306,6 +308,51 @@ function toggleTestButtons() {
     if (testButtons) {
         testButtons.style.display = isViewingTest ? 'none' : 'block';
     }
+}
+
+function exportToSpreadsheet(testId) {
+    fetch(`/test_results/${testId}/`)
+    .then(response => response.json())
+    .then(data => {
+        // Initialize workbook and worksheet
+        const workbook = XLSX.utils.book_new();
+
+        // Prepare Patient Test Results Sheet
+        const patientResults = [
+            ['Metric', 'Value', 'Average', 'Comparison']
+        ];
+        data.test_results.forEach(result => {
+            patientResults.push([
+                result.metric.replace(/_/g, ' '),
+                result.value,
+                result.average || "N/A",
+                result.comparison
+            ]);
+        });
+
+        // Add patient results to the workbook
+        const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
+        XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
+
+        // Prepare Aggregate Results Sheet
+        const aggregateResults = [
+            ['Metric', 'Average']
+        ];
+        data.aggregate_results.forEach(result => {
+            aggregateResults.push([
+                result.metric.replace("avg_", "").replace(/_/g, ' '),
+                result.average
+            ]);
+        });
+
+        // Add aggregate results to the workbook
+        const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
+        XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+
+        // Export the workbook to a file
+        XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 
