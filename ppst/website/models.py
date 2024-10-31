@@ -58,53 +58,33 @@ class Test(models.Model):
         }
 
 class Result(models.Model):
-    test = models.ForeignKey(Test,on_delete=models.CASCADE)
-    # four didget stats
-    fourdigit_accuracy_1 = models.FloatField(default=0,null=True)
-    fourdigit_latency_1 = models.IntegerField(default=0)
-    fourdigit_accuracy_2 = models.FloatField(default=0,null=True)
-    fourdigit_latency_2 = models.IntegerField(default=0)
-    fourdigit_accuracy_3 = models.FloatField(default=0,null=True)
-    fourdigit_latency_3 = models.IntegerField(default=0)
-    # five didgit stats
-    fivedigit_accuracy_1 = models.FloatField(default=0,null=True)
-    fivedigit_latency_1 = models.IntegerField(default=0)
-    fivedigit_accuracy_2 = models.FloatField(default=0,null=True)
-    fivedigit_latency_2 = models.IntegerField(default=0)
-    fivedigit_accuracy_3 = models.FloatField(default=0,null=True)
-    fivedigit_latency_3 = models.IntegerField(default=0)
-    # four mixed stats
-    fourmixed_accuracy_1 = models.FloatField(default=0,null=True)
-    fourmixed_latency_1 = models.IntegerField(default=0)
-    fourmixed_accuracy_2 = models.FloatField(default=0,null=True)
-    fourmixed_latency_2 = models.IntegerField(default=0)
-    fourmixed_accuracy_3 = models.FloatField(default=0,null=True)
-    fourmixed_latency_3 = models.IntegerField(default=0)
-    # five mixed stats
-    fivemixed_accuracy_1 = models.FloatField(default=0,null=True)
-    fivemixed_latency_1 = models.IntegerField(default=0)
-    fivemixed_accuracy_2 = models.FloatField(default=0,null=True)
-    fivemixed_latency_2 = models.IntegerField(default=0)
-    fivemixed_accuracy_3 = models.FloatField(default=0,null=True)
-    fivemixed_latency_3 = models.IntegerField(default=0)
+    test = models.ForeignKey(Test, on_delete=models.CASCADE)
+    
+    # Store latencies and accuracies in JSON format
+    character_latencies = models.JSONField(default=dict, blank=True)  # Format: {position: [latency1, latency2, ...]}
+    character_accuracies = models.JSONField(default=dict, blank=True)  # Format: {position: [accuracy1, accuracy2, ...]}
+
     amount_correct = models.IntegerField(default=0)
 
-    def  __str__(self):
+    def __str__(self):
         return self.test.link
+
+from django.db import models
 
 class Stimulus_Type(models.Model):
     stimulus_type = models.CharField(max_length=15, default='')
-    
-    def  __str__(self):
+
+    def __str__(self):
         return self.stimulus_type
 
 class Stimulus(models.Model):
     stimulus_content = models.CharField(max_length=6)
     stimulus_type = models.ForeignKey(Stimulus_Type, on_delete=models.CASCADE, default=1)
 
-    def  __str__(self):
-        return self.stimulus_content + " " + self.stimulus_type.stimulus_type
+    def __str__(self):
+        return f"{self.stimulus_content} ({self.stimulus_type})"
 
+from django.utils import timezone
 
 class Response(models.Model):
     response = models.CharField(max_length=5, default='')

@@ -5,12 +5,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from .models import Ticket, Test, Result, Aggregate
+from dateutil import parser
+from django.utils import timezone
 import json
 
 def home(request):
-    all_users = User.objects.all
+    all_users = User.objects.all()  # Call the method to get all users
     return render(request, 'home.html', {
-        'all':all_users
+        'all': all_users
     })
 
 def login_view(request):
@@ -34,8 +36,6 @@ def login_view(request):
     
     return render(request, 'login.html', {'error_message': error_message})
 
-
-
 def logout_view(request):
     auth_logout(request)  # Logs out the user
     return redirect('login')  # Redirects to the login page after logout
@@ -47,6 +47,8 @@ def dashboard(request):
         return render(request, 'dashboard.html', {'user': request.user})
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
+
+from django.utils.crypto import get_random_string  # For generating unique links
 
 @csrf_exempt
 @login_required
@@ -65,12 +67,114 @@ def create_test(request):
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
         return JsonResponse({'test_link': test_url})
 
+from .models import Stimulus
 def test_page_view(request, link):
-    # Fetch the test associated with the given link
-    test = get_object_or_404(Test, link=link)
-    
-    # Here you can render the test page with the test data
-    return render(request, 'testpage.html', {'test': test})
+    try:
+        test = Test.objects.get(link=link)
+        stimuli = Stimulus.objects.all()
+        return render(request, 'testpage.html', {'test': test, 'stimuli': stimuli})
+    except Test.DoesNotExist:
+        return render(request, '404.html')
+
+
+from .models import Response
+
+@csrf_exempt
+def submit_response(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            link = data['link']
+            stimulus_id = data['stimulus_id']
+            response_text = data['response_text']
+            response_position = data['response_position']
+            timestamps = data.get('timestamps', [])
+            expected_stimulus = data['expected_stimulus']
+
+            if not isinstance(timestamps, list):
+                return JsonResponse({'error': 'Timestamps must be a list.'}, status=400)
+
+            # Fetch the Test instance using the provided link
+            test = Test.objects.get(link=link)
+            stimulus = Stimulus.objects.get(id=stimulus_id)
+
+            # Save the response instance
+            response_instance = Response(
+                response=response_text,
+                test=test,
+                stimulus=stimulus,
+                response_position=response_position,
+                time_submitted=timezone.now()
+            )
+            response_instance.save()
+
+            # Calculate latencies for characters based on timestamps
+            character_latencies = []
+            if timestamps:
+                reference_timestamp = timestamps[0]
+                
+                for index in range(1, len(timestamps)):
+                    if index < len(response_text) + 1:
+                        current_timestamp = timestamps[index]
+                        latency = (parser.isoparse(current_timestamp) - 
+                            parser.isoparse(reference_timestamp)).total_seconds() * 1000  # Convert to milliseconds
+                        character_latencies.append(latency)
+            
+                        reference_timestamp = current_timestamp
+            else:
+                return JsonResponse({'error': 'No timestamps available.'}, status=400)
+
+            # Determine expected number of latencies based on the expected stimulus
+            if stimulus.stimulus_type.stimulus_type.startswith('4_Span'):
+                expected_count = 4
+            elif stimulus.stimulus_type.stimulus_type.startswith('5_Span'):
+                expected_count = 5
+            else:
+                expected_count = len(expected_stimulus)
+
+            # Truncate character_latencies to expected_count
+            character_latencies = character_latencies[:expected_count]
+
+            # Calculate accuracy for each character
+            accuracy = []
+            for i in range(min(len(response_text), len(expected_stimulus))):
+                if response_text[i] == expected_stimulus[i]:
+                    accuracy.append(1.0)  # Correct character
+                else:
+                    accuracy.append(0.0)  # Incorrect character
+
+            # Increment amount correct based on the accuracy
+            amount_correct = 0
+            if len(response_text) == expected_count and all(a == 1.0 for a in accuracy):
+                amount_correct += 1
+
+            # Save latencies and accuracy in the Results table
+            result, created = Result.objects.get_or_create(test=test)
+
+            # Store latencies for this response position
+            if response_position not in result.character_latencies:
+                result.character_latencies[response_position] = []
+            result.character_latencies[response_position].extend(character_latencies)
+
+            # Store accuracies for this response position
+            if response_position not in result.character_accuracies:
+                result.character_accuracies[response_position] = []
+            result.character_accuracies[response_position].extend(accuracy)
+
+            result.amount_correct = (result.amount_correct or 0) + amount_correct
+
+            result.save()  # Save the updated Result
+
+            return JsonResponse({'status': 'success'})
+
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing field: {str(e)}'}, status=400)
+        except Test.DoesNotExist:
+            return JsonResponse({'error': 'Test not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request.'}, status=400)
 
 @login_required
 def get_test_results(request):
@@ -92,6 +196,57 @@ def get_test_results(request):
 
     return JsonResponse({'tests': test_data})
 
+def get_stimuli(request):
+    stimuli = Stimulus.objects.select_related('stimulus_type').all()
+    
+    # Organizing question presentation by type
+    ordered_stimuli = {
+        '4_Span_Digit_Pr': [],
+        '5_Span_Digit_Pr': [],
+        '4_Span_Digit': [],
+        '5_Span_Digit': [],
+        '4_Span_Mixed_Pr': [],
+        '5_Span_Mixed_Pr': [],
+        '4_Span_Mixed': [],
+        '5_Span_Mixed': []
+    }
+    
+    for stimulus in stimuli:
+        if stimulus.stimulus_type.stimulus_type == '4_Span_Digit':
+            ordered_stimuli['4_Span_Digit'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Digit':
+            ordered_stimuli['5_Span_Digit'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '4_Span_Mixed':
+            ordered_stimuli['4_Span_Mixed'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Mixed':
+            ordered_stimuli['5_Span_Mixed'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '4_Span_Digit_Pr':
+            ordered_stimuli['4_Span_Digit_Pr'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Digit_Pr':
+            ordered_stimuli['5_Span_Digit_Pr'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '4_Span_Mixed_Pr':
+            ordered_stimuli['4_Span_Mixed_Pr'].append(stimulus)
+        elif stimulus.stimulus_type.stimulus_type == '5_Span_Mixed_Pr':
+            ordered_stimuli['5_Span_Mixed_Pr'].append(stimulus)
+
+    final_stimuli = (
+        ordered_stimuli['4_Span_Digit_Pr'] +
+        ordered_stimuli['5_Span_Digit_Pr'] +
+        ordered_stimuli['4_Span_Digit'] +
+        ordered_stimuli['5_Span_Digit'] +
+        ordered_stimuli['4_Span_Mixed_Pr'] +
+        ordered_stimuli['5_Span_Mixed_Pr'] +
+        ordered_stimuli['4_Span_Mixed'] +
+        ordered_stimuli['5_Span_Mixed']
+    )
+
+    # Convert to a list of dictionaries for JSON response
+    response_data = [{'id': stim.id, 'stimulus_content': stim.stimulus_content, 'stimulus_type': stim.stimulus_type.stimulus_type} for stim in final_stimuli]
+    
+    return JsonResponse(response_data, safe=False)
+
+
+@login_required
 def test_results(request, test_id):
     test = get_object_or_404(Test, id=test_id)
     result = Result.objects.filter(test=test).first()  # Assuming a single Result per test

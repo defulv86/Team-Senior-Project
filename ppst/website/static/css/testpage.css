@@ -1,72 +1,124 @@
-h2{
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+h1,
+h2 {
     text-align: center;
+    /* Center align headings */
+    word-wrap: break-word;
+    /* Allow words to break to the next line */
+    margin: 0 20px;
+    /* Add horizontal margin for better spacing */
+}
+
+h2 {
     color: #0077b3;
     font-family: 'Open Sans', sans-serif;
-    font-size: 40px;
     font-weight: bold;
 }
 
-h3{
+h3 {
     font-family: 'Open Sans', sans-serif;
     font-size: 18.72px;
+    /* You can adjust this as well */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-p{
+p {
+    text-align: center;
+    /* Center text for paragraphs */
+}
+
+#introduction {
+    max-height: 500px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#stimulus {
+    font-size: 2rem;
+    text-align: center;
+    margin: 50px 0;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    width: 100%;
+    position: relative;
+}
+
+#response-section {
+    display: none;
     text-align: center;
 }
 
-.button-container {
-    display: flex; 
+#digit-keyboard,
+#alphanumeric-keyboard {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin-top: 100px;
+    margin-top: 20px;
+    /* Center keyboard buttons */
 }
 
-button{
+.key {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.key:hover {
+    background-color: #0056b3;
+}
+
+button {
+    z-index: 20;
     color: white;
     background-color: #0077B3;
     border: none;
     font-family: 'Open Sans', sans-serif;
     font-weight: bold;
     height: 50px;
-    width:  100px;
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    border-bottom-right-radius: 30px;
-    border-bottom-left-radius: 30px; 
+    width: 100px;
+    border-radius: 30px;
+    cursor: pointer;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-.center{
-    top: 50%;
-    position: relative;
-    text-align: center;
-    justify-content: space-between;
-    
+.video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 50px;
 }
 
-.testButton{
-    margin: 20px;
-    display: inline-block;
-    height: 75px;
-    width: 75px;
-    position: relative;
-    text-align: center;
-    margin-top: 150px;
+#speak-button {
+    margin-top: 0px;
+    /* Adjust spacing */
+    color: #0077B3;
+    /* Change color as needed */
 }
 
-#test span{
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+#speak-button:hover {
+    color: #0056b3;
+    /* Change color on hover */
 }
-
-  .centered-text{
-    width: 50%; /* Adjust the width percentage as needed */
-    margin: 0 auto;
-    padding: 20px; /* Adjust the padding values as needed */
-    text-align: center;
-  }
