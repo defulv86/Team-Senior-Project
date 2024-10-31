@@ -290,7 +290,7 @@ function viewTestResults(testId) {
         // Display results, add a "Back to Test Results" button, and add "Export to Spreadsheet" button
         testContent.innerHTML = testResultsTable + aggregateTable + `
             <button onclick="retrieveTestResults()">Back to Test Results</button>
-            <button onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+            <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
         `;
     })
     .catch(error => console.error('Error:', error));
@@ -355,8 +355,6 @@ function exportToSpreadsheet(testId) {
     .catch(error => console.error('Error:', error));
 }
 
-
-
 // Function to save account changes for the user.
 function saveAccountChanges() {
     const firstName = document.getElementById('first-name').value;
@@ -396,6 +394,7 @@ function saveAccountChanges() {
     })
     .catch(error => console.error('Error:', error));
 }
+
 // Function to get user information
 function getUserInfo() {
     fetch('/get_user_info/', {
