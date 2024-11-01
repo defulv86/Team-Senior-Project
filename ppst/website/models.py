@@ -134,7 +134,7 @@ class Ticket(models.Model):
         return f"Ticket {self.id} - {self.category} by {self.user.username}"
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     test = models.ForeignKey(Test, on_delete=models.CASCADE, default=1)
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
