@@ -139,4 +139,4 @@ class Notification(models.Model):
     is_dismissed = models.BooleanField(default=False)
 
     def  __str__(self):
-        return "Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)
+        return   str(self.id) + "Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)

@@ -168,12 +168,23 @@ def get_user_info(request):
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-# @login_required
+@login_required
 def get_user_notifications(request):
     if request.method == 'GET':
         tests = Test.objects.filter(user=request.user)
-        notifications = Notification.objects.filter(test__in=tests, is_dismissed=False).values('message', 'time_created').order_by('-time_created')
+        notifications = Notification.objects.filter(test__in=tests, is_dismissed=False).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
         print(list(tests))
         return JsonResponse(list(notifications), safe=False)
     
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def dismiss_notification(request, id):
+    if request.method == 'PATCH':
+        try:
+            notif = Notification.objects.get(id=id)
+            notif.is_dismissed = True
+            notif.save()
+            return JsonResponse({'status': 'success'})
+        except Notification.DoesNotExist:
+            return JsonResponse({'status': 'not found'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
