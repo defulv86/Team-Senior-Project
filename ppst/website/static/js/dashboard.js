@@ -449,20 +449,120 @@ document.addEventListener('mouseup', () => {
 // Close notifications with the close button
 function closeNotifications() {
     document.getElementById('notification-popout').style.display = 'none';
+    document.getElementById('notification-body').style.display = 'none';
+    document.getElementById('notification-list').style.display = 'none';
 }
 
 // Show or hide the notification popout
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
     event.preventDefault();
+    
+    //Load notifications if visible
+    if (!isNotificationsOpen) {
+        loadNotifications();
+    }
 
     // Toggle the display of the notification popout
     const notificationPopout = document.getElementById('notification-popout');
     notificationPopout.style.display = 
-        notificationPopout.style.display === 'block' ? 'none' : 'block';
+    notificationPopout.style.display === 'block' ? 'none' : 'block';
+    
+    const notificationBody = document.getElementById('notification-body');
+    notificationBody.style.display = 
+    notificationBody.style.display === 'block' ? 'none' : 'block';
 
+    const notificationList = document.getElementById('notification-list');
+    notificationList.style.display = 
+    notificationList.style.display === 'block' ? 'none' : 'block';
+    
     // Update the isNotificationsOpen variable based on the visibility of the popout
     isNotificationsOpen = notificationPopout.style.display === 'block';
+}
+isNotificationsOpen = false;
+
+// function that loads in notifications based on the current logged in user
+function loadNotifications(){
+    const notificationList = document.getElementById('notification-list');
+    notificationList.innerHTML = '';
+
+
+    fetch('/get_user_notifications/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.length === 0) {
+            notificationList.innerHTML = '<li> No new Notifications </li>';
+        } else {
+            data.forEach(notif => {
+                if (notif.is_dismissed == false) {
+                    
+                    const notifItem = document.createElement('li');
+
+                    const separator = document.createElement('li');
+                    notifItem.className = 'separator';
+                    notificationList.appendChild(separator);
+    
+                    const notificationTime = new Date(notif.time_created);
+                    const now = new Date();
+                
+                    // Calculate the time difference in milliseconds
+                    const timeDiff = now - notificationTime;
+                    const hoursDiff = timeDiff / (1000 * 60 * 60); //convert to hours
+                    
+                    const dateSpan = document.createElement('span');
+                    if (hoursDiff < 24) {
+                        dateSpan.textContent = `Today at ${new Date(notif.time_created).toLocaleString([], { hour: 'numeric', minute: '2-digit' })}`;
+                    }
+                    else{
+                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString()}`;
+                    }
+
+                    const headerSpan = document.createElement('span');
+                    headerSpan.textContent = `${notif.header}`;
+                    headerSpan.style.fontWeight = 'bold';
+    
+                    const messageSpan = document.createElement('span');
+                    messageSpan.textContent = `${notif.message}`;
+    
+                    const dismissButton = document.createElement(`button`);
+                    dismissButton.textContent = 'Dismiss';
+                    dismissButton.onclick = () => dismissNotification(notif.id, notifItem);
+
+                    notifItem.appendChild(dateSpan);
+                    notifItem.appendChild(document.createElement('br'));
+                    notifItem.appendChild(headerSpan);
+                    notifItem.appendChild(document.createElement('br'));
+                    notifItem.appendChild(messageSpan);
+                    notifItem.appendChild(document.createElement('br'));
+                    notifItem.appendChild(dismissButton);
+                    
+                    notificationList.appendChild(notifItem);
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error:', error));    
+}
+
+// removes the notification based on the notifItem corrisponding to the button that was pressed
+function dismissNotification(id ,notifItem){
+    const notificationList = document.getElementById('notification-list');
+    notificationList.removeChild(notifItem);
+
+    fetch(`/dismiss_notification/${id}/`,{
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ is_dismissed: true })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('failed to dismiss notification')
+        }
+    })
+    .catch(error => console.error('Error updating notification', error))
 }
 
 // Automatically load the "Dashboard" tab when the page is first loaded
