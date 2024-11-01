@@ -278,15 +278,12 @@ def get_stimuli(request):
 @login_required
 def test_results(request, test_id):
     test = get_object_or_404(Test, id=test_id)
-    result = Result.objects.filter(test=test).first()  # Assuming a single Result per test
-
-    # Fetch the aggregate data for the relevant age group
+    result = Result.objects.filter(test=test).first()
     age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
 
-    # Prepare test results with comparison to aggregate data
     test_results = []
-    
-    # Full list of relevant fields for comparisons
+    aggregate_results = []
+
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -295,58 +292,45 @@ def test_results(request, test_id):
     ]
 
     for metric in metrics:
-        # Retrieve the patient's accuracy and latency for each metric
-        user_accuracy = result.character_accuracies.get(metric)
-        user_latency = result.character_latencies.get(metric)
-        
-        # Retrieve the average values from the Aggregate model JSON fields
-        avg_accuracy = age_group.average_accuracies.get(metric) if age_group else None
-        avg_latency = age_group.average_latencies.get(metric) if age_group else None
+        user_accuracy = result.character_accuracies.get(metric, [None])[0] if result and metric in result.character_accuracies else None
+        user_latency = result.character_latencies.get(metric, [None])[0] if result and metric in result.character_latencies else None
+        avg_accuracy = age_group.average_accuracies.get(metric) if age_group and metric in age_group.average_accuracies else None
+        avg_latency = age_group.average_latencies.get(metric) if age_group and metric in age_group.average_latencies else None
 
-        # Only add if both values are available for accuracy and latency
-        if user_accuracy is not None and avg_accuracy is not None:
-            comparison = "above average" if user_accuracy > avg_accuracy else "below average"
-            test_results.append({
-                "metric": f"{metric}_accuracy",
-                "value": user_accuracy,
-                "average": avg_accuracy,
-                "comparison": comparison
-            })
-        
-        if user_latency is not None and avg_latency is not None:
-            comparison = "above average" if user_latency > avg_latency else "below average"
-            test_results.append({
-                "metric": f"{metric}_latency",
-                "value": user_latency,
-                "average": avg_latency,
-                "comparison": comparison
-            })
+        # Calculate the comparison only if both user and average values are available
+        comparison_accuracy = (
+            "above average" if user_accuracy and avg_accuracy and user_accuracy > avg_accuracy
+            else "below average" if user_accuracy and avg_accuracy and user_accuracy < avg_accuracy
+            else "N/A"
+        )
+        comparison_latency = (
+            "above average" if user_latency and avg_latency and user_latency > avg_latency
+            else "below average" if user_latency and avg_latency and user_latency < avg_latency
+            else "N/A"
+        )
 
-    # Prepare aggregate data for a separate table
-    aggregate_results = [
-        {
+        test_results.append({
             "metric": f"{metric}_accuracy",
-            "average": age_group.average_accuracies.get(metric) if age_group else None
-        }
-        for metric in metrics
-    ] + [
-        {
-            "metric": f"{metric}_latency",
-            "average": age_group.average_latencies.get(metric) if age_group else None
-        }
-        for metric in metrics
-    ]
+            "value": user_accuracy if user_accuracy is not None else "N/A",
+            "average": avg_accuracy if avg_accuracy is not None else "N/A",
+            "comparison": comparison_accuracy
+        })
 
-    # Use `amount_correct` directly for the correct answers count
+        test_results.append({
+            "metric": f"{metric}_latency",
+            "value": user_latency if user_latency is not None else "N/A",
+            "average": avg_latency if avg_latency is not None else "N/A",
+            "comparison": comparison_latency
+        })
+
     amount_correct = result.amount_correct if result else 0
 
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
-        "aggregate_results": aggregate_results,
+        "aggregate_results": test_results,  # Only use test_results to simplify the response
         "amount_correct": amount_correct
     })
-
 
 # Handle ticket submission (for non-staff users)
 @login_required
