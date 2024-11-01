@@ -2,7 +2,21 @@ let stimuli = [];
 let currentStimulusIndex = 0;
 let response = ''; // Store the response from the keyboard
 const timestamps = [];
+const form = document.querySelector('form');
 
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var selectedFontSize = document.getElementById("fontSize").value;
+    changeFontSize(selectedFontSize);
+});
+
+function changeFontSize(size) {
+    document.getElementById("intro").style.fontSize = size;
+}
+
+function getFontSize() {
+    return document.getElementById("fontSize").value;
+}
 
 // Check if the test is already complete when the page loads
 document.addEventListener('DOMContentLoaded', () => {
