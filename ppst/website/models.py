@@ -69,8 +69,6 @@ class Result(models.Model):
     def __str__(self):
         return self.test.link
 
-from django.db import models
-
 class Stimulus_Type(models.Model):
     stimulus_type = models.CharField(max_length=15, default='')
 
@@ -83,8 +81,6 @@ class Stimulus(models.Model):
 
     def __str__(self):
         return f"{self.stimulus_content} ({self.stimulus_type})"
-
-from django.utils import timezone
 
 class Response(models.Model):
     response = models.CharField(max_length=5, default='')
