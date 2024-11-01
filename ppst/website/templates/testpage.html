@@ -2,161 +2,84 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
-    <script src="{% static 'js/testpage.js' %}" defer></script>
-    <title> Test Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>PPST Test</title>
 </head>
 
 <body>
+    <div id="introduction">
+        <h1>Welcome to the Philadelphia Pointing Span Test</h1>
+        <h2>This is a demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to
+            proceed, click the button below to begin taking the test. <i class="fas fa-volume-up" id="speak-button"
+            style="font-size: 30px; cursor: pointer;"></i> </h2>
+
     <h3 id="title">Online Philadelphia Pointing Span Test</h3>
     <form id="changeFont" name="changeFont">
-        Change Font Size: <select name="fontSize" id="fontSize">
+         Change Font Size: <select name="fontSize" id="fontSize"> 
             <option value="16px">16px</option>
             <option value="24px">24px</option>
-            <option value="32px">32px</option>
+            <option value="32px">32px</option> 
         </select>
-        <input type="submit" value="Submit">
+        <input type="submit" value="Submit"> 
     </form>
     <h2 id="Welcome">Welcome to your Philadelphia Pointing Span Test</h2><br><br>
     <p id="demo_vid"></p>
     <p id="P"></p>
     <p id="submit_p"></p>
 
-    <div class="center" id="test" style="display: none;">
-        <p></p> <br><br><br>
-        <p></p> <br><br><br>
+
+        <div id="text-to-speak" style="display:none;"> Welcome to the Philadelphia Pointing Span Test. This is a demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to proceed, click the button below to begin taking the test.
+        </div>
+
+        <div class="video-container">
+            <video width="640" height="360" controls>
+                <source src="{% static 'images\PPSTTestIntoVid.mp4' %}" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <button id="start-test">Start Test</button>
+        </div>
+
     </div>
 
-    <div class="center" id="playDemo">
-        <button onclick="playDemo()">Play Demo</button>
+    <input type="hidden" id="test-link" value="{{ test.link }}">
+    <div id="stimulus"></div>
+    <div id="response-section">
+        <h2>Enter Your Answer:</h2>
+        <div id="digit-keyboard">
+            <button class="key" data-value="6">6</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="3">3</button>
+        </div>
+
+        <div id="alphanumeric-keyboard" style="display: none;">
+            <button class="key" data-value="R">R</button>
+            <button class="key" data-value="K">K</button>
+            <button class="key" data-value="F">F</button>
+            <button class="key" data-value="P">P</button>
+            <button class="key" data-value="Y">Y</button>
+            <button class="key" data-value="L">L</button>
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="3">3</button>
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="6">6</button>
+        </div>
+
+        <button id="submit-response" class="btn btn-primary mt-3">Submit</button>
     </div>
 
-    <div class="center" id="d12t4" style="display: none;">
-        <button class="testButton" , onclick="choice">1</button>
-        <button class="testButton" , onclick="choice">2</button>
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">7</button>
-        <button class="testButton" , onclick="choice">8</button>
-    </div>
-    <div class="center" id="t25" style="display: none;">
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">7</button>
-        <button class="testButton" , onclick="choice">8</button>
-        <button class="testButton" , onclick="choice">9</button>
-        <button class="testButton" , onclick="choice">0</button>
-    </div>
-    <div class="center" id="t136" style="display: none;">
-        <button class="testButton" , onclick="choice">1</button>
-        <button class="testButton" , onclick="choice">2</button>
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">8</button>
-        <button class="testButton" , onclick="choice">9</button>
-        <button class="testButton" , onclick="choice">0</button>
-    </div>
-    <div class="center" id="dem3" style="display: none;">
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">D</button>
-        <button class="testButton" , onclick="choice">E</button>
-        <button class="testButton" , onclick="choice">T</button>
-        <button class="testButton" , onclick="choice">U</button>
-    </div>
-    <div class="center" id="dem4" style="display: none;">
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">7</button>
-        <button class="testButton" , onclick="choice">A</button>
-        <button class="testButton" , onclick="choice">C</button>
-        <button class="testButton" , onclick="choice">H</button>
-        <button class="testButton" , onclick="choice">J</button>
-    </div>
-    <div class="center" id="t7" style="display: none;">
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">8</button>
-        <button class="testButton" , onclick="choice">9</button>
-        <button class="testButton" , onclick="choice">I</button>
-        <button class="testButton" , onclick="choice">J</button>
-        <button class="testButton" , onclick="choice">K</button>
-        <button class="testButton" , onclick="choice">L</button>
-    </div>
-    <div class="center" id="t8" style="display: none;">
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">7</button>
-        <button class="testButton" , onclick="choice">0</button>
-        <button class="testButton" , onclick="choice">S</button>
-        <button class="testButton" , onclick="choice">T</button>
-        <button class="testButton" , onclick="choice">U</button>
-        <button class="testButton" , onclick="choice">V</button>
-    </div>
-    <div class="center" id="t9" style="display: none;">
-        <button class="testButton" , onclick="choice">2</button>
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">0</button>
-        <button class="testButton" , onclick="choice">D</button>
-        <button class="testButton" , onclick="choice">E</button>
-        <button class="testButton" , onclick="choice">Q</button>
-        <button class="testButton" , onclick="choice">R</button>
-    </div>
-    <div class="center" id="t10" style="display: none;">
-        <button class="testButton" , onclick="choice">3</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">9</button>
-        <button class="testButton" , onclick="choice">0</button>
-        <button class="testButton" , onclick="choice">A</button>
-        <button class="testButton" , onclick="choice">C</button>
-        <button class="testButton" , onclick="choice">E</button>
-        <button class="testButton" , onclick="choice">F</button>
-    </div>
-    <div class="center" id="t11" style="display: none;">
-        <button class="testButton" , onclick="choice">2</button>
-        <button class="testButton" , onclick="choice">4</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">8</button>
-        <button class="testButton" , onclick="choice">A</button>
-        <button class="testButton" , onclick="choice">H</button>
-        <button class="testButton" , onclick="choice">X</button>
-        <button class="testButton" , onclick="choice">Y</button>
-    </div>
-    <div class="center" id="t12" style="display: none;">
-        <button class="testButton" , onclick="choice">5</button>
-        <button class="testButton" , onclick="choice">6</button>
-        <button class="testButton" , onclick="choice">7</button>
-        <button class="testButton" , onclick="choice">8</button>
-        <button class="testButton" , onclick="choice">L</button>
-        <button class="testButton" , onclick="choice">N</button>
-        <button class="testButton" , onclick="choice">P</button>
-        <button class="testButton" , onclick="choice">R</button>
-    </div>
-
-    <div class="center" id="demoTest1" style="display: none;">
-        <button onclick="demoTest1()">Demo Test 1</button>
-    </div>
-
-    <div class="center" id="demoTest2" style="display: none;">
-        <button onclick="demoTest2()">Demo Test 2</button>
-    </div>
-
-    <div class="center" id="takeTest" style="display: none;">
-        <button onclick="takeTest()">Take the test</button>
-    </div>
-
-    <div class="center" id="submit" style="display: none;">
-        <button onclick="submit()">Submit</button>
-    </div>
+    <script src="{% static 'js/testpage.js' %}"></script>
 </body>
+
 </html>

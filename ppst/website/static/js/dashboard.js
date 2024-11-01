@@ -195,55 +195,165 @@ function generateTestLink() {
 }
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = '<h2>Retrieve Patient Test Results</h2>';
+    testContent.innerHTML = `
+        <h2>Retrieve Patient Test Results</h2>
+    `;
 
+    // Load test results
     fetch('/get_test_results/')
     .then(response => response.json())
     .then(data => {
         data.tests.forEach(test => {
-            let colorClass = 'gray-button';  // Default to in-progress
-            if (test.status === 'complete') {
-                colorClass = 'blue-button';
+            let colorClass = 'incomplete';  // Default to in-progress (gray)
+            let onclickAttr = '';  // Default to no click event
+
+            if (test.status === 'completed') {
+                colorClass = 'completed';  // Blue button for completed
+                onclickAttr = `onclick="viewTestResults(${test.id})"`;  // Make clickable
             } else if (test.status === 'invalid') {
-                colorClass = 'red-button';
+                colorClass = 'invalid';  // Red button for invalid
             }
 
             testContent.innerHTML += `
-                <button class="${colorClass}" onclick="viewTestResults(${test.id})">
+                <button class="${colorClass}" ${onclickAttr}>
                     Test ID ${test.id} Results
                 </button><br>`;
         });
     })
     .catch(error => console.error('Error:', error));
 }
-// Function to view test results for a completed test.
+
+// Track if we're in test viewing mode
+let isViewingTest = false;
+
 function viewTestResults(testId) {
+    const testContent = document.getElementById('test-content');
+    isViewingTest = true;
+    toggleTestButtons();
+
+    // Fetch the test results for the selected test ID
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
     .then(data => {
-        const testContent = document.getElementById('test-content');
-        testContent.innerHTML = `
-            <h2>Test Results for ID ${testId}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${data.results.map(result => `
+        const testResultsTable = `
+            <div class="table-container">
+                <h2>Test Results for ID ${testId}</h2>
+                <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
+                <table class="results-table">
+                    <thead>
                         <tr>
-                            <td>${result.metric}</td>
-                            <td>${result.value}</td>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Average</th>
+                            <th>Comparison</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            <button onclick="goBack()">Back to Tests</button>
+                    </thead>
+                    <tbody>
+                        ${data.test_results.map(result => `
+                            <tr>
+                                <td>${result.metric.replace(/_/g, ' ')}</td>
+                                <td>${result.value}</td>
+                                <td>${result.average || "N/A"}</td>
+                                <td class="${result.comparison === 'above average' ? 'above-average' : 'below-average'}">
+                                    ${result.comparison}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
         `;
-    });
+
+        const aggregateTable = `
+            <div class="table-container">
+                <h3>Aggregate Results for Age Group</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.aggregate_results.map(result => `
+                            <tr>
+                                <td>${result.metric.replace("avg_", "").replace(/_/g, ' ')}</td>
+                                <td>${result.average}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        // Render results and provide navigation buttons
+        testContent.innerHTML = testResultsTable + aggregateTable + `
+            <button onclick="retrieveTestResults()">Back to Test Results</button>
+            <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+        `;
+    })
+    .catch(error => console.error('Error:', error));
 }
+
+function backToTestResults() {
+    isViewingTest = false; // Reset when going back
+    toggleTestButtons(); // Show the test buttons again
+    retrieveTestResults(); // Reload the test results list
+}
+
+// Function to toggle visibility of test buttons
+function toggleTestButtons() {
+    const testButtons = document.querySelector('.test-buttons');
+    if (testButtons) {
+        testButtons.style.display = isViewingTest ? 'none' : 'block';
+    }
+}
+
+function exportToSpreadsheet(testId) {
+    fetch(`/test_results/${testId}/`)
+    .then(response => response.json())
+    .then(data => {
+        // Initialize workbook and worksheet
+        const workbook = XLSX.utils.book_new();
+
+        // Prepare Patient Test Results Sheet
+        const patientResults = [
+            ['Metric', 'Value', 'Average', 'Comparison']
+        ];
+        data.test_results.forEach(result => {
+            patientResults.push([
+                result.metric.replace(/_/g, ' '),
+                result.value,
+                result.average || "N/A",
+                result.comparison
+            ]);
+        });
+
+        // Add patient results to the workbook
+        const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
+        XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
+
+        // Prepare Aggregate Results Sheet
+        const aggregateResults = [
+            ['Metric', 'Average']
+        ];
+        data.aggregate_results.forEach(result => {
+            aggregateResults.push([
+                result.metric.replace("avg_", "").replace(/_/g, ' '),
+                result.average
+            ]);
+        });
+
+        // Add aggregate results to the workbook
+        const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
+        XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+
+        // Export the workbook to a file
+        XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 // Function to save account changes for the user.
 function saveAccountChanges() {
     const firstName = document.getElementById('first-name').value;
@@ -283,6 +393,7 @@ function saveAccountChanges() {
     })
     .catch(error => console.error('Error:', error));
 }
+
 // Function to get user information
 function getUserInfo() {
     fetch('/get_user_info/', {

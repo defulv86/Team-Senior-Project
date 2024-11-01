@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static 'css/login.css' %}">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
-  rel="stylesheet">
-</head>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <script src="{% static 'js/login.js' %}" defer></script>
+</head>  
 <body>
     <div class="container">
       <div class="left-column">
@@ -23,11 +24,21 @@
           <h2>Get Started Now</h2>
           <form method="post">
             {% csrf_token %}
-            <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Enter your username" required>
+            <div class="txt_field">
+              <input type="text" id="username" name="username" placeholder="" required>
+              <i class="fas fa-user"></i>
+              <span></span>
+              <label>Username</label>
+              <span class="caps-lock-warning"> <i class="fas fa-exclamation-triangle"></i><span class="caps-lock-text">Caps Lock is On</span></span>
+            </div>
             <div class="new-line"></div>
-            <label for="passwd">Password</label>
-            <input type="password" id="passwd" name="passwd" placeholder="Enter your password" required>
+            <div class="txt_field">
+              <input type="password" id="passwd" name="passwd" placeholder="" required>
+              <i class="fas fa-lock"></i>
+              <span></span>
+              <label>Password</label>
+              <span class="caps-lock-warning"> <i class="fas fa-exclamation-triangle"></i><span class="caps-lock-text">Caps Lock is On</span></span>
+            </div>
             <div class="new-line"></div>
              <!-- Display error message if it exists -->
             {% if error_message %}
