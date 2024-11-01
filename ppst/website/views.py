@@ -4,9 +4,9 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
-from django.utils import timezone
 import json
 
 def home(request):
@@ -174,6 +174,36 @@ def submit_response(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+def check_test_status(request, link):
+    if request.method == 'GET':  # Ensure the request is a GET request
+        test = get_object_or_404(Test, link=link)  # Fetch the test by link
+        test.check_status()  # Call any status update logic
+        return JsonResponse({'status': test.status})
+    else:
+        # Return an error if the request method is not GET
+        return JsonResponse({'error': 'Invalid request method. Only GET is allowed.'}, status=405)
+
+def mark_test_complete(request, link):
+    if request.method == 'POST':
+        test = get_object_or_404(Test, link=link)
+        test.finished_at = timezone.now()  # Set the finish time
+        test.status = 'Completed'
+        test.save()
+        return JsonResponse({'status': 'success', 'message': 'Test marked as complete with finish time recorded.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
+    
+
+def start_test(request, link):
+    if request.method == 'POST':
+        test = get_object_or_404(Test, link=link)
+        test.started_at = timezone.now()  # Set the start time
+        test.save()
+        return JsonResponse({'status': 'success', 'message': 'Test start time recorded.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
+
 
 @login_required
 def get_test_results(request):
