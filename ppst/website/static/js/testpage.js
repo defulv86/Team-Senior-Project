@@ -17,14 +17,19 @@ function flashStimulus(stimulus) {
     const stimulusContent = stimulus.stimulus_content;
     let currentCharIndex = 0;
 
+    function speakCharacter(character) {
+        const utterance = new SpeechSynthesisUtterance(character);
+        window.speechSynthesis.speak(utterance);
+    }
+
     // Function to show the next character
     const showNextChar = () => {
         if (currentCharIndex < stimulusContent.length) {
             stimulusDiv.textContent = stimulusContent[currentCharIndex];
+            speakCharacter(stimulusContent[currentCharIndex]);
             currentCharIndex++;
-            setTimeout(showNextChar, 1000); // Show next character after 1 second
+            setTimeout(showNextChar, 1500); // Show next character after 1.5 seconds
         } else {
-            // Clear the stimulus and show the keyboard
             stimulusDiv.textContent = '';
 
             const keyboardShowTime = new Date().toISOString();
@@ -35,11 +40,10 @@ function flashStimulus(stimulus) {
             } else if (stimulus.stimulus_type.includes('Mixed')) {
                 alphanumericKeyboard.style.display = 'flex';
             }
-            responseSection.style.display = 'block'; // Show the response section again
+            responseSection.style.display = 'block';
         }
     };
 
-    // Start showing characters
     showNextChar();
 }
 
@@ -48,22 +52,58 @@ document.querySelectorAll('.key').forEach(key => {
     key.addEventListener('click', () => {
         response += key.dataset.value;  // Append clicked key value
         timestamps.push(new Date().toISOString()); // Capture timestamp for each character entered
-        console.log(response); // For debugging
+        console.log(response);
     });
 });
 
+function showPauseScreen(message, callback) {
+    const pauseScreen = document.getElementById('pause-screen');
+    const messageDiv = document.getElementById('pause-message');
+    const continueButton = document.getElementById('continue-button');
+
+    messageDiv.textContent = message;
+    pauseScreen.style.display = 'flex';
+
+    continueButton.onclick = function (event) {
+        event.stopPropagation();
+        pauseScreen.style.display = 'none';
+        if (callback) callback();
+    };
+}
+
+let shownTypes = new Set();
 function nextStimulus() {
     if (currentStimulusIndex < stimuli.length) {
-        startTime = new Date().getTime();
-        flashStimulus(stimuli[currentStimulusIndex]);
-        currentStimulusIndex++;
-        response = ''; // Reset response for next stimulus
-        timestamps.length = 0; // Clear timestamps for the next stimulus
+        const currentStimulus = stimuli[currentStimulusIndex];
+        const stimulusType = currentStimulus.stimulus_type;
+
+        if (['4_Span_Digit_Pr', '4_Span_Digit', '4_Span_Mixed_Pr', '4_Span_Mixed'].includes(stimulusType) && !shownTypes.has(stimulusType)) {
+            shownTypes.add(stimulusType);
+            const messageMap = {
+                '4_Span_Digit_Pr': "You will now see two digit practice stimuli.",
+                '4_Span_Digit': "You will now see six digit stimuli.",
+                '4_Span_Mixed_Pr': "You will now see two mixed practice stimuli.",
+                '4_Span_Mixed': "You will now see six mixed stimuli."
+            };
+
+            showPauseScreen(messageMap[stimulusType], () => {
+                flashStimulus(currentStimulus);
+                currentStimulusIndex++;
+            });
+        } else {
+            flashStimulus(currentStimulus);
+            currentStimulusIndex++;
+        }
+
+        response = '';
+        timestamps.length = 0;
+        
     } else {
         document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
         document.getElementById('response-section').style.display = 'none';
     }
 }
+
 
 function get_correct_answer(stimulus) {
     if (stimulus.stimulus_type.includes('Digit')) {
@@ -89,6 +129,17 @@ document.getElementById('submit-response').addEventListener('click', () => {
     const characterLatencies = [];
     const accuracies = [];
 
+    // Determine expected length based on stimulus type
+    let expectedLength;
+    if (currentStimulus.stimulus_type.includes('4_Span')) {
+        expectedLength = 4;
+    } else if (currentStimulus.stimulus_type.includes('5_Span')) {
+        expectedLength = 5;
+    }
+
+    // Truncate response to expected length
+    const truncatedResponse = response.slice(0, expectedLength);
+
     fetch('/submit-response/', {
         method: 'POST',
         headers: {
@@ -96,7 +147,7 @@ document.getElementById('submit-response').addEventListener('click', () => {
         },
         body: JSON.stringify({
             link: testLink,
-            response_text: response,
+            response_text: truncatedResponse, // Use truncated response
             stimulus_id: currentStimulus.id,
             response_position: currentStimulusIndex,
             character_latencies: characterLatencies, // Send latencies to the backend
@@ -125,7 +176,7 @@ document.getElementById('submit-response').addEventListener('click', () => {
 
 function playDemo() { // shows demo video and speaks/shows instructions
     var video = document.createElement("VIDEO");
-    video.width = 420; 
+    video.width = 420;
     video.height = 300; video.controls = true;
     video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
@@ -135,7 +186,7 @@ function playDemo() { // shows demo video and speaks/shows instructions
     speak(welcomeText);
 
     var paragraph = document.getElementById("P");
-    paragraph.style.color =  "#0077b3";
+    paragraph.style.color = "#0077b3";
     paragraph.style.fontFamily = "Open Sans";
     paragraph.style.fontWeight = "bold";
     paragraph.classList.add("centered-text");
@@ -148,22 +199,13 @@ function playDemo() { // shows demo video and speaks/shows instructions
     document.getElementById("demoTest1").style.display = "block"; // shows demo1 video 
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('response-input').addEventListener('input', (event) => {
-        response = event.target.value; // Update the response variable
-        const firstCharacterTime = new Date().toISOString();
-        timestamps.push(firstCharacterTime);
-    });
-});
-
 function startTest() {
     testLink = document.getElementById('test-link').value; // Retrieve the test link
 
     fetch('/get-stimuli/')
         .then(response => {
             if (!response.ok) {
-                throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
+                throw new Error('Fetch error: ${response.status} ${response.statusText}');
             }
             return response.json();
         })
@@ -186,17 +228,24 @@ function populateVoices() {
     voices = window.speechSynthesis.getVoices();
 }
 
-
 window.speechSynthesis.onvoiceschanged = populateVoices;
 
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = voices.find(voice => voice.name === 'Google US English');
+
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
+
+    speechSynthesis.speak(utterance);
+}
 
 function speakText() {
     const textElement = document.getElementById('text-to-speak');
     const text = textElement.innerText;
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-
-
 
         const speech = new SpeechSynthesisUtterance(text);
         speech.voice = voices[0];
