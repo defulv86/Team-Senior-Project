@@ -148,7 +148,16 @@ function nextStimulus() {
 
 
 function get_correct_answer(stimulus) {
-    return stimulus.stimulus_content; // Return the stimulus as-is, without sorting
+    if (stimulus.stimulus_type.includes('Digit')) {
+        // Sort digits in numerical order
+        return stimulus.stimulus_content.split('').sort((a, b) => a - b).join('');
+    } else if (stimulus.stimulus_type.includes('Mixed')) {
+        // Sort digits numerically and letters alphabetically
+        const digits = stimulus.stimulus_content.split('').filter(char => !isNaN(char)).sort();
+        const letters = stimulus.stimulus_content.split('').filter(char => isNaN(char)).sort();
+        return digits.concat(letters).join('');
+    }
+    return '';
 }
 
 document.getElementById('submit-response').addEventListener('click', () => {
