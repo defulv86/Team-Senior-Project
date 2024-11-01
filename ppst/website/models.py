@@ -134,6 +134,7 @@ class Ticket(models.Model):
         return f"Ticket {self.id} - {self.category} by {self.user.username}"
 
 class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.CASCADE, default=1)
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
@@ -141,4 +142,4 @@ class Notification(models.Model):
     is_dismissed = models.BooleanField(default=False)
 
     def  __str__(self):
-        return   str(self.id) + "Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)
+        return   str(self.id) + " Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)
