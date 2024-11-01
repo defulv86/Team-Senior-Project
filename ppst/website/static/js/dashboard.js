@@ -193,34 +193,34 @@ function generateTestLink() {
         linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
     }
 }
+
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `
-        <h2>Retrieve Patient Test Results</h2>
-    `;
+    testContent.innerHTML = `<h2>Retrieve Patient Test Results</h2>`;
 
-    // Load test results
+    // Fetch the test results
     fetch('/get_test_results/')
-    .then(response => response.json())
-    .then(data => {
-        data.tests.forEach(test => {
-            let colorClass = 'incomplete';  // Default to in-progress (gray)
-            let onclickAttr = '';  // Default to no click event
+        .then(response => response.json())
+        .then(data => {
+            data.tests.forEach(test => {
+                let colorClass = 'incomplete';
+                let onclickAttr = '';
 
-            if (test.status === 'completed') {
-                colorClass = 'completed';  // Blue button for completed
-                onclickAttr = `onclick="viewTestResults(${test.id})"`;  // Make clickable
-            } else if (test.status === 'invalid') {
-                colorClass = 'invalid';  // Red button for invalid
-            }
+                if (test.status === 'completed') {
+                    colorClass = 'completed';
+                    onclickAttr = `onclick="viewTestResults(${test.id})"`;
+                } else if (test.status === 'invalid') {
+                    colorClass = 'invalid';
+                }
 
-            testContent.innerHTML += `
-                <button class="${colorClass}" ${onclickAttr}>
-                    Test ID ${test.id} Results
-                </button><br>`;
-        });
-    })
-    .catch(error => console.error('Error:', error));
+                testContent.innerHTML += `
+                    <button class="${colorClass}" ${onclickAttr}>
+                        Test ID ${test.id} Results
+                    </button><br>
+                `;
+            });
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Track if we're in test viewing mode
@@ -231,10 +231,14 @@ function viewTestResults(testId) {
     isViewingTest = true;
     toggleTestButtons();
 
-    // Fetch the test results for the selected test ID
     fetch(`/test_results/${testId}/`)
     .then(response => response.json())
     .then(data => {
+        if (!data.test_results || data.test_results.length === 0) {
+            testContent.innerHTML = `<p style="color:red;">No test results available for this test.</p>`;
+            return;
+        }
+
         const testResultsTable = `
             <div class="table-container">
                 <h2>Test Results for ID ${testId}</h2>
@@ -252,10 +256,10 @@ function viewTestResults(testId) {
                         ${data.test_results.map(result => `
                             <tr>
                                 <td>${result.metric.replace(/_/g, ' ')}</td>
-                                <td>${result.value}</td>
+                                <td>${result.value || "N/A"}</td>
                                 <td>${result.average || "N/A"}</td>
                                 <td class="${result.comparison === 'above average' ? 'above-average' : 'below-average'}">
-                                    ${result.comparison}
+                                    ${result.comparison || "N/A"}
                                 </td>
                             </tr>
                         `).join('')}
@@ -277,7 +281,7 @@ function viewTestResults(testId) {
                     <tbody>
                         ${data.aggregate_results.map(result => `
                             <tr>
-                                <td>${result.metric.replace("avg_", "").replace(/_/g, ' ')}</td>
+                                <td>${result.metric.replace(/_/g, ' ')}</td>
                                 <td>${result.average}</td>
                             </tr>
                         `).join('')}
@@ -286,13 +290,15 @@ function viewTestResults(testId) {
             </div>
         `;
 
-        // Render results and provide navigation buttons
         testContent.innerHTML = testResultsTable + aggregateTable + `
             <button onclick="retrieveTestResults()">Back to Test Results</button>
             <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
         `;
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        testContent.innerHTML = `<p style="color:red;">Failed to load test results.</p>`;
+    });
 }
 
 function backToTestResults() {

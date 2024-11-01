@@ -3,6 +3,45 @@ let currentStimulusIndex = 0;
 let response = ''; // Store the response from the keyboard
 const timestamps = [];
 
+
+// Check if the test is already complete when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    testLink = document.getElementById('test-link').value; // Retrieve the test link
+
+    fetch(`/check-test-status/${testLink}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'completed') {
+                window.location.href = '/TestError1/'; // Redirect to another page
+            }
+        })
+        .catch(error => {
+            console.error('Error checking test status:', error);
+        });
+});
+
+// Function to mark the test as complete in the backend
+function markTestComplete(testLink) {
+    testLink = document.getElementById('test-link').value; // Retrieve the test link
+    fetch(`/mark-test-complete/${testLink}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Test marked as complete.');
+        }
+    })
+    .catch(error => {
+        console.error('Error marking test as complete:', error);
+    });
+}
+
+
 function flashStimulus(stimulus) {
     const stimulusDiv = document.getElementById('stimulus');
     const digitKeyboard = document.getElementById('digit-keyboard');
@@ -101,6 +140,9 @@ function nextStimulus() {
     } else {
         document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
         document.getElementById('response-section').style.display = 'none';
+
+
+        markTestComplete();
     }
 }
 
@@ -202,26 +244,54 @@ function playDemo() { // shows demo video and speaks/shows instructions
 function startTest() {
     testLink = document.getElementById('test-link').value; // Retrieve the test link
 
-    fetch('/get-stimuli/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Fetch error: ${response.status} ${response.statusText}');
-            }
-            return response.json();
-        })
-        .then(data => {
-            stimuli = data;
-            nextStimulus();
-        })
-        .catch(error => {
-            console.error('Error fetching stimuli:', error);
-        });
+    // Record the start time on the backend
+    fetch(`/start-test/${testLink}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Test start time recorded.');
+            fetch('/get-stimuli/')
+                .then(response => response.json())
+                .then(data => {
+                    stimuli = data;
+                    nextStimulus();  // Proceed with the test
+                })
+                .catch(error => {
+                    console.error('Error fetching stimuli:', error);
+                });
+        }
+    })
+    .catch(error => {
+        console.error('Error recording start time:', error);
+    });
 }
 
 document.getElementById('start-test').addEventListener('click', function () {
     document.getElementById('introduction').style.display = 'none';
     startTest();
 });
+
+// CSRF token retrieval function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 let voices = [];
 function populateVoices() {
