@@ -187,12 +187,12 @@ stimulus_instance_11 = Stimulus.objects.create(
 )
 
 stimulus_instance_12 = Stimulus.objects.create(
-    stimulus_content = "5Y42",
+    stimulus_content = "5YR2",
     stimulus_type = four_span_mixed_type
 )
 
 stimulus_instance_13 = Stimulus.objects.create(
-    stimulus_content = "P5L8",
+    stimulus_content = "P5L6",
     stimulus_type = four_span_mixed_type
 )
 
