@@ -16,24 +16,11 @@
         <h1>Welcome to the Philadelphia Pointing Span Test</h1>
         <h2>This is a demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to
             proceed, click the button below to begin taking the test. <i class="fas fa-volume-up" id="speak-button"
-            style="font-size: 30px; cursor: pointer;"></i> </h2>
+                style="font-size: 30px; cursor: pointer;"></i> </h2>
 
-    <h3 id="title">Online Philadelphia Pointing Span Test</h3>
-    <form id="changeFont" name="changeFont">
-         Change Font Size: <select name="fontSize" id="fontSize"> 
-            <option value="16px">16px</option>
-            <option value="24px">24px</option>
-            <option value="32px">32px</option> 
-        </select>
-        <input type="submit" value="Submit"> 
-    </form>
-    <h2 id="Welcome">Welcome to your Philadelphia Pointing Span Test</h2><br><br>
-    <p id="demo_vid"></p>
-    <p id="P"></p>
-    <p id="submit_p"></p>
-
-
-        <div id="text-to-speak" style="display:none;"> Welcome to the Philadelphia Pointing Span Test. This is a demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to proceed, click the button below to begin taking the test.
+        <div id="text-to-speak" style="display:none;"> Welcome to the Philadelphia Pointing Span Test. This is a
+            demonstration video for taking the Philadelphia Pointing Span Test. Once you are prepared to proceed, click
+            the button below to begin taking the test.
         </div>
 
         <div class="video-container">
@@ -47,6 +34,13 @@
         </div>
 
     </div>
+
+    <div id="pause-screen"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); color: white; justify-content: center; align-items: center; flex-direction: column;">
+        <div id="pause-message" style="margin-bottom: 20px; text-align: center;"></div>
+        <button id="continue-button" class="btn btn-primary">Continue</button>
+    </div>
+
 
     <input type="hidden" id="test-link" value="{{ test.link }}">
     <div id="stimulus"></div>
@@ -68,12 +62,12 @@
             <button class="key" data-value="P">P</button>
             <button class="key" data-value="Y">Y</button>
             <button class="key" data-value="L">L</button>
-            <button class="key" data-value="1">1</button>
-            <button class="key" data-value="2">2</button>
-            <button class="key" data-value="3">3</button>
-            <button class="key" data-value="4">4</button>
-            <button class="key" data-value="5">5</button>
             <button class="key" data-value="6">6</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="3">3</button>
         </div>
 
         <button id="submit-response" class="btn btn-primary mt-3">Submit</button>
