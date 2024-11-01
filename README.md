@@ -12,7 +12,7 @@ Installation along with instructions to make sure it works properly.
 
 5. Install the django into the directory: pip install django
    
-7. Install the dateutil into the directory: pip install dateutil
+7. Install the dateutil into the directory: pip install python-dateutil
 
 8. Perform the migrations: py manage.py makemigrations
 
