@@ -47,6 +47,8 @@ invalid_test = Test.objects.create(
     status='invalid'
 )
 
+test_instance=completed_test
+
 # Create a Ticket instance submitted by DoctorWho
 Ticket.objects.create(
     user=doctor_who,
@@ -70,32 +72,32 @@ aggregates_data = [
         "min_age": 50,
         "max_age": 59,
         "average_latencies": {
-            "fourdigit_1": 140,
-            "fourdigit_2": 150,
-            "fourdigit_3": 160,
-            "fivedigit_1": 190,
-            "fivedigit_2": 175,
-            "fivedigit_3": 190,
-            "fourmixed_1": 120,
-            "fourmixed_2": 155,
-            "fourmixed_3": 125,
-            "fivemixed_1": 185,
-            "fivemixed_2": 195,
-            "fivemixed_3": 200
+            "fourdigit_1": 753,
+            "fourdigit_2": 1331,
+            "fourdigit_3": 969,
+            "fivedigit_1": 1246.2,
+            "fivedigit_2": 913,
+            "fivedigit_3": 765.6,
+            "fourmixed_1": 1619,
+            "fourmixed_2": 6406,
+            "fourmixed_3": 1395,
+            "fivemixed_1": 1295.2,
+            "fivemixed_2": 1744.4,
+            "fivemixed_3": 1608.4
         },
         "average_accuracies": {
-            "fourdigit_1": 0.79,
-            "fourdigit_2": 0.74,
-            "fourdigit_3": 0.70,
-            "fivedigit_1": 0.68,
-            "fivedigit_2": 0.71,
-            "fivedigit_3": 0.65,
-            "fourmixed_1": 0.76,
-            "fourmixed_2": 0.80,
-            "fourmixed_3": 0.84,
-            "fivemixed_1": 0.65,
-            "fivemixed_2": 0.71,
-            "fivemixed_3": 0.72
+            "fourdigit_1": 1.0,
+            "fourdigit_2": 1.0,
+            "fourdigit_3": 1.0,
+            "fivedigit_1": 1.0,
+            "fivedigit_2": 1.0,
+            "fivedigit_3": 1.0,
+            "fourmixed_1": 1.0,
+            "fourmixed_2": 1.0,
+            "fourmixed_3": 1.0,
+            "fivemixed_1": 1.0,
+            "fivemixed_2": 0.8,
+            "fivemixed_3": 1.0
         }
     },
     # Add more dictionaries for other age groups as needed
@@ -244,3 +246,198 @@ stimulus_instance_16 = Stimulus.objects.create(
     stimulus_content="62K4P",
     stimulus_type = five_span_mixed_type
 )
+
+
+test_response_1 = [
+    {
+        "response": "2456",
+        "test": completed_test,
+        "response_position": 1,
+        "stimulus": stimulus_instance_1,
+        "time_submitted": "2024-10-25T11:00:00.000Z"
+    }
+]
+for test_response_1 in test_response_1:
+    Response.objects.create(**test_response_1)
+
+test_response_2 = [
+    {
+        "response": "23456",
+        "test": completed_test,
+        "response_position": 2,
+        "stimulus": stimulus_instance_2,
+        "time_submitted": "2024-10-25T11:05:00.000Z"
+    }
+]
+for test_response_2 in test_response_2:
+    Response.objects.create(**test_response_2)
+
+test_response_3 = [
+    {
+        "response": "2346",
+        "test": completed_test,
+        "response_position": 3,
+        "stimulus": stimulus_instance_3,
+        "time_submitted": "2024-10-25T11:10:00.000Z"
+    }
+]
+for test_response_3 in test_response_3:
+    Response.objects.create(**test_response_3)
+
+test_response_4 = [
+    {
+        "response": "1356",
+        "test": completed_test,
+        "response_position": 4,
+        "stimulus": stimulus_instance_4,
+        "time_submitted": "2024-10-25T11:15:00.000Z"
+    }
+]
+for test_response_4 in test_response_4:
+    Response.objects.create(**test_response_4)
+
+test_response_5 = [
+    {
+        "response": "1245",
+        "test": completed_test,
+        "response_position": 5,
+        "stimulus": stimulus_instance_5,
+        "time_submitted": "2024-10-25T11:20:00.000Z"
+    }
+]
+for test_response_5 in test_response_5:
+    Response.objects.create(**test_response_5)
+
+test_response_6 = [
+    {
+        "response": "2456",
+        "test": completed_test,
+        "response_position": 6,
+        "stimulus": stimulus_instance_6,
+        "time_submitted": "2024-10-25T11:25:00.000Z"
+    }
+]
+for test_response_6 in test_response_6:
+    Response.objects.create(**test_response_6)
+
+test_response_7 = [
+    {
+        "response": "13456",
+        "test": completed_test,
+        "response_position": 7,
+        "stimulus": stimulus_instance_7,
+        "time_submitted": "2024-10-25T11:30:00.000Z"
+    }
+]
+for test_response_7 in test_response_7:
+    Response.objects.create(**test_response_7)
+
+test_response_8 = [
+    {
+        "response": "13456",
+        "test": completed_test,
+        "response_position": 8,
+        "stimulus": stimulus_instance_8,
+        "time_submitted": "2024-10-25T11:35:00.000Z"
+    }
+]
+for test_response_8 in test_response_8:
+    Response.objects.create(**test_response_8)
+
+test_response_9 = [
+    {
+        "response": "56RK",
+        "test": completed_test,
+        "response_position": 9,
+        "stimulus": stimulus_instance_9,
+        "time_submitted": "2024-10-25T11:40:00.000Z"
+    }
+]
+for test_response_9 in test_response_9:
+    Response.objects.create(**test_response_9)
+
+test_response_10 = [
+    {
+        "response": "346LY",
+        "test": completed_test,
+        "response_position": 10,
+        "stimulus": stimulus_instance_10,
+        "time_submitted": "2024-10-25T11:45:00.000Z"
+    }
+]
+for test_response_10 in test_response_10:
+    Response.objects.create(**test_response_10)
+
+test_response_11 = [
+    {
+        "response": "56FP",
+        "test": completed_test,
+        "response_position": 11,
+        "stimulus": stimulus_instance_11,
+        "time_submitted": "2024-10-25T11:50:00.000Z"
+    }
+]
+for test_response_11 in test_response_11:
+    Response.objects.create(**test_response_11)
+
+test_response_12 = [
+    {
+        "response": "25RY",
+        "test": completed_test,
+        "response_position": 12,
+        "stimulus": stimulus_instance_12,
+        "time_submitted": "2024-10-25T11:55:00.000Z"
+    }
+]
+for test_response_12 in test_response_12:
+    Response.objects.create(**test_response_12)
+
+test_response_13 = [
+    {
+        "response": "56LP",
+        "test": completed_test,
+        "response_position": 13,
+        "stimulus": stimulus_instance_13,
+        "time_submitted": "2024-10-25T12:00:00.000Z"
+    }
+]
+for test_response_13 in test_response_13:
+    Response.objects.create(**test_response_13) 
+
+test_response_14 = [
+    {
+        "response": "134FR",
+        "test": completed_test,
+        "response_position": 14,
+        "stimulus": stimulus_instance_14,
+        "time_submitted": "2024-10-25T12:05:00.000Z"
+    }
+]
+for test_response_14 in test_response_14:
+    Response.objects.create(**test_response_14)
+
+test_response_15 = [
+    {
+        "response": "136LP",
+        "test": completed_test,
+        "response_position": 15,
+        "stimulus": stimulus_instance_15,
+        "time_submitted": "2024-10-25T12:10:00.000Z"
+    }
+]
+for test_response_15 in test_response_15:
+    Response.objects.create(**test_response_15)
+
+test_response_16 = [
+    {
+        "response": "246KP",
+        "test": completed_test,
+        "response_position": 16,
+        "stimulus": stimulus_instance_16,
+        "time_submitted": "2024-10-25T12:15:00.000Z"
+    }
+]
+for test_response_16 in test_response_16:
+    Response.objects.create(**test_response_16)
+
+

@@ -190,6 +190,9 @@ def mark_test_complete(request, link):
         test.finished_at = timezone.now()  # Set the finish time
         test.status = 'Completed'
         test.save()
+
+        # Update or create the aggregate for the test's age group
+        update_or_create_aggregate(test)
         return JsonResponse({'status': 'success', 'message': 'Test marked as complete with finish time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
@@ -277,13 +280,20 @@ def get_stimuli(request):
 
 @login_required
 def test_results(request, test_id):
+    # Step 1: Retrieve test and result data
     test = get_object_or_404(Test, id=test_id)
     result = Result.objects.filter(test=test).first()
+    
+    # If no result exists, return an error message
+    if not result:
+        return JsonResponse({"error": "No test results available for this test."}, status=404)
+
+    # Step 2: Retrieve the appropriate age group aggregate data
     age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
+    if not age_group:
+        return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
 
-    test_results = []
-    aggregate_results = []
-
+    # Define metrics to evaluate and map them correctly
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -291,46 +301,140 @@ def test_results(request, test_id):
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
 
-    for metric in metrics:
-        user_accuracy = result.character_accuracies.get(metric, [None])[0] if result and metric in result.character_accuracies else None
-        user_latency = result.character_latencies.get(metric, [None])[0] if result and metric in result.character_latencies else None
-        avg_accuracy = age_group.average_accuracies.get(metric) if age_group and metric in age_group.average_accuracies else None
-        avg_latency = age_group.average_latencies.get(metric) if age_group and metric in age_group.average_latencies else None
+    # Initialize lists for test results and aggregate data
+    test_results = []
+    aggregate_results = []
 
-        # Calculate the comparison only if both user and average values are available
-        comparison_accuracy = (
-            "above average" if user_accuracy and avg_accuracy and user_accuracy > avg_accuracy
-            else "below average" if user_accuracy and avg_accuracy and user_accuracy < avg_accuracy
+    # Step 3: Loop through each metric to build the results tables
+    for idx, metric in enumerate(metrics, start=1):
+        # Retrieve user accuracy and latency for each metric
+        user_accuracy = result.character_accuracies.get(str(idx), [None])[0]
+        user_latency = result.character_latencies.get(str(idx), [None])[0]
+
+        # Retrieve age group averages for accuracy and latency
+        avg_accuracy = age_group.average_accuracies.get(metric, "N/A")
+        avg_latency = age_group.average_latencies.get(metric, "N/A")
+
+        # Comparison for accuracy and latency
+        accuracy_comparison = (
+            "Above average" if user_accuracy is not None and avg_accuracy != "N/A" and user_accuracy > avg_accuracy
+            else "Below average" if user_accuracy is not None and avg_accuracy != "N/A" and user_accuracy < avg_accuracy
             else "N/A"
         )
-        comparison_latency = (
-            "above average" if user_latency and avg_latency and user_latency > avg_latency
-            else "below average" if user_latency and avg_latency and user_latency < avg_latency
+        latency_comparison = (
+            "Above average" if user_latency is not None and avg_latency != "N/A" and user_latency < avg_latency
+            else "Below average" if user_latency is not None and avg_latency != "N/A" and user_latency > avg_latency
             else "N/A"
         )
 
+        # Add each metric's data to test and aggregate results tables
         test_results.append({
-            "metric": f"{metric}_accuracy",
+            "metric": f"{metric} Accuracy",
             "value": user_accuracy if user_accuracy is not None else "N/A",
-            "average": avg_accuracy if avg_accuracy is not None else "N/A",
-            "comparison": comparison_accuracy
+            "average": avg_accuracy,
+            "comparison": accuracy_comparison
         })
-
         test_results.append({
-            "metric": f"{metric}_latency",
+            "metric": f"{metric} Latency",
             "value": user_latency if user_latency is not None else "N/A",
-            "average": avg_latency if avg_latency is not None else "N/A",
-            "comparison": comparison_latency
+            "average": avg_latency,
+            "comparison": latency_comparison
         })
 
-    amount_correct = result.amount_correct if result else 0
+        aggregate_results.append({
+            "metric": f"{metric} Accuracy",
+            "average": avg_accuracy
+        })
+        aggregate_results.append({
+            "metric": f"{metric} Latency",
+            "average": avg_latency
+        })
 
+    # Return the results in JSON format
+    amount_correct = result.amount_correct
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
-        "aggregate_results": test_results,  # Only use test_results to simplify the response
+        "aggregate_results": aggregate_results,
         "amount_correct": amount_correct
     })
+
+
+def update_or_create_aggregate(test):
+    """
+    Updates or creates an aggregate entry for the age group associated with the completed test.
+    """
+    # Define the special age group for ages 18-29
+    age = test.age
+    if 18 <= age <= 29:
+        min_age, max_age = 18, 29
+    else:
+        # Define age range boundaries for other groups in 10-year intervals
+        min_age = (age // 10) * 10
+        max_age = min_age + 9
+
+    # Check if an aggregate for this age group already exists
+    age_group, created = Aggregate.objects.get_or_create(
+        min_age=min_age,
+        max_age=max_age,
+        defaults={"average_latencies": {}, "average_accuracies": {}}
+    )
+
+    # Retrieve all relevant results within this age group
+    results_in_age_group = Result.objects.filter(test__age__gte=min_age, test__age__lte=max_age)
+
+    # Initialize dictionaries to store sums and counts for averages
+    latencies_sums = {}
+    accuracies_sums = {}
+    counts = {}
+
+    # Define the metrics for which we want to calculate averages
+    metrics = [
+        'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+        'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+        'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+        'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
+    ]
+
+    # Initialize sums and counts for each metric
+    for metric in metrics:
+        latencies_sums[metric] = 0
+        accuracies_sums[metric] = 0
+        counts[metric] = 0
+
+    # Aggregate data from each result in the age group
+    for result in results_in_age_group:
+        for idx, metric in enumerate(metrics, start=1):
+            # Retrieve accuracy and latency lists for each metric
+            accuracy_values = result.character_accuracies.get(str(idx), [])
+            latency_values = result.character_latencies.get(str(idx), [])
+
+            # Sum values and count entries to calculate averages
+            if accuracy_values:
+                accuracies_sums[metric] += sum(accuracy_values)
+                counts[metric] += len(accuracy_values)
+            if latency_values:
+                latencies_sums[metric] += sum(latency_values)
+
+    # Calculate the average for each metric and update the age group data
+    average_accuracies = {}
+    average_latencies = {}
+
+    for metric in metrics:
+        if counts[metric] > 0:
+            average_accuracies[metric] = round(accuracies_sums[metric] / counts[metric], 2)
+            average_latencies[metric] = round(latencies_sums[metric] / counts[metric], 2)
+        else:
+            average_accuracies[metric] = "N/A"
+            average_latencies[metric] = "N/A"
+
+    # Update or create the aggregate entry
+    age_group.average_accuracies = average_accuracies
+    age_group.average_latencies = average_latencies
+    age_group.save()
+
+    return age_group
+
 
 # Handle ticket submission (for non-staff users)
 @login_required

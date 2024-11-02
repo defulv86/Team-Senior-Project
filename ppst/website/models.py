@@ -44,7 +44,7 @@ class Test(models.Model):
         return has_expired or was_exited
 
     def __str__(self):
-        return f"Test Link: {self.link}, Patient's Age: {self.age}, Status: {self.status}"
+        return f"Test Link: {self.link}"
 
     def get_test_details(self):
         """Returns test details as a dictionary."""
