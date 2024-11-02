@@ -193,16 +193,60 @@ def mark_test_complete(request, link):
 
         # Update or create the aggregate for the test's age group
         update_or_create_aggregate(test)
+
+        # Create a notification for test completion
+        create_test_notification(test)
+
         return JsonResponse({'status': 'success', 'message': 'Test marked as complete with finish time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     
+def check_and_notify_expiring_tests():
+    """
+    Periodic function to check for tests close to expiration and generate appropriate notifications.
+    """
+    one_day_warning_date = timezone.now() - timezone.timedelta(days=6)
+    expiration_date = timezone.now() - timezone.timedelta(weeks=1)
+
+    # 2. Notify for tests 1 day from expiration
+    tests_near_expiry = Test.objects.filter(
+        created_at__lte=one_day_warning_date,
+        status='Pending',
+        started_at__isnull=True
+    )
+    for test in tests_near_expiry:
+        create_test_notification(test)
+
+    # 3. Notify for tests that have become invalid after 1 week without being taken
+    expired_tests = Test.objects.filter(
+        created_at__lte=expiration_date,
+        status='Pending',
+        started_at__isnull=True
+    )
+    for test in expired_tests:
+        test.status = 'Invalid'
+        test.save()
+        create_test_notification(test)
+
+    # 4. Notify for tests that have become invalid after starting but not completing
+    incomplete_expired_tests = Test.objects.filter(
+        created_at__lte=expiration_date,
+        status='Pending',
+        started_at__isnull=False,
+        finished_at__isnull=True
+    )
+    for test in incomplete_expired_tests:
+        test.status = 'Invalid'
+        test.save()
+        create_test_notification(test)
 
 def start_test(request, link):
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
         test.started_at = timezone.now()  # Set the start time
         test.save()
+
+        create_test_notification(test)
         return JsonResponse({'status': 'success', 'message': 'Test start time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
@@ -504,6 +548,61 @@ def get_user_info(request):
         return JsonResponse(user_info)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def create_test_notification(test):
+    """
+    Creates a notification based on the current status of the test.
+    """
+    # 1. If the test is completed
+    if test.status == 'Completed' and test.finished_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Completed",
+            message="The test has been completed. Results are available to view."
+        )
+        return
+    
+    # 2. If the test is 1 day from becoming invalid
+    one_day_before_expiry = test.created_at + timezone.timedelta(days=6)
+    if timezone.now() >= one_day_before_expiry and test.status == 'Pending' and not test.started_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Expiration Warning",
+            message="The test link will expire in 1 day if not taken."
+        )
+        return
+    
+    # 3. If the test becomes invalid after 1 week without being taken
+    if test.status == 'Invalid' and not test.started_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Expired",
+            message="The test is invalid due to the link expiring. Do you wish to create a new test for the patient?"
+        )
+        return
+
+    # 4. If the test becomes invalid after the patient started but exited without completing
+    if test.status == 'Invalid' and test.started_at and not test.finished_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Not Completed",
+            message="The patient started the test but did not complete it in one sitting. Do you want to create a new test for the patient?"
+        )
+        return
+
+    # 5. If the test has been started by the patient
+    if test.started_at and not test.finished_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Started",
+            message="The patient has officially started the test."
+        )
+        return
 
 @login_required
 def get_user_notifications(request):
