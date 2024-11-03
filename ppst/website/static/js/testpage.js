@@ -134,9 +134,9 @@ function nextStimulus() {
             shownTypes.add(stimulusType);
             const messageMap = {
                 '4_Span_Digit_Pr': "You will now see two digit practice stimuli.",
-                '4_Span_Digit': "You will now see six digit stimuli.",
+                '4_Span_Digit': "The actual test will now begin. You will now see six different digit stimuli. These results will be recorded.", // "six digit stimuli" by itself sounded a bit confusing and misleading in my opinion
                 '4_Span_Mixed_Pr': "You will now see two mixed practice stimuli.",
-                '4_Span_Mixed': "You will now see six mixed stimuli."
+                '4_Span_Mixed': "The actual test will now begin. You will now see six different mixed stimuli. These results will be recorded." // "six mixed stimuli" sounds a little less confusing but I changed it anyway for consistency
             };
 
             showPauseScreen(messageMap[stimulusType], () => {
@@ -246,7 +246,7 @@ function playDemo() { // shows demo video and speaks/shows instructions
     paragraph.style.fontFamily = "Open Sans";
     paragraph.style.fontWeight = "bold";
     paragraph.classList.add("centered-text");
-    paragraph.style.fontSize = "25px"; // This is here so that the font size has an initial value declared. After this point, getFontSize() does all the work.
+    paragraph.style.fontSize = "24px"; // This is here so that the font size has an initial value declared. After this point, getFontSize() does all the work.
     paragraph.textContent = "Please turn the volume on your device up. This is a demo video for the Philadelphia Pointing Span Test. Do NOT close your browser window while taking this test. Exiting out of the test before its completion will invalidate the results, and you will not be able to continue. Once you are prepared to proceed, click the button below to take the two demo tests. Then you will be prompted to take the actual test.";
     paragraph.style.fontSize = getFontSize();
     document.getElementById("demo_vid").appendChild(paragraph);

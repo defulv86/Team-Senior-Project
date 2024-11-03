@@ -20,5 +20,6 @@ urlpatterns = [
     path('dismiss_notification/<int:id>/', views.dismiss_notification, name='dismiss_notification'),
     path('check-test-status/<str:link>/', views.check_test_status, name='check-test-status'),
     path('start-test/<str:link>/', views.start_test, name='start_test'),
-    path('mark-test-complete/<str:link>/', views.mark_test_complete, name='mark_test_complete')
+    path('mark-test-complete/<str:link>/', views.mark_test_complete, name='mark_test_complete'),
+    path('errorpage/', views.errorpage, name="errorpage")
 ]

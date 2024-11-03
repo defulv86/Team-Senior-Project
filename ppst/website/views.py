@@ -421,3 +421,7 @@ def dismiss_notification(request, id):
         except Notification.DoesNotExist:
             return JsonResponse({'status': 'not found'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def errorpage(request):
+    # Have testpage redirect to here if user exits out of browser during the test.
+    return render(request, 'errorpage.html')
