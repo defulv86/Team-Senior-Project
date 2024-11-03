@@ -13,14 +13,14 @@
     <div class="container">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
-            <div class="logo">
-                <img src="{% static 'images/logo.png' %}" alt="Logo">
+            <div class="logo-image">
+               <img src="{% static 'images/ppst_logo.png' %}" alt="Logo"> <!--logo image-->   
             </div>
             <ul class="menu">
-                <li><a href="#myaccount" onclick="loadContent('account')">My Account</a></li>
-                <li><a href="#dashboard" onclick="loadContent('dashboard')">Dashboard</a></li>
-                <li><a href="#tests" onclick="loadContent('tests')">Tests</a></li>
-                <li><a href="#support" onclick="loadContent('support')">Support</a></li>
+                <li> <a href="#myaccount" onclick="loadContent('account')">My Account<img src="{% static 'images/myaccount2.png' %}" alt="Account Icon"> </a></li>
+                <li> <a href="#dashboard" onclick="loadContent('dashboard')">Dashboard<img src="{% static 'images/dashboard2.png' %}" alt="Dashboard Icon"></a></li>
+                <li> <a href="#tests" onclick="loadContent('tests')">Tests <img src="{% static 'images/tests2.png' %}" alt="Tests Icon"></a></li>
+                <li> <a href="#support" onclick="loadContent('support')">Support <img src="{% static 'images/support2.png' %}" alt="Support Icon"></a></li>
             </ul>
         </div>
 
@@ -30,8 +30,10 @@
             <div class="top-bar">
                 <div class="title">Medical Personnel Dashboard</div>
                 <div class="top-right">
-                    <a href="#" onclick="toggleNotifications(event)"><i class="fa fa-bell"></i> Notifications</a>
-                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+                    <a href="#" onclick="toggleNotifications(event)"><i class="fa fa-bell"></i> 
+                        <img src="{% static 'images/Notifications2.png' %}" alt="Support Icon"> Notifications</a>
+                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> 
+                        <img src="{% static 'images/logout2.png' %}" alt="Support Icon"> Sign Out</a>
                 </div>
             </div>
 
