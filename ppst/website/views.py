@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
+from statistics import mean
 import json
 
 def home(request):
@@ -328,16 +329,15 @@ def test_results(request, test_id):
     test = get_object_or_404(Test, id=test_id)
     result = Result.objects.filter(test=test).first()
     
-    # If no result exists, return an error message
     if not result:
         return JsonResponse({"error": "No test results available for this test."}, status=404)
 
-    # Step 2: Retrieve the appropriate age group aggregate data
+    # Step 2: Retrieve age group aggregate data
     age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
     if not age_group:
         return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
 
-    # Define metrics to evaluate and map them correctly
+    # Define the metrics list
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -345,43 +345,60 @@ def test_results(request, test_id):
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
 
-    # Initialize lists for test results and aggregate data
+    # Exclude positions for practice questions
+    excluded_positions = {"1", "2", "9", "10"}
+    
     test_results = []
     aggregate_results = []
+    metric_position = 3  # Start at position 3, as requested
 
-    # Step 3: Loop through each metric to build the results tables
-    for idx, metric in enumerate(metrics, start=1):
-        # Retrieve user accuracy and latency for each metric
-        user_accuracy = result.character_accuracies.get(str(idx), [None])[0]
-        user_latency = result.character_latencies.get(str(idx), [None])[0]
+    # Step 3: Loop through each metric and calculate averages, excluding practice positions
+    for metric in metrics:
+        # Find the next valid metric position by skipping excluded positions
+        while str(metric_position) in excluded_positions:
+            metric_position += 1
 
-        # Retrieve age group averages for accuracy and latency
+        # Retrieve data for each metric, ignoring practice positions
+        user_accuracies = result.character_accuracies.get(str(metric_position), [])
+        user_latencies = result.character_latencies.get(str(metric_position), [])
+        
+        # Calculate averages
+        user_accuracy_avg = mean(user_accuracies) if user_accuracies else "N/A"
+        user_latency_avg = mean(user_latencies) if user_latencies else "N/A"
+        
+        # Retrieve age group averages
         avg_accuracy = age_group.average_accuracies.get(metric, "N/A")
         avg_latency = age_group.average_latencies.get(metric, "N/A")
 
-        # Comparison for accuracy and latency
+        # Determine comparison labels with "Neutral/Equal" case
         accuracy_comparison = (
-            "Above average" if user_accuracy is not None and avg_accuracy != "N/A" and user_accuracy > avg_accuracy
-            else "Below average" if user_accuracy is not None and avg_accuracy != "N/A" and user_accuracy < avg_accuracy
-            else "N/A"
-        )
-        latency_comparison = (
-            "Above average" if user_latency is not None and avg_latency != "N/A" and user_latency < avg_latency
-            else "Below average" if user_latency is not None and avg_latency != "N/A" and user_latency > avg_latency
+            "Above average" if user_accuracy_avg != "N/A" and avg_accuracy != "N/A" and user_accuracy_avg > avg_accuracy
+            else "Below average" if user_accuracy_avg != "N/A" and avg_accuracy != "N/A" and user_accuracy_avg < avg_accuracy
+            else "Average" if user_accuracy_avg == avg_accuracy and user_accuracy_avg != "N/A"
             else "N/A"
         )
 
-        # Add each metric's data to test and aggregate results tables
+        # Adjust latency comparison: lower user latency is better (below average), higher is worse (above average)
+        latency_comparison = (
+            "Below average" if user_latency_avg != "N/A" and avg_latency != "N/A" and user_latency_avg < avg_latency
+            else "Above average" if user_latency_avg != "N/A" and avg_latency != "N/A" and user_latency_avg > avg_latency
+            else "Average" if user_latency_avg == avg_latency and user_latency_avg != "N/A"
+            else "N/A"
+        )
+
+        # Append the data for each metric
         test_results.append({
             "metric": f"{metric} Accuracy",
-            "value": user_accuracy if user_accuracy is not None else "N/A",
-            "average": avg_accuracy,
+            "values": user_accuracies if user_accuracies else ["N/A"],
+            "average": user_accuracy_avg,
+            "aggregate_average": avg_accuracy,
             "comparison": accuracy_comparison
         })
         test_results.append({
             "metric": f"{metric} Latency",
-            "value": user_latency if user_latency is not None else "N/A",
-            "average": avg_latency,
+            "values": user_latencies if user_latencies else ["N/A"],
+            "average": user_latency_avg,
+            "aggregate_average": avg_latency,
             "comparison": latency_comparison
         })
 
@@ -394,7 +411,9 @@ def test_results(request, test_id):
             "average": avg_latency
         })
 
-    # Return the results in JSON format
+        # Move to the next metric position
+        metric_position += 1
+
     amount_correct = result.amount_correct
     return JsonResponse({
         "test_id": test_id,
@@ -403,6 +422,33 @@ def test_results(request, test_id):
         "amount_correct": amount_correct
     })
 
+
+
+
+def get_test_comparison_data(request, test_id):
+    test = Test.objects.get(id=test_id)
+    result = Result.objects.get(test=test)
+    age = test.age
+
+    # Find the matching aggregate based on age
+    aggregate = Aggregate.objects.filter(min_age__lte=age, max_age__gte=age).first()
+
+    if not aggregate:
+        return JsonResponse({'error': 'No matching aggregate data found'}, status=404)
+
+    # Prepare data for chart
+    data = {
+        "patient": {
+            "latencies": result.character_latencies,
+            "accuracies": result.character_accuracies,
+            "amount_correct": result.amount_correct,
+        },
+        "aggregate": {
+            "latencies": aggregate.average_latencies,
+            "accuracies": aggregate.average_accuracies,
+        },
+    }
+    return JsonResponse(data)
 
 def update_or_create_aggregate(test):
     """

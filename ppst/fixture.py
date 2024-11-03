@@ -79,9 +79,9 @@ aggregates_data = [
             "fivedigit_2": 913,
             "fivedigit_3": 765.6,
             "fourmixed_1": 1619,
-            "fourmixed_2": 6406,
+            "fourmixed_2": 1601.5,
             "fourmixed_3": 1395,
-            "fivemixed_1": 1295.2,
+            "fivemixed_1": 1110.8,
             "fivemixed_2": 1744.4,
             "fivemixed_3": 1608.4
         },

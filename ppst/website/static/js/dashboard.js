@@ -1,7 +1,7 @@
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
-    
+
     if (section === 'account') {
         dynamicContent.innerHTML = `
             <h2>My Account</h2>
@@ -101,18 +101,18 @@ function submitTicket() {
         },
         body: formData // Send form data
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            errorMessage.textContent = data.error;
-            errorMessage.style.display = 'block';
-        } else {
-            errorMessage.style.display = 'none';
-            loadUserTickets(); // Reload tickets
-            document.getElementById('ticketForm').reset(); // Clear the form
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                errorMessage.textContent = data.error;
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+                loadUserTickets(); // Reload tickets
+                document.getElementById('ticketForm').reset(); // Clear the form
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Function to load the user's tickets
@@ -122,19 +122,19 @@ function loadUserTickets() {
 
     // Fetch the user's tickets
     fetch('/get_user_tickets/')
-    .then(response => response.json())
-    .then(data => {
-        if (data.length === 0) {
-            ticketList.innerHTML = '<li>No tickets found.</li>';
-        } else {
-            data.forEach(ticket => {
-                const ticketItem = document.createElement('li');
-                ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
-                ticketList.appendChild(ticketItem);
-            });
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                ticketList.innerHTML = '<li>No tickets found.</li>';
+            } else {
+                data.forEach(ticket => {
+                    const ticketItem = document.createElement('li');
+                    ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                    ticketList.appendChild(ticketItem);
+                });
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // CSRF token helper function
@@ -178,17 +178,17 @@ function generateTestLink() {
             },
             body: JSON.stringify({ age: age })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
-            } else {
-                const testLink = data.test_link;
-                linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    const testLink = data.test_link;
+                    linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
                                            <a href="${testLink}" target="_blank">${testLink}</a>`;
-            }
-        })
-        .catch(error => console.error('Error:', error));
+                }
+            })
+            .catch(error => console.error('Error:', error));
     } else {
         linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
     }
@@ -232,74 +232,197 @@ function viewTestResults(testId) {
     toggleTestButtons();
 
     fetch(`/test_results/${testId}/`)
-    .then(response => response.json())
-    .then(data => {
-        if (!data.test_results || data.test_results.length === 0) {
-            testContent.innerHTML = `<p style="color:red;">No test results available for this test.</p>`;
-            return;
-        }
+        .then(response => response.json())
+        .then(data => {
+            if (!data.test_results || data.test_results.length === 0) {
+                testContent.innerHTML = `<p style="color:red;">No test results available for this test.</p>`;
+                return;
+            }
 
-        const testResultsTable = `
-            <div class="table-container">
-                <h2>Test Results for ID ${testId}</h2>
-                <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th>Value</th>
-                            <th>Average</th>
-                            <th>Comparison</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.test_results.map(result => `
-                            <tr>
-                                <td>${result.metric.replace(/_/g, ' ')}</td>
-                                <td>${result.value || "N/A"}</td>
-                                <td>${result.average || "N/A"}</td>
-                                <td class="${result.comparison === 'above average' ? 'above-average' : 'below-average'}">
-                                    ${result.comparison || "N/A"}
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
+            // Render the table view by default
+            renderTestResultsTable(data, testId);
 
-        const aggregateTable = `
-            <div class="table-container">
-                <h3>Aggregate Results for Age Group</h3>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th>Average</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.aggregate_results.map(result => `
-                            <tr>
-                                <td>${result.metric.replace(/_/g, ' ')}</td>
-                                <td>${result.average}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-
-        testContent.innerHTML = testResultsTable + aggregateTable + `
-            <button onclick="retrieveTestResults()">Back to Test Results</button>
-            <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
-        `;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        testContent.innerHTML = `<p style="color:red;">Failed to load test results.</p>`;
-    });
+            // Add a toggle button to switch to the graph view
+            const toggleButton = document.createElement("button");
+            toggleButton.textContent = "View as Graph";
+            toggleButton.onclick = () => toggleResultsView(testId, data);
+            testContent.appendChild(toggleButton);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            testContent.innerHTML = `<p style="color:red;">Failed to load test results.</p>`;
+        });
 }
+
+function renderTestResultsTable(data, testId) {
+    const testContent = document.getElementById('test-content');
+    testContent.innerHTML = `
+    <div class="table-container">
+        <h2>Test Results for ID ${testId}</h2>
+        <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Result Values</th>
+                    <th>Result Value Avg</th>
+                    <th>Aggregate Avg</th>
+                    <th>Comparison</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.test_results.map(result => {
+                    let comparisonText = result.comparison || "N/A";
+                    let colorStyle = '';  // Inline styles for color coding
+
+                    // Determine if the metric is for latency or accuracy
+                    const isLatency = result.metric.toLowerCase().includes("latency");
+                    const isAccuracy = result.metric.toLowerCase().includes("accuracy");
+
+                    // Apply color rules based on metric type and comparison value
+                    if (isLatency) {
+                        // Latency: Above average = red, Below average = green
+                        if (comparisonText === 'Above average') {
+                            colorStyle = 'color: red; font-weight: bold;';
+                        } else if (comparisonText === 'Below average') {
+                            colorStyle = 'color: green; font-weight: bold;';
+                        } else if (comparisonText === 'Average') {
+                            colorStyle = 'color: black; font-weight: bold;';
+                        }
+                    } else if (isAccuracy) {
+                        // Accuracy: Above average = green, Below average = red
+                        if (comparisonText === 'Above average') {
+                            colorStyle = 'color: green; font-weight: bold;';
+                        } else if (comparisonText === 'Below average') {
+                            colorStyle = 'color: red; font-weight: bold;';
+                        } else if (comparisonText === 'Average') {
+                            colorStyle = 'color: black; font-weight: bold;';
+                        }
+                    }
+
+                    return `
+                    <tr>
+                        <td>${result.metric.replace(/_/g, ' ')}</td>
+                        <td>${result.values.join(", ")}</td>  <!-- Display all values -->
+                        <td>${result.average || "N/A"}</td>   <!-- Display user average -->
+                        <td>${result.aggregate_average || "N/A"}</td>   <!-- Display aggregate average -->
+                        <td style="${colorStyle}">  <!-- Apply inline color style here -->
+                            ${comparisonText}
+                        </td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+    </div>
+    <div class="table-container">
+        <h3>Aggregate Results for Age Group</h3>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.aggregate_results.map(result => `
+                    <tr>
+                        <td>${result.metric.replace(/_/g, ' ')}</td>
+                        <td>${result.average}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+    <button onclick="retrieveTestResults()">Back to Test Results</button>
+    <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+    `;
+}
+
+// Function to toggle between table and graph views
+function toggleResultsView(testId, data) {
+    const testContent = document.getElementById('test-content');
+
+    if (testContent.querySelector('.results-table')) {
+        // Switch to graph view
+        testContent.innerHTML = `
+            <h2>Patient vs Aggregate Comparison</h2>
+            <canvas id="comparisonChart"></canvas>
+        `;
+        loadComparisonChart(testId);  // Call function to load Chart.js graph
+    } else {
+        // Switch back to table view
+        renderTestResultsTable(data, testId);
+    }
+
+    // Toggle the button text
+    const toggleButton = testContent.querySelector("button");
+    toggleButton.textContent = toggleButton.textContent === "View as Graph" ? "View as Table" : "View as Graph";
+}
+
+// Function to create and load the comparison chart with Chart.js
+function loadComparisonChart(testId) {
+    fetch(`/get_test_comparison_data/${testId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('test-content').innerHTML = `<p style="color:red;">${data.error}</p>`;
+                return;
+            }
+
+            const labels = Object.keys(data.patient.latencies);
+            const patientLatencies = Object.values(data.patient.latencies).flat();
+            const aggregateLatencies = Object.values(data.aggregate.latencies).flat();
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Patient Latencies',
+                            data: patientLatencies,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Aggregate Latencies',
+                            data: aggregateLatencies,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Metrics'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Latency (ms)'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
 
 function backToTestResults() {
     isViewingTest = false; // Reset when going back
@@ -317,47 +440,47 @@ function toggleTestButtons() {
 
 function exportToSpreadsheet(testId) {
     fetch(`/test_results/${testId}/`)
-    .then(response => response.json())
-    .then(data => {
-        // Initialize workbook and worksheet
-        const workbook = XLSX.utils.book_new();
+        .then(response => response.json())
+        .then(data => {
+            // Initialize workbook and worksheet
+            const workbook = XLSX.utils.book_new();
 
-        // Prepare Patient Test Results Sheet
-        const patientResults = [
-            ['Metric', 'Value', 'Average', 'Comparison']
-        ];
-        data.test_results.forEach(result => {
-            patientResults.push([
-                result.metric.replace(/_/g, ' '),
-                result.value,
-                result.average || "N/A",
-                result.comparison
-            ]);
-        });
+            // Prepare Patient Test Results Sheet
+            const patientResults = [
+                ['Metric', 'Value', 'Average', 'Comparison']
+            ];
+            data.test_results.forEach(result => {
+                patientResults.push([
+                    result.metric.replace(/_/g, ' '),
+                    result.value,
+                    result.average || "N/A",
+                    result.comparison
+                ]);
+            });
 
-        // Add patient results to the workbook
-        const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
-        XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
+            // Add patient results to the workbook
+            const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
+            XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
 
-        // Prepare Aggregate Results Sheet
-        const aggregateResults = [
-            ['Metric', 'Average']
-        ];
-        data.aggregate_results.forEach(result => {
-            aggregateResults.push([
-                result.metric.replace("avg_", "").replace(/_/g, ' '),
-                result.average
-            ]);
-        });
+            // Prepare Aggregate Results Sheet
+            const aggregateResults = [
+                ['Metric', 'Average']
+            ];
+            data.aggregate_results.forEach(result => {
+                aggregateResults.push([
+                    result.metric.replace("avg_", "").replace(/_/g, ' '),
+                    result.average
+                ]);
+            });
 
-        // Add aggregate results to the workbook
-        const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
-        XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+            // Add aggregate results to the workbook
+            const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
+            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
 
-        // Export the workbook to a file
-        XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
-    })
-    .catch(error => console.error('Error:', error));
+            // Export the workbook to a file
+            XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Function to save account changes for the user.
@@ -385,19 +508,19 @@ function saveAccountChanges() {
         },
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            accountErrorMessage.textContent = data.error;
-            accountErrorMessage.style.display = 'block';
-            accountMessage.style.display = 'none';
-        } else {
-            accountMessage.textContent = 'Account updated successfully!';
-            accountMessage.style.display = 'block';
-            accountErrorMessage.style.display = 'none';
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                accountErrorMessage.textContent = data.error;
+                accountErrorMessage.style.display = 'block';
+                accountMessage.style.display = 'none';
+            } else {
+                accountMessage.textContent = 'Account updated successfully!';
+                accountMessage.style.display = 'block';
+                accountErrorMessage.style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Function to get user information
@@ -408,20 +531,20 @@ function getUserInfo() {
             'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF protection, if needed
         },
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            console.error(data.error);
-        } else {
-            // Populate the fields with user info
-            document.getElementById('first-name').value = data.first_name || '';
-            document.getElementById('last-name').value = data.last_name || '';
-            document.getElementById('email').value = data.email || '';
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching user info:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                // Populate the fields with user info
+                document.getElementById('first-name').value = data.first_name || '';
+                document.getElementById('last-name').value = data.last_name || '';
+                document.getElementById('email').value = data.email || '';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching user info:', error);
+        });
 }
 
 
@@ -463,7 +586,7 @@ function closeNotifications() {
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
     event.preventDefault();
-    
+
     //Load notifications if visible
     if (!isNotificationsOpen) {
         loadNotifications();
@@ -471,91 +594,91 @@ function toggleNotifications(event) {
 
     // Toggle the display of the notification popout
     const notificationPopout = document.getElementById('notification-popout');
-    notificationPopout.style.display = 
-    notificationPopout.style.display === 'block' ? 'none' : 'block';
-    
+    notificationPopout.style.display =
+        notificationPopout.style.display === 'block' ? 'none' : 'block';
+
     const notificationBody = document.getElementById('notification-body');
-    notificationBody.style.display = 
-    notificationBody.style.display === 'block' ? 'none' : 'block';
+    notificationBody.style.display =
+        notificationBody.style.display === 'block' ? 'none' : 'block';
 
     const notificationList = document.getElementById('notification-list');
-    notificationList.style.display = 
-    notificationList.style.display === 'block' ? 'none' : 'block';
-    
+    notificationList.style.display =
+        notificationList.style.display === 'block' ? 'none' : 'block';
+
     // Update the isNotificationsOpen variable based on the visibility of the popout
     isNotificationsOpen = notificationPopout.style.display === 'block';
 }
 isNotificationsOpen = false;
 
 // function that loads in notifications based on the current logged in user
-function loadNotifications(){
+function loadNotifications() {
     const notificationList = document.getElementById('notification-list');
     notificationList.innerHTML = '';
 
 
     fetch('/get_user_notifications/')
-    .then(response => response.json())
-    .then(data => {
-        if (data.length === 0) {
-            notificationList.innerHTML = '<li> No new Notifications </li>';
-        } else {
-            data.forEach(notif => {
-                if (notif.is_dismissed == false) {
-                    
-                    const notifItem = document.createElement('li');
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                notificationList.innerHTML = '<li> No new Notifications </li>';
+            } else {
+                data.forEach(notif => {
+                    if (notif.is_dismissed == false) {
 
-                    const separator = document.createElement('li');
-                    notifItem.className = 'separator';
-                    notificationList.appendChild(separator);
-    
-                    const notificationTime = new Date(notif.time_created);
-                    const now = new Date();
-                
-                    // Calculate the time difference in milliseconds
-                    const timeDiff = now - notificationTime;
-                    const hoursDiff = timeDiff / (1000 * 60 * 60); //convert to hours
-                    
-                    const dateSpan = document.createElement('span');
-                    if (hoursDiff < 24) {
-                        dateSpan.textContent = `Today at ${new Date(notif.time_created).toLocaleString([], { hour: 'numeric', minute: '2-digit' })}`;
+                        const notifItem = document.createElement('li');
+
+                        const separator = document.createElement('li');
+                        notifItem.className = 'separator';
+                        notificationList.appendChild(separator);
+
+                        const notificationTime = new Date(notif.time_created);
+                        const now = new Date();
+
+                        // Calculate the time difference in milliseconds
+                        const timeDiff = now - notificationTime;
+                        const hoursDiff = timeDiff / (1000 * 60 * 60); //convert to hours
+
+                        const dateSpan = document.createElement('span');
+                        if (hoursDiff < 24) {
+                            dateSpan.textContent = `Today at ${new Date(notif.time_created).toLocaleString([], { hour: 'numeric', minute: '2-digit' })}`;
+                        }
+                        else {
+                            dateSpan.textContent = `${new Date(notif.time_created).toLocaleString()}`;
+                        }
+
+                        const headerSpan = document.createElement('span');
+                        headerSpan.textContent = `${notif.header}`;
+                        headerSpan.style.fontWeight = 'bold';
+
+                        const messageSpan = document.createElement('span');
+                        messageSpan.textContent = `${notif.message}`;
+
+                        const dismissButton = document.createElement(`button`);
+                        dismissButton.textContent = 'Dismiss';
+                        dismissButton.onclick = () => dismissNotification(notif.id, notifItem);
+
+                        notifItem.appendChild(dateSpan);
+                        notifItem.appendChild(document.createElement('br'));
+                        notifItem.appendChild(headerSpan);
+                        notifItem.appendChild(document.createElement('br'));
+                        notifItem.appendChild(messageSpan);
+                        notifItem.appendChild(document.createElement('br'));
+                        notifItem.appendChild(dismissButton);
+
+                        notificationList.appendChild(notifItem);
                     }
-                    else{
-                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString()}`;
-                    }
-
-                    const headerSpan = document.createElement('span');
-                    headerSpan.textContent = `${notif.header}`;
-                    headerSpan.style.fontWeight = 'bold';
-    
-                    const messageSpan = document.createElement('span');
-                    messageSpan.textContent = `${notif.message}`;
-    
-                    const dismissButton = document.createElement(`button`);
-                    dismissButton.textContent = 'Dismiss';
-                    dismissButton.onclick = () => dismissNotification(notif.id, notifItem);
-
-                    notifItem.appendChild(dateSpan);
-                    notifItem.appendChild(document.createElement('br'));
-                    notifItem.appendChild(headerSpan);
-                    notifItem.appendChild(document.createElement('br'));
-                    notifItem.appendChild(messageSpan);
-                    notifItem.appendChild(document.createElement('br'));
-                    notifItem.appendChild(dismissButton);
-                    
-                    notificationList.appendChild(notifItem);
-                }
-            });
-        }
-    })
-    .catch(error => console.error('Error:', error));    
+                });
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // removes the notification based on the notifItem corrisponding to the button that was pressed
-function dismissNotification(id ,notifItem){
+function dismissNotification(id, notifItem) {
     const notificationList = document.getElementById('notification-list');
     notificationList.removeChild(notifItem);
 
-    fetch(`/dismiss_notification/${id}/`,{
+    fetch(`/dismiss_notification/${id}/`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -563,12 +686,12 @@ function dismissNotification(id ,notifItem){
         },
         body: JSON.stringify({ is_dismissed: true })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('failed to dismiss notification')
-        }
-    })
-    .catch(error => console.error('Error updating notification', error))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('failed to dismiss notification')
+            }
+        })
+        .catch(error => console.error('Error updating notification', error))
 }
 
 // Automatically load the "Dashboard" tab when the page is first loaded
