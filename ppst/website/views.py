@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
+from statistics import mean
 import json
 
 def home(request):
@@ -190,16 +191,63 @@ def mark_test_complete(request, link):
         test.finished_at = timezone.now()  # Set the finish time
         test.status = 'Completed'
         test.save()
+
+        # Update or create the aggregate for the test's age group
+        update_or_create_aggregate(test)
+
+        # Create a notification for test completion
+        create_test_notification(test)
+
         return JsonResponse({'status': 'success', 'message': 'Test marked as complete with finish time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     
+def check_and_notify_expiring_tests():
+    """
+    Periodic function to check for tests close to expiration and generate appropriate notifications.
+    """
+    one_day_warning_date = timezone.now() - timezone.timedelta(days=6)
+    expiration_date = timezone.now() - timezone.timedelta(weeks=1)
+
+    # 2. Notify for tests 1 day from expiration
+    tests_near_expiry = Test.objects.filter(
+        created_at__lte=one_day_warning_date,
+        status='Pending',
+        started_at__isnull=True
+    )
+    for test in tests_near_expiry:
+        create_test_notification(test)
+
+    # 3. Notify for tests that have become invalid after 1 week without being taken
+    expired_tests = Test.objects.filter(
+        created_at__lte=expiration_date,
+        status='Pending',
+        started_at__isnull=True
+    )
+    for test in expired_tests:
+        test.status = 'Invalid'
+        test.save()
+        create_test_notification(test)
+
+    # 4. Notify for tests that have become invalid after starting but not completing
+    incomplete_expired_tests = Test.objects.filter(
+        created_at__lte=expiration_date,
+        status='Pending',
+        started_at__isnull=False,
+        finished_at__isnull=True
+    )
+    for test in incomplete_expired_tests:
+        test.status = 'Invalid'
+        test.save()
+        create_test_notification(test)
 
 def start_test(request, link):
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
         test.started_at = timezone.now()  # Set the start time
         test.save()
+
+        create_test_notification(test)
         return JsonResponse({'status': 'success', 'message': 'Test start time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
@@ -277,13 +325,19 @@ def get_stimuli(request):
 
 @login_required
 def test_results(request, test_id):
+    # Step 1: Retrieve test and result data
     test = get_object_or_404(Test, id=test_id)
     result = Result.objects.filter(test=test).first()
+    
+    if not result:
+        return JsonResponse({"error": "No test results available for this test."}, status=404)
+
+    # Step 2: Retrieve age group aggregate data
     age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
+    if not age_group:
+        return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
 
-    test_results = []
-    aggregate_results = []
-
+    # Define the metrics list
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -291,46 +345,204 @@ def test_results(request, test_id):
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
 
+    # Exclude positions for practice questions
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    test_results = []
+    aggregate_results = []
+    metric_position = 3  # Start at position 3, as requested
+
+    # Step 3: Loop through each metric and calculate averages, excluding practice positions
     for metric in metrics:
-        user_accuracy = result.character_accuracies.get(metric, [None])[0] if result and metric in result.character_accuracies else None
-        user_latency = result.character_latencies.get(metric, [None])[0] if result and metric in result.character_latencies else None
-        avg_accuracy = age_group.average_accuracies.get(metric) if age_group and metric in age_group.average_accuracies else None
-        avg_latency = age_group.average_latencies.get(metric) if age_group and metric in age_group.average_latencies else None
+        # Find the next valid metric position by skipping excluded positions
+        while str(metric_position) in excluded_positions:
+            metric_position += 1
 
-        # Calculate the comparison only if both user and average values are available
-        comparison_accuracy = (
-            "above average" if user_accuracy and avg_accuracy and user_accuracy > avg_accuracy
-            else "below average" if user_accuracy and avg_accuracy and user_accuracy < avg_accuracy
+        # Retrieve data for each metric, ignoring practice positions
+        user_accuracies = result.character_accuracies.get(str(metric_position), [])
+        user_latencies = result.character_latencies.get(str(metric_position), [])
+        
+        # Calculate averages
+        user_accuracy_avg = mean(user_accuracies) if user_accuracies else "N/A"
+        user_latency_avg = mean(user_latencies) if user_latencies else "N/A"
+        
+        # Retrieve age group averages
+        avg_accuracy = age_group.average_accuracies.get(metric, "N/A")
+        avg_latency = age_group.average_latencies.get(metric, "N/A")
+
+        # Determine comparison labels with "Neutral/Equal" case
+        accuracy_comparison = (
+            "Above average" if user_accuracy_avg != "N/A" and avg_accuracy != "N/A" and user_accuracy_avg > avg_accuracy
+            else "Below average" if user_accuracy_avg != "N/A" and avg_accuracy != "N/A" and user_accuracy_avg < avg_accuracy
+            else "Average" if user_accuracy_avg == avg_accuracy and user_accuracy_avg != "N/A"
             else "N/A"
         )
-        comparison_latency = (
-            "above average" if user_latency and avg_latency and user_latency > avg_latency
-            else "below average" if user_latency and avg_latency and user_latency < avg_latency
+
+        # Adjust latency comparison: lower user latency is better (below average), higher is worse (above average)
+        latency_comparison = (
+            "Below average" if user_latency_avg != "N/A" and avg_latency != "N/A" and user_latency_avg < avg_latency
+            else "Above average" if user_latency_avg != "N/A" and avg_latency != "N/A" and user_latency_avg > avg_latency
+            else "Average" if user_latency_avg == avg_latency and user_latency_avg != "N/A"
             else "N/A"
         )
 
+        # Append the data for each metric
         test_results.append({
-            "metric": f"{metric}_accuracy",
-            "value": user_accuracy if user_accuracy is not None else "N/A",
-            "average": avg_accuracy if avg_accuracy is not None else "N/A",
-            "comparison": comparison_accuracy
+            "metric": f"{metric} Accuracy",
+            "values": user_accuracies if user_accuracies else ["N/A"],
+            "average": user_accuracy_avg,
+            "aggregate_average": avg_accuracy,
+            "comparison": accuracy_comparison
+        })
+        test_results.append({
+            "metric": f"{metric} Latency",
+            "values": user_latencies if user_latencies else ["N/A"],
+            "average": user_latency_avg,
+            "aggregate_average": avg_latency,
+            "comparison": latency_comparison
         })
 
-        test_results.append({
-            "metric": f"{metric}_latency",
-            "value": user_latency if user_latency is not None else "N/A",
-            "average": avg_latency if avg_latency is not None else "N/A",
-            "comparison": comparison_latency
+        aggregate_results.append({
+            "metric": f"{metric} Accuracy",
+            "average": avg_accuracy
+        })
+        aggregate_results.append({
+            "metric": f"{metric} Latency",
+            "average": avg_latency
         })
 
-    amount_correct = result.amount_correct if result else 0
+        # Move to the next metric position
+        metric_position += 1
 
+    amount_correct = result.amount_correct
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
-        "aggregate_results": test_results,  # Only use test_results to simplify the response
+        "aggregate_results": aggregate_results,
         "amount_correct": amount_correct
     })
+
+def get_test_comparison_data(request, test_id):
+    test = Test.objects.get(id=test_id)
+    result = Result.objects.get(test=test)
+    age = test.age
+
+    # Find the matching aggregate based on age
+    aggregate = Aggregate.objects.filter(min_age__lte=age, max_age__gte=age).first()
+
+    if not aggregate:
+        return JsonResponse({'error': 'No matching aggregate data found'}, status=404)
+
+    # Define positions to exclude (practice questions)
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Calculate averages for patient data excluding practice questions
+    patient_latencies = {
+        pos: mean(values) for pos, values in result.character_latencies.items()
+        if pos not in excluded_positions and values
+    }
+    patient_accuracies = {
+        pos: mean(values) for pos, values in result.character_accuracies.items()
+        if pos not in excluded_positions and values
+    }
+    
+    # Calculate averages for aggregate data in the same way
+    aggregate_latencies = {
+        pos: avg for pos, avg in aggregate.average_latencies.items() if pos not in excluded_positions
+    }
+    aggregate_accuracies = {
+        pos: avg for pos, avg in aggregate.average_accuracies.items() if pos not in excluded_positions
+    }
+
+    # Prepare data for chart
+    data = {
+        "patient": {
+            "latencies": patient_latencies,
+            "accuracies": patient_accuracies,
+            "amount_correct": result.amount_correct,
+        },
+        "aggregate": {
+            "latencies": aggregate_latencies,
+            "accuracies": aggregate_accuracies,
+        },
+    }
+    return JsonResponse(data)
+
+def update_or_create_aggregate(test):
+    """
+    Updates or creates an aggregate entry for the age group associated with the completed test.
+    """
+    # Define the special age group for ages 18-29
+    age = test.age
+    if 18 <= age <= 29:
+        min_age, max_age = 18, 29
+    else:
+        # Define age range boundaries for other groups in 10-year intervals
+        min_age = (age // 10) * 10
+        max_age = min_age + 9
+
+    # Check if an aggregate for this age group already exists
+    age_group, created = Aggregate.objects.get_or_create(
+        min_age=min_age,
+        max_age=max_age,
+        defaults={"average_latencies": {}, "average_accuracies": {}}
+    )
+
+    # Retrieve all relevant results within this age group
+    results_in_age_group = Result.objects.filter(test__age__gte=min_age, test__age__lte=max_age)
+
+    # Initialize dictionaries to store sums and counts for averages
+    latencies_sums = {}
+    accuracies_sums = {}
+    counts = {}
+
+    # Define the metrics for which we want to calculate averages
+    metrics = [
+        'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+        'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+        'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+        'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
+    ]
+
+    # Initialize sums and counts for each metric
+    for metric in metrics:
+        latencies_sums[metric] = 0
+        accuracies_sums[metric] = 0
+        counts[metric] = 0
+
+    # Aggregate data from each result in the age group
+    for result in results_in_age_group:
+        for idx, metric in enumerate(metrics, start=1):
+            # Retrieve accuracy and latency lists for each metric
+            accuracy_values = result.character_accuracies.get(str(idx), [])
+            latency_values = result.character_latencies.get(str(idx), [])
+
+            # Sum values and count entries to calculate averages
+            if accuracy_values:
+                accuracies_sums[metric] += sum(accuracy_values)
+                counts[metric] += len(accuracy_values)
+            if latency_values:
+                latencies_sums[metric] += sum(latency_values)
+
+    # Calculate the average for each metric and update the age group data
+    average_accuracies = {}
+    average_latencies = {}
+
+    for metric in metrics:
+        if counts[metric] > 0:
+            average_accuracies[metric] = round(accuracies_sums[metric] / counts[metric], 2)
+            average_latencies[metric] = round(latencies_sums[metric] / counts[metric], 2)
+        else:
+            average_accuracies[metric] = "N/A"
+            average_latencies[metric] = "N/A"
+
+    # Update or create the aggregate entry
+    age_group.average_accuracies = average_accuracies
+    age_group.average_latencies = average_latencies
+    age_group.save()
+
+    return age_group
+
 
 # Handle ticket submission (for non-staff users)
 @login_required
@@ -400,6 +612,61 @@ def get_user_info(request):
         return JsonResponse(user_info)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def create_test_notification(test):
+    """
+    Creates a notification based on the current status of the test.
+    """
+    # 1. If the test is completed
+    if test.status == 'Completed' and test.finished_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Completed",
+            message="The test has been completed. Results are available to view."
+        )
+        return
+    
+    # 2. If the test is 1 day from becoming invalid
+    one_day_before_expiry = test.created_at + timezone.timedelta(days=6)
+    if timezone.now() >= one_day_before_expiry and test.status == 'Pending' and not test.started_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Expiration Warning",
+            message="The test link will expire in 1 day if not taken."
+        )
+        return
+    
+    # 3. If the test becomes invalid after 1 week without being taken
+    if test.status == 'Invalid' and not test.started_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Expired",
+            message="The test is invalid due to the link expiring. Do you wish to create a new test for the patient?"
+        )
+        return
+
+    # 4. If the test becomes invalid after the patient started but exited without completing
+    if test.status == 'Invalid' and test.started_at and not test.finished_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Not Completed",
+            message="The patient started the test but did not complete it in one sitting. Do you want to create a new test for the patient?"
+        )
+        return
+
+    # 5. If the test has been started by the patient
+    if test.started_at and not test.finished_at:
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Started",
+            message="The patient has officially started the test."
+        )
+        return
 
 @login_required
 def get_user_notifications(request):
