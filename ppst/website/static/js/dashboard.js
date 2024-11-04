@@ -51,6 +51,7 @@ function loadContent(section) {
             <div id="support-section">
                 <div id="create-ticket">
                     <h3>Create a Support Ticket</h3>
+                    <br>
                     <form id="ticketForm">
                         <label for="category">Category:</label>
                         <select id="category" required>
@@ -59,9 +60,12 @@ function loadContent(section) {
                             <option value="account">Account Management</option>
                             <option value="bug/error">Bug/Error Report</option>
                         </select>
+                        <br><br>
                         <label for="description">Issue Description:</label>
+                        <br>
                         <textarea id="description" rows="4" required></textarea>
-                        <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                        <br><br>
+                        <button style="background-color: #0099ff; color: white;" type="button" onclick="submitTicket()">Submit Ticket</button>
                     </form>
                     <div id="error-message" style="color: red; display: none;"></div>
                 </div>
@@ -81,8 +85,8 @@ function submitTicket() {
     const description = document.getElementById('description').value;
     const errorMessage = document.getElementById('error-message');
 
-    // Ensure the form is not empty
-    if (!category || !description) {
+    // Ensure the form is not empty or the description doesn't contain only spaces.
+    if (!category || !description || description.trim() === "") {
         errorMessage.textContent = 'Please fill in all required fields.';
         errorMessage.style.display = 'block';
         return;
