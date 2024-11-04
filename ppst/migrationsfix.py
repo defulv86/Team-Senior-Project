@@ -22,15 +22,15 @@ else:
 
 # Step 3: Run makemigrations command
 print("Running makemigrations...")
-subprocess.run(["python", "manage.py", "makemigrations"])
+subprocess.run(["py", "manage.py", "makemigrations"])
 
 # Step 4: Run migrate command
 print("Running migrate...")
-subprocess.run(["python", "manage.py", "migrate"])
+subprocess.run(["py", "manage.py", "migrate"])
 
 # Step 5: Load fixture data by running a script in the Django shell
 if os.path.exists(fixture_script):
     print(f"Running fixture script: {fixture_script}...")
-    subprocess.run(["python", "manage.py", "shell", "<", fixture_script], shell=True)
+    subprocess.run(["py", "manage.py", "shell", "<", fixture_script], shell=True)
 else:
     print(f"Fixture script {fixture_script} not found. Please ensure it is in the project directory.")
