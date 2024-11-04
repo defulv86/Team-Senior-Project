@@ -422,9 +422,6 @@ def test_results(request, test_id):
         "amount_correct": amount_correct
     })
 
-
-
-
 def get_test_comparison_data(request, test_id):
     test = Test.objects.get(id=test_id)
     result = Result.objects.get(test=test)
@@ -436,16 +433,37 @@ def get_test_comparison_data(request, test_id):
     if not aggregate:
         return JsonResponse({'error': 'No matching aggregate data found'}, status=404)
 
+    # Define positions to exclude (practice questions)
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Calculate averages for patient data excluding practice questions
+    patient_latencies = {
+        pos: mean(values) for pos, values in result.character_latencies.items()
+        if pos not in excluded_positions and values
+    }
+    patient_accuracies = {
+        pos: mean(values) for pos, values in result.character_accuracies.items()
+        if pos not in excluded_positions and values
+    }
+    
+    # Calculate averages for aggregate data in the same way
+    aggregate_latencies = {
+        pos: avg for pos, avg in aggregate.average_latencies.items() if pos not in excluded_positions
+    }
+    aggregate_accuracies = {
+        pos: avg for pos, avg in aggregate.average_accuracies.items() if pos not in excluded_positions
+    }
+
     # Prepare data for chart
     data = {
         "patient": {
-            "latencies": result.character_latencies,
-            "accuracies": result.character_accuracies,
+            "latencies": patient_latencies,
+            "accuracies": patient_accuracies,
             "amount_correct": result.amount_correct,
         },
         "aggregate": {
-            "latencies": aggregate.average_latencies,
-            "accuracies": aggregate.average_accuracies,
+            "latencies": aggregate_latencies,
+            "accuracies": aggregate_accuracies,
         },
     }
     return JsonResponse(data)

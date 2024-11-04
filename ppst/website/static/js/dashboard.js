@@ -242,11 +242,14 @@ function viewTestResults(testId) {
             // Render the table view by default
             renderTestResultsTable(data, testId);
 
-            // Add a toggle button to switch to the graph view
-            const toggleButton = document.createElement("button");
-            toggleButton.textContent = "View as Graph";
-            toggleButton.onclick = () => toggleResultsView(testId, data);
-            testContent.appendChild(toggleButton);
+            // Ensure only one "View as Graph" button is added
+            if (!document.getElementById('viewGraphButton')) {
+                const toggleButton = document.createElement("button");
+                toggleButton.id = 'viewGraphButton'; // Add an ID to the button
+                toggleButton.textContent = "View as Graph";
+                toggleButton.onclick = () => toggleResultsView(testId, data);
+                testContent.appendChild(toggleButton);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -336,31 +339,50 @@ function renderTestResultsTable(data, testId) {
     <button onclick="retrieveTestResults()">Back to Test Results</button>
     <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
     `;
+    // Check if the View as Graph button is already present
+    if (!document.getElementById('viewGraphButton')) {
+        const toggleButton = document.createElement("button");
+        toggleButton.id = 'viewGraphButton'; // Add an ID to the button
+        toggleButton.textContent = "View as Graph";
+        toggleButton.onclick = () => toggleResultsView(testId, data);
+        testContent.appendChild(toggleButton);
+    }
 }
 
-// Function to toggle between table and graph views
 function toggleResultsView(testId, data) {
     const testContent = document.getElementById('test-content');
 
+    if (data) {
+        currentTestData = data;
+    }
+    // If currently in the table view, switch to the graph view with latency chart as default
     if (testContent.querySelector('.results-table')) {
-        // Switch to graph view
         testContent.innerHTML = `
             <h2>Patient vs Aggregate Comparison</h2>
+            <div class="chart-toggle-buttons">
+                <button onclick="loadLatencyChart(${testId})">Latency Comparison</button>
+                <button onclick="loadAccuracyChart(${testId})">Accuracy Comparison</button>
+            </div>
             <canvas id="comparisonChart"></canvas>
+            <div class="view-toggle-buttons">
+                <button onclick="retrieveTestResults()">Back to Patient's Results Tab</button>
+                <button onclick="toggleResultsView(${testId})">Back to Table View</button>
+            </div>
         `;
-        loadComparisonChart(testId);  // Call function to load Chart.js graph
+        loadLatencyChart(testId);  // Load latency chart by default
     } else {
         // Switch back to table view
-        renderTestResultsTable(data, testId);
+        if (currentTestData) {
+            renderTestResultsTable(currentTestData, testId);
+        } else {
+            console.error("No test data found to render table view.");
+        }
     }
-
-    // Toggle the button text
-    const toggleButton = testContent.querySelector("button");
-    toggleButton.textContent = toggleButton.textContent === "View as Graph" ? "View as Table" : "View as Graph";
 }
 
-// Function to create and load the comparison chart with Chart.js
-function loadComparisonChart(testId) {
+
+// Function to load latency comparison chart
+function loadLatencyChart(testId) {
     fetch(`/get_test_comparison_data/${testId}/`)
         .then(response => response.json())
         .then(data => {
@@ -369,12 +391,18 @@ function loadComparisonChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.latencies);
-            const patientLatencies = Object.values(data.patient.latencies).flat();
-            const aggregateLatencies = Object.values(data.aggregate.latencies).flat();
+            const labels = Object.keys(data.patient.latencies).map(pos => `Position ${pos}`);
+            const patientLatencies = Object.values(data.patient.latencies);
+            const aggregateLatencies = Object.values(data.aggregate.latencies);
 
             const ctx = document.getElementById('comparisonChart').getContext('2d');
-            new Chart(ctx, {
+
+            // Check if comparisonChart exists and has a destroy method
+            if (window.comparisonChart && typeof window.comparisonChart.destroy === 'function') {
+                window.comparisonChart.destroy();  // Destroy any existing chart instance
+            }
+
+            window.comparisonChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -422,6 +450,71 @@ function loadComparisonChart(testId) {
         .catch(error => console.error('Error:', error));
 }
 
+// Function to load accuracy comparison chart
+function loadAccuracyChart(testId) {
+    fetch(`/get_test_comparison_data/${testId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('test-content').innerHTML = `<p style="color:red;">${data.error}</p>`;
+                return;
+            }
+
+            const labels = Object.keys(data.patient.accuracies).map(pos => `Position ${pos}`);
+            const patientAccuracies = Object.values(data.patient.accuracies);
+            const aggregateAccuracies = Object.values(data.aggregate.accuracies);
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            if (window.comparisonChart) {
+                window.comparisonChart.destroy();  // Destroy any existing chart instance
+            }
+            window.comparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Patient Accuracies',
+                            data: patientAccuracies,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Aggregate Accuracies',
+                            data: aggregateAccuracies,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Metrics'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Accuracy (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
 
 
 function backToTestResults() {
