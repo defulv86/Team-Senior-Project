@@ -24,7 +24,8 @@ body {
     left: 0;
     width: 200px;
     height: 100vh; /* Full height of the viewport */
-    background-color: #00a0e3;
+    /*background-color: #00a0e3;  changed 11/4*/ 
+    background-color: #a3d6ff;
     display: flex;
     flex-direction: column;
     padding-top: 20px;
@@ -53,7 +54,8 @@ body {
 
 .sidebar .menu li a {
     text-decoration: none;
-    color: white;
+    /*color: white; changed 11/4*/
+    color: #000;
     display: flex;
     align-items: center;
     font-size: 18px;
