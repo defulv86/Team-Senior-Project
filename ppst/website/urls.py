@@ -24,3 +24,4 @@ urlpatterns = [
     path('errorpage/', views.errorpage, name="errorpage"),
     path('get_test_comparison_data/<int:test_id>/', views.get_test_comparison_data, name='get_test_comparison_data'),
 
+]
