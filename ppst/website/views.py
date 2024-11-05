@@ -392,7 +392,6 @@ def get_user_notifications(request):
     if request.method == 'GET':
         tests = Test.objects.filter(user=request.user)
         notifications = Notification.objects.filter(test__in=tests, is_dismissed=False).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
-        # print(list(tests))
         return JsonResponse(list(notifications), safe=False)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)

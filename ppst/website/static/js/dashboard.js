@@ -504,17 +504,16 @@ function loadNotifications(){
     
                     const notificationTime = new Date(notif.time_created);
                     const now = new Date();
-                
-                    // Calculate the time difference in milliseconds
-                    const timeDiff = now - notificationTime;
-                    const hoursDiff = timeDiff / (1000 * 60 * 60); //convert to hours
+
+                    const current_date = now.getDay() + now.getMonth() + now.getFullYear()
+                    const notif_date = notificationTime.getDay() + notificationTime.getMonth() + notificationTime.getFullYear()
                     
                     const dateSpan = document.createElement('span');
-                    if (hoursDiff < 24) {
+                    if (current_date == notif_date) {
                         dateSpan.textContent = `Today at ${new Date(notif.time_created).toLocaleString([], { hour: 'numeric', minute: '2-digit' })}`;
                     }
                     else{
-                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString()}`;
+                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString([], {year:'2-digit', month:'2-digit', day:'2-digit', hour:'numeric', minute: '2-digit'})}`;
                     }
 
                     const headerSpan = document.createElement('span');
