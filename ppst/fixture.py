@@ -39,12 +39,18 @@ pending_test = Test.objects.create(
 )
 
 # 3. Invalid Test (created a week ago, started but not completed)
-invalid_test = Test.objects.create(
+invalid_test_1 = Test.objects.create(
     user=doctor_who,
     age=67,
-    created_at=timezone.now() - timedelta(days=10),
-    started_at=timezone.now() - timedelta(days=9),
-    status='invalid'
+    created_at=timezone.now() - timedelta(weeks=1),
+    status='pending'
+)
+# 4. Invalid Test (created 6 days, 23 hours, and 59 minutes ago. Testing to see if it updates when a minute passes)
+invalid_test_2 = Test.objects.create(
+    user=doctor_who,
+    age=64,
+    created_at=timezone.now() - timedelta(days=6) + timedelta(hours=23) + timedelta(minutes=59),
+    status='pending'
 )
 
 test_instance=completed_test
@@ -59,7 +65,7 @@ Ticket.objects.create(
 
 Notification.objects.create(
     user=doctor_who,
-    test=invalid_test,
+    test=invalid_test_1,
     header="Reminder: Patient Test Incomplete", 
     message="Patient test at ppst.com/testLink1 has not been taken yet. Please follow up.",
     time_created=datetime(2024, 10, 25, 9, 0, 0),
