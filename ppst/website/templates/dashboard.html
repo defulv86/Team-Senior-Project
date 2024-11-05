@@ -16,7 +16,7 @@
             <div class="logo-image">
                <img src="{% static 'images/ppst_logo.png' %}" alt="Logo"> <!--logo image-->   
             </div>
-            <ul class="menu">
+            <ul class="menu"><!-- Pictures next to  menu items -->
                 <li> <a href="#myaccount" onclick="loadContent('account')">My Account<img src="{% static 'images/myaccount2.png' %}" alt="Account Icon"> </a></li>
                 <li> <a href="#dashboard" onclick="loadContent('dashboard')">Dashboard<img src="{% static 'images/dashboard2.png' %}" alt="Dashboard Icon"></a></li>
                 <li> <a href="#tests" onclick="loadContent('tests')">Tests <img src="{% static 'images/tests2.png' %}" alt="Tests Icon"></a></li>
@@ -28,8 +28,8 @@
         <div class="content">
             <!-- Top Bar -->
             <div class="top-bar">
-                <div class="title">Medical Personnel Dashboard</div>
-                <div class="top-right">
+                <div class="title">Medical Personnel Dashboard</div> 
+                <div class="top-right"><!-- Pictures next to  top bar items-->
                     <a href="#" onclick="toggleNotifications(event)"><i class="fa fa-bell"></i> 
                         <img src="{% static 'images/Notifications2.png' %}" alt="Support Icon"> Notifications</a>
                     <a href="{% url 'logout' %}"><i class="fa fa-sign-out-alt"></i> 
@@ -64,7 +64,7 @@
 
                 </ul>
             </div>
-            <div class="notification-footer">
+            <div class="notification-footer"><!-- Notification options-->
                 <button onclick="markAllRead()">Read All</button>
                 <button onclick="clearNotifications()">Clear</button>
             </div>
