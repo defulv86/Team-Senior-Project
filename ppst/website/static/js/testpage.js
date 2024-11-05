@@ -196,6 +196,9 @@ document.getElementById('submit-response').addEventListener('click', () => {
     // Truncate response to expected length
     const truncatedResponse = response.slice(0, expectedLength);
 
+    // Skip practice questions when counting correct answers
+    const isPracticeQuestion = currentStimulus.stimulus_type.includes('_Pr');
+
     fetch('/submit-response/', {
         method: 'POST',
         headers: {
@@ -203,13 +206,14 @@ document.getElementById('submit-response').addEventListener('click', () => {
         },
         body: JSON.stringify({
             link: testLink,
-            response_text: truncatedResponse, // Use truncated response
+            response_text: truncatedResponse,
             stimulus_id: currentStimulus.id,
             response_position: currentStimulusIndex,
-            character_latencies: characterLatencies, // Send latencies to the backend
-            character_accuracies: accuracies, // Send accuracies to the backend
-            expected_stimulus: correctAnswer, // Send the expected stimulus for accuracy checks
-            timestamps: timestamps
+            character_latencies: characterLatencies,
+            character_accuracies: accuracies,
+            expected_stimulus: correctAnswer,
+            timestamps: timestamps,
+            is_practice: isPracticeQuestion // Add a flag to identify practice questions
         })
     })
         .then(response => {
@@ -220,8 +224,8 @@ document.getElementById('submit-response').addEventListener('click', () => {
             return response.json();
         })
         .then(() => {
-            response = ''; // Reset response after submission
-            timestamps.length = 0; // Clear the timestamps for the next response
+            response = '';
+            timestamps.length = 0;
             nextStimulus();
         })
         .catch(error => {
