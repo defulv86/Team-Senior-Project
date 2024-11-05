@@ -219,7 +219,7 @@ function retrieveTestResults() {
 
                 testContent.innerHTML += `
                     <button class="${colorClass}" ${onclickAttr}>
-                        Test ID ${test.id} Results
+                        Test ID ${test.id} | Link: ${test.link}
                     </button><br>
                 `;
             });
