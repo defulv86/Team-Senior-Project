@@ -61,8 +61,12 @@ def create_test(request):
         if not age or int(age) < 18:
             return JsonResponse({'error': 'Invalid age: Age must be 18 or older to create a test.'}, status=400)
 
-        # Create the test object
-        test = Test.objects.create(user=request.user, age=age)
+        # Explicitly set created_at to the current time
+        test = Test.objects.create(
+            user=request.user,
+            age=age,
+            created_at=timezone.now()  # Explicitly setting created_at
+        )
         
         # Build the full URL using the test link
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
@@ -244,6 +248,7 @@ def check_and_notify_expiring_tests():
 def start_test(request, link):
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
+        test.status = 'Pending'
         test.started_at = timezone.now()  # Set the start time
         test.save()
 
