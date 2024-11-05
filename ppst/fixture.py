@@ -30,6 +30,7 @@ completed_test = Test.objects.create(
     status='completed'
 )
 
+
 # 2. Pending Test
 pending_test = Test.objects.create(
     user=doctor_who,
@@ -38,7 +39,17 @@ pending_test = Test.objects.create(
     status='pending'
 )
 
-# 3. Invalid Test (created a week ago, started but not completed)
+# Create a datetime value that accounts for the current timezone
+six_days_ago = timezone.now() - timedelta(days=6)
+# 3. Additional Pending Test (for testing notifications)
+pending_test_2 = Test.objects.create(
+    user=doctor_who,
+    age=35,
+    created_at=six_days_ago,  # Created 6 days ago to test notifications
+    status='pending'
+)
+
+# 4. Invalid Test (created a week ago, started but not completed)
 invalid_test = Test.objects.create(
     user=doctor_who,
     age=67,

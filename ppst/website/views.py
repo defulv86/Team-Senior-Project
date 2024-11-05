@@ -202,6 +202,26 @@ def mark_test_complete(request, link):
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     
+def mark_test_invalid(request, link):
+    if request.method == 'POST':
+        try:
+            test = Test.objects.get(link=link)
+            if test.started_at and not test.finished_at:
+                test.status = 'invalid'
+                test.save()
+                # Create notification for medical personnel
+                Notification.objects.create(
+                    user=test.user,
+                    test=test,
+                    header="Test Status Update",
+                    message=f"The test with link {link} was exited without completion and is now invalid.",
+                    time_created=timezone.now()
+                )
+                return JsonResponse({'status': 'success', 'message': 'Test marked as invalid.'})
+        except Test.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Test not found.'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+    
 def check_and_notify_expiring_tests():
     """
     Periodic function to check for tests close to expiration and generate appropriate notifications.

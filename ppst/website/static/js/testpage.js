@@ -346,3 +346,22 @@ function speakText() {
 
 document.getElementById('speak-button').addEventListener('click', speakText);
 document.addEventListener('DOMContentLoaded', populateVoices);
+
+window.addEventListener('beforeunload', function (event) {
+    // Check if the test is incomplete
+    if (currentStimulusIndex < stimuli.length && testLink) {
+        fetch(`/mark-test-invalid/${testLink}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        
+        // Display a confirmation dialog (prevent the default action)
+        event.preventDefault();
+        
+        // Some modern browsers require this line for the dialog to be displayed
+        event.preventDefault();
+    }
+});

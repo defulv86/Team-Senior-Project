@@ -19,7 +19,7 @@ class Test(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     link = models.CharField(default=generate_link, max_length=100, null=True)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(null=True)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     age = models.IntegerField(default=0)
