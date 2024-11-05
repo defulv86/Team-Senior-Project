@@ -17,14 +17,14 @@ body {
     margin-left: 200px; /* Matches sidebar width */
 }
 
-
 .sidebar {
     position: fixed; /* Fixes the sidebar position */
     top: 0;
     left: 0;
     width: 200px;
     height: 100vh; /* Full height of the viewport */
-    background-color: #00a0e3;
+    /*background-color: #00a0e3;  changed 11/4*/ 
+    background-color: #a3d6ff;
     display: flex;
     flex-direction: column;
     padding-top: 20px;
@@ -36,7 +36,7 @@ body {
     margin-bottom: 20px;
 }
 
-.logo-image {
+.logo-image {  /* Styles the logo image */
     width: 50px; /* Set your desired width */
     height: auto; /* Maintain aspect ratio */
     max-width: 100%;
@@ -53,7 +53,8 @@ body {
 
 .sidebar .menu li a {
     text-decoration: none;
-    color: white;
+    /*color: white; changed 11/4*/
+    color: #000;
     display: flex;
     align-items: center;
     font-size: 18px;
