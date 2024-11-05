@@ -419,12 +419,17 @@ def test_results(request, test_id):
         # Move to the next metric position
         metric_position += 1
 
-    amount_correct = result.amount_correct
+    amount_correct = 0
+    for pos, accuracy in result.character_accuracies.items():
+        # Only count non-practice positions and correct answers
+        if pos not in excluded_positions and all(a == 1 for a in accuracy):  # All correct answers
+            amount_correct += 1
+
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
-        "amount_correct": amount_correct
+        "amount_correct": amount_correct  # Return non-practice correct count
     })
 
 def get_test_comparison_data(request, test_id):
