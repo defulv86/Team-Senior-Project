@@ -49,8 +49,7 @@ invalid_test_1 = Test.objects.create(
 invalid_test_2 = Test.objects.create(
     user=doctor_who,
     age=64,
-    created_at=timezone.now() - timedelta(days=6) + timedelta(hours=23) + timedelta(minutes=59),
-    status='pending'
+    created_at=timezone.now() - timedelta(days=6, hours=23, minutes=59)
 )
 
 test_instance=completed_test
