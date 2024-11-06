@@ -348,5 +348,53 @@ function speakText() {
     }
 }
 
+
+
 document.getElementById('speak-button').addEventListener('click', speakText);
 document.addEventListener('DOMContentLoaded', populateVoices);
+
+
+// Function to invalidate the test in the backend
+function invalidateTest(testLink) {
+    testLink = document.getElementById('test-link').value; // Retrieve the test link
+    fetch(`/invalidate_test/${testLink}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ link: testLink }),
+        keepalive: true  // Ensures fetch request completes even if the page is unloading
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Test marked as invalid.');
+        } else {
+            console.warn('Failed to invalidate test:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error invalidating test:', error);
+    });
+}
+let confirmUnload = false; // Flag to check if user confirmed the unload
+
+// Warn the user if they try to leave the page with an incomplete test
+window.onbeforeunload = function (event) {
+    if (currentStimulusIndex < stimuli.length) { // Check if the test is incomplete
+        // Display the warning message
+        const warningMessage = "You have unfinished responses. Leaving this page will invalidate your test. Are you sure you want to proceed?";
+        event.returnValue = warningMessage; // Required for most browsers
+        confirmUnload = true; // Set the flag if the user confirms
+        return warningMessage;
+    }
+};
+
+// Invalidate the test if the user confirmed the unload
+window.addEventListener('pagehide', function () {
+    if (confirmUnload && currentStimulusIndex < stimuli.length) {
+        const testLink = document.getElementById('test-link').value;
+        invalidateTest(testLink);
+    }
+});
