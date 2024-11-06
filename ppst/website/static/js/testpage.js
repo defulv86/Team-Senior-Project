@@ -12,6 +12,7 @@ form.addEventListener('submit', function(e) {
 
 function changeFontSize(size) {
     document.getElementById("intro").style.fontSize = size;
+    document.getElementById("show-subtitles").style.fontSize = size;
 }
 
 function getFontSize() {
@@ -237,7 +238,8 @@ document.getElementById('submit-response').addEventListener('click', () => {
 function playDemo() { // shows demo video and speaks/shows instructions
     var video = document.createElement("VIDEO");
     video.width = 420;
-    video.height = 300; video.controls = true;
+    video.height = 300; 
+    video.controls = true;
     video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
     var titleText = document.getElementById("title").textContent;
@@ -289,6 +291,20 @@ function startTest() {
         console.error('Error recording start time:', error);
     });
 }
+
+const subtitlesButton = document.getElementById("subtitles-button");
+subtitlesButton.addEventListener("click", function () {
+    const subtitles = document.getElementById("show-subtitles");
+    if (subtitles.style.display === 'none') {
+        subtitlesButton.innerText = 'Hide Subtitles';
+        subtitles.style.display = 'block';
+    } else {
+        subtitlesButton.innerText = 'Show Subtitles';
+        subtitles.style.display = 'none';
+    }
+    subtitles.style.fontSize = "24px"; // default value for when page is loaded
+    subtitles.style.fontSize = getFontSize();
+});
 
 document.getElementById('start-test').addEventListener('click', function () {
     document.getElementById('introduction').style.display = 'none';
