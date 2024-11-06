@@ -24,6 +24,7 @@ class Test(models.Model):
     finished_at = models.DateTimeField(null=True)
     age = models.IntegerField(default=0)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    premature_exit = models.BooleanField(default=False)  # New field to mark premature exit
 
     def check_status(self):
         """Update the status based on test conditions."""
@@ -38,23 +39,8 @@ class Test(models.Model):
     @property
     def is_invalid(self):
         """Determine if a test should be invalid based on conditions."""
-        one_week_later = self.created_at + timedelta(weeks=1)
-        has_expired = timezone.now() > one_week_later
-        return has_expired
-
-    def __str__(self):
-        return f"Test Link: {self.link}"
-
-    def get_test_details(self):
-        """Returns test details as a dictionary."""
-        return {
-            "link": self.link,
-            "age": self.age,
-            "created_at": self.created_at,
-            "started_at": self.started_at,
-            "finished_at": self.finished_at,
-            "status": self.status
-        }
+        expiration_date = self.created_at + timedelta(weeks=1)
+        return timezone.now() >= expiration_date or self.premature_exit
 
 class Result(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)

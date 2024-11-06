@@ -197,6 +197,9 @@ document.getElementById('submit-response').addEventListener('click', () => {
     // Truncate response to expected length
     const truncatedResponse = response.slice(0, expectedLength);
 
+    // Skip practice questions when counting correct answers
+    const isPracticeQuestion = currentStimulus.stimulus_type.includes('_Pr');
+
     fetch('/submit-response/', {
         method: 'POST',
         headers: {
@@ -204,13 +207,14 @@ document.getElementById('submit-response').addEventListener('click', () => {
         },
         body: JSON.stringify({
             link: testLink,
-            response_text: truncatedResponse, // Use truncated response
+            response_text: truncatedResponse,
             stimulus_id: currentStimulus.id,
             response_position: currentStimulusIndex,
-            character_latencies: characterLatencies, // Send latencies to the backend
-            character_accuracies: accuracies, // Send accuracies to the backend
-            expected_stimulus: correctAnswer, // Send the expected stimulus for accuracy checks
-            timestamps: timestamps
+            character_latencies: characterLatencies,
+            character_accuracies: accuracies,
+            expected_stimulus: correctAnswer,
+            timestamps: timestamps,
+            is_practice: isPracticeQuestion // Add a flag to identify practice questions
         })
     })
         .then(response => {
@@ -221,8 +225,8 @@ document.getElementById('submit-response').addEventListener('click', () => {
             return response.json();
         })
         .then(() => {
-            response = ''; // Reset response after submission
-            timestamps.length = 0; // Clear the timestamps for the next response
+            response = '';
+            timestamps.length = 0;
             nextStimulus();
         })
         .catch(error => {
@@ -360,5 +364,53 @@ function speakText() {
     }
 }
 
+
+
 document.getElementById('speak-button').addEventListener('click', speakText);
 document.addEventListener('DOMContentLoaded', populateVoices);
+
+
+// Function to invalidate the test in the backend
+function invalidateTest(testLink) {
+    testLink = document.getElementById('test-link').value; // Retrieve the test link
+    fetch(`/invalidate_test/${testLink}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ link: testLink }),
+        keepalive: true  // Ensures fetch request completes even if the page is unloading
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Test marked as invalid.');
+        } else {
+            console.warn('Failed to invalidate test:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error invalidating test:', error);
+    });
+}
+let confirmUnload = false; // Flag to check if user confirmed the unload
+
+// Warn the user if they try to leave the page with an incomplete test
+window.onbeforeunload = function (event) {
+    if (currentStimulusIndex < stimuli.length) { // Check if the test is incomplete
+        // Display the warning message
+        const warningMessage = "You have unfinished responses. Leaving this page will invalidate your test. Are you sure you want to proceed?";
+        event.returnValue = warningMessage; // Required for most browsers
+        confirmUnload = true; // Set the flag if the user confirms
+        return warningMessage;
+    }
+};
+
+// Invalidate the test if the user confirmed the unload
+window.addEventListener('pagehide', function () {
+    if (confirmUnload && currentStimulusIndex < stimuli.length) {
+        const testLink = document.getElementById('test-link').value;
+        invalidateTest(testLink);
+    }
+});

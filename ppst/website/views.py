@@ -5,11 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from datetime import timedelta
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
 from statistics import mean
 import json
-
+import logging
 def home(request):
     all_users = User.objects.all()  # Call the method to get all users
     return render(request, 'home.html', {
@@ -49,7 +50,6 @@ def dashboard(request):
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
 
-from django.utils.crypto import get_random_string  # For generating unique links
 
 @csrf_exempt
 @login_required
@@ -206,44 +206,57 @@ def mark_test_complete(request, link):
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     
-def check_and_notify_expiring_tests():
-    """
-    Periodic function to check for tests close to expiration and generate appropriate notifications.
-    """
-    one_day_warning_date = timezone.now() - timezone.timedelta(days=6)
-    expiration_date = timezone.now() - timezone.timedelta(weeks=1)
-
-    # 2. Notify for tests 1 day from expiration
-    tests_near_expiry = Test.objects.filter(
-        created_at__lte=one_day_warning_date,
-        status='Pending',
-        started_at__isnull=True
-    )
-    for test in tests_near_expiry:
-        create_test_notification(test)
-
-    # 3. Notify for tests that have become invalid after 1 week without being taken
-    expired_tests = Test.objects.filter(
-        created_at__lte=expiration_date,
-        status='Pending',
-        started_at__isnull=True
-    )
-    for test in expired_tests:
-        test.status = 'Invalid'
+logger = logging.getLogger(__name__)
+def invalidate_test(request, link):
+    if request.method == 'POST':
+        test = get_object_or_404(Test, link=link)
+        logger.info(f"cancel_test called for test link: {link} with current status: {test.status}")
+        test.premature_exit = True  # Mark as exited prematurely
         test.save()
-        create_test_notification(test)
+        logger.info(f"Test {test.link} status set to 'invalid'")
+            
+        # Notify the administrator
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Incompletion Alert",
+            message="Your patient exited the test without completion. This caused the test to become invalid. Do you want to create a new test for the patient?"
+        )
+        check_test_status(request, link)
+        return JsonResponse({"status": "canceled"})
+    return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
 
-    # 4. Notify for tests that have become invalid after starting but not completing
-    incomplete_expired_tests = Test.objects.filter(
-        created_at__lte=expiration_date,
-        status='Pending',
-        started_at__isnull=False,
-        finished_at__isnull=True
-    )
-    for test in incomplete_expired_tests:
-        test.status = 'Invalid'
-        test.save()
-        create_test_notification(test)
+def check_and_notify_test_status():
+    """
+    Periodically checks each test status to see if a warning or expiration notification should be sent.
+    """
+    now = timezone.now()
+    tests = Test.objects.filter(status='pending')  # Filter only pending tests
+
+    for test in tests:
+        # Check if the test is expiring in 24 hours
+        time_until_expiry = (test.created_at + timedelta(weeks=1)) - now
+        if time_until_expiry <= timedelta(hours=24) and not test.finished_at:
+            # Send warning notification if 24 hours remain
+            Notification.objects.create(
+                user=test.user,
+                test=test,
+                header="Test Expiry Warning",
+                message="Your patient has not started or completed the test yet. "
+                        "The test will expire in 24 hours if not completed.",
+            )
+
+        # Check if the test is expired
+        elif time_until_expiry <= timedelta(0) and not test.finished_at:
+            # Update test status to 'invalid' and notify
+            test.status = 'invalid'
+            test.save()
+            Notification.objects.create(
+                user=test.user,
+                test=test,
+                header="Test Expired",
+                message=f"Test link {test.link} has expired because it was not completed in one week.",
+            )
 
 def start_test(request, link):
     if request.method == 'POST':
@@ -419,12 +432,17 @@ def test_results(request, test_id):
         # Move to the next metric position
         metric_position += 1
 
-    amount_correct = result.amount_correct
+    amount_correct = 0
+    for pos, accuracy in result.character_accuracies.items():
+        # Only count non-practice positions and correct answers
+        if pos not in excluded_positions and all(a == 1 for a in accuracy):  # All correct answers
+            amount_correct += 1
+
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
-        "amount_correct": amount_correct
+        "amount_correct": amount_correct  # Return non-practice correct count
     })
 
 def get_test_comparison_data(request, test_id):
@@ -482,7 +500,6 @@ def update_or_create_aggregate(test):
     if 18 <= age <= 29:
         min_age, max_age = 18, 29
     else:
-        # Define age range boundaries for other groups in 10-year intervals
         min_age = (age // 10) * 10
         max_age = min_age + 9
 
@@ -501,13 +518,17 @@ def update_or_create_aggregate(test):
     accuracies_sums = {}
     counts = {}
 
-    # Define the metrics for which we want to calculate averages
+    # Define the metrics and excluded positions
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
         'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Start metric_position at 3 as specified
+    metric_position = 3
 
     # Initialize sums and counts for each metric
     for metric in metrics:
@@ -517,17 +538,25 @@ def update_or_create_aggregate(test):
 
     # Aggregate data from each result in the age group
     for result in results_in_age_group:
-        for idx, metric in enumerate(metrics, start=1):
-            # Retrieve accuracy and latency lists for each metric
-            accuracy_values = result.character_accuracies.get(str(idx), [])
-            latency_values = result.character_latencies.get(str(idx), [])
+        metric_position = 3  # Reset to 3 for each result
+        for metric in metrics:
+            # Skip excluded positions
+            while str(metric_position) in excluded_positions:
+                metric_position += 1
 
-            # Sum values and count entries to calculate averages
+            # Retrieve accuracy and latency lists for each metric by position
+            accuracy_values = result.character_accuracies.get(str(metric_position), [])
+            latency_values = result.character_latencies.get(str(metric_position), [])
+
+            # Sum values and count entries to calculate averages only if lists are not empty
             if accuracy_values:
                 accuracies_sums[metric] += sum(accuracy_values)
                 counts[metric] += len(accuracy_values)
             if latency_values:
                 latencies_sums[metric] += sum(latency_values)
+
+            # Move to the next metric position
+            metric_position += 1
 
     # Calculate the average for each metric and update the age group data
     average_accuracies = {}
