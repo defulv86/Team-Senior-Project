@@ -61,8 +61,12 @@ def create_test(request):
         if not age or int(age) < 18:
             return JsonResponse({'error': 'Invalid age: Age must be 18 or older to create a test.'}, status=400)
 
-        # Create the test object
-        test = Test.objects.create(user=request.user, age=age)
+        # Explicitly set created_at to the current time
+        test = Test.objects.create(
+            user=request.user,
+            age=age,
+            created_at=timezone.now()  # Explicitly setting created_at
+        )
         
         # Build the full URL using the test link
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
@@ -244,6 +248,7 @@ def check_and_notify_expiring_tests():
 def start_test(request, link):
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
+        test.status = 'Pending'
         test.started_at = timezone.now()  # Set the start time
         test.save()
 
@@ -414,12 +419,17 @@ def test_results(request, test_id):
         # Move to the next metric position
         metric_position += 1
 
-    amount_correct = result.amount_correct
+    amount_correct = 0
+    for pos, accuracy in result.character_accuracies.items():
+        # Only count non-practice positions and correct answers
+        if pos not in excluded_positions and all(a == 1 for a in accuracy):  # All correct answers
+            amount_correct += 1
+
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
-        "amount_correct": amount_correct
+        "amount_correct": amount_correct  # Return non-practice correct count
     })
 
 def get_test_comparison_data(request, test_id):
@@ -477,7 +487,6 @@ def update_or_create_aggregate(test):
     if 18 <= age <= 29:
         min_age, max_age = 18, 29
     else:
-        # Define age range boundaries for other groups in 10-year intervals
         min_age = (age // 10) * 10
         max_age = min_age + 9
 
@@ -496,13 +505,17 @@ def update_or_create_aggregate(test):
     accuracies_sums = {}
     counts = {}
 
-    # Define the metrics for which we want to calculate averages
+    # Define the metrics and excluded positions
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
         'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Start metric_position at 3 as specified
+    metric_position = 3
 
     # Initialize sums and counts for each metric
     for metric in metrics:
@@ -512,17 +525,25 @@ def update_or_create_aggregate(test):
 
     # Aggregate data from each result in the age group
     for result in results_in_age_group:
-        for idx, metric in enumerate(metrics, start=1):
-            # Retrieve accuracy and latency lists for each metric
-            accuracy_values = result.character_accuracies.get(str(idx), [])
-            latency_values = result.character_latencies.get(str(idx), [])
+        metric_position = 3  # Reset to 3 for each result
+        for metric in metrics:
+            # Skip excluded positions
+            while str(metric_position) in excluded_positions:
+                metric_position += 1
 
-            # Sum values and count entries to calculate averages
+            # Retrieve accuracy and latency lists for each metric by position
+            accuracy_values = result.character_accuracies.get(str(metric_position), [])
+            latency_values = result.character_latencies.get(str(metric_position), [])
+
+            # Sum values and count entries to calculate averages only if lists are not empty
             if accuracy_values:
                 accuracies_sums[metric] += sum(accuracy_values)
                 counts[metric] += len(accuracy_values)
             if latency_values:
                 latencies_sums[metric] += sum(latency_values)
+
+            # Move to the next metric position
+            metric_position += 1
 
     # Calculate the average for each metric and update the age group data
     average_accuracies = {}

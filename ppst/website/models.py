@@ -19,7 +19,7 @@ class Test(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     link = models.CharField(default=generate_link, max_length=100, null=True)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(null=True)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     age = models.IntegerField(default=0)
@@ -40,8 +40,7 @@ class Test(models.Model):
         """Determine if a test should be invalid based on conditions."""
         one_week_later = self.created_at + timedelta(weeks=1)
         has_expired = timezone.now() > one_week_later
-        was_exited = self.started_at is not None and self.finished_at is None
-        return has_expired or was_exited
+        return has_expired
 
     def __str__(self):
         return f"Test Link: {self.link}"
