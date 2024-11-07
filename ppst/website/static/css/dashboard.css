@@ -66,6 +66,7 @@ body {
     margin-left: 10px;
     font-size: 16px;
     transition: opacity 0.3s ease;
+}
 
 .sidebar:hover {
     width: 200px;

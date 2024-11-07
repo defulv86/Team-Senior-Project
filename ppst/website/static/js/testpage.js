@@ -85,9 +85,7 @@ function flashStimulus(stimulus) {
             setTimeout(showNextChar, 1500); // Show next character after 1.5 seconds
         } else {
             stimulusDiv.textContent = '';
-
-            const keyboardShowTime = new Date().toISOString();
-            timestamps.push(keyboardShowTime);
+            timestamps.push(performance.now());
 
             if (stimulus.stimulus_type.includes('Digit')) {
                 digitKeyboard.style.display = 'flex';
@@ -105,7 +103,7 @@ function flashStimulus(stimulus) {
 document.querySelectorAll('.key').forEach(key => {
     key.addEventListener('click', () => {
         response += key.dataset.value;  // Append clicked key value
-        timestamps.push(new Date().toISOString()); // Capture timestamp for each character entered
+        timestamps.push(performance.now()); // Capture timestamp for each character entered
         console.log(response);
     });
 });
