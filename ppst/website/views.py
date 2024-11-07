@@ -10,7 +10,6 @@ from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notific
 from dateutil import parser
 from statistics import mean
 import json
-import logging
 def home(request):
     all_users = User.objects.all()  # Call the method to get all users
     return render(request, 'home.html', {
@@ -200,29 +199,30 @@ def mark_test_complete(request, link):
         update_or_create_aggregate(test)
 
         # Create a notification for test completion
-        create_test_notification(test)
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Completed",
+            message=f"Your patient has completed the test for link: {test.link}. Results are available to view."
+        )
 
         return JsonResponse({'status': 'success', 'message': 'Test marked as complete with finish time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     
-logger = logging.getLogger(__name__)
 def invalidate_test(request, link):
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
-        logger.info(f"cancel_test called for test link: {link} with current status: {test.status}")
         test.premature_exit = True  # Mark as exited prematurely
         test.save()
-        logger.info(f"Test {test.link} status set to 'invalid'")
-            
-        # Notify the administrator
+        check_test_status(request, link)
         Notification.objects.create(
             user=test.user,
             test=test,
-            header="Test Incompletion Alert",
-            message="Your patient exited the test without completion. This caused the test to become invalid. Do you want to create a new test for the patient?"
+            header="Test Invalidated",
+            message=f"Your patient has exited the test without completion for link: {test.link}. Do you want to create a test?"
         )
-        check_test_status(request, link)
+        
         return JsonResponse({"status": "canceled"})
     return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
 
@@ -231,33 +231,33 @@ def check_and_notify_test_status():
     Periodically checks each test status to see if a warning or expiration notification should be sent.
     """
     now = timezone.now()
-    tests = Test.objects.filter(status='pending')  # Filter only pending tests
+    tests = Test.objects.all()
 
     for test in tests:
-        # Check if the test is expiring in 24 hours
-        time_until_expiry = (test.created_at + timedelta(weeks=1)) - now
-        if time_until_expiry <= timedelta(hours=24) and not test.finished_at:
-            # Send warning notification if 24 hours remain
-            Notification.objects.create(
-                user=test.user,
-                test=test,
-                header="Test Expiry Warning",
-                message="Your patient has not started or completed the test yet. "
-                        "The test will expire in 24 hours if not completed.",
-            )
+        expiration_date = test.created_at + timedelta(weeks=1)
+        time_until_expiry = expiration_date - now
 
-        # Check if the test is expired
+        # Adjust the time checks to ensure precision with 24-hour notifications
+        if timedelta(hours=23, minutes=59) < time_until_expiry <= timedelta(hours=24) and not test.finished_at:
+            # Warning if time left is between 23 hours 59 minutes and exactly 24 hours
+            if not Notification.objects.filter(test=test, header="Test Expiry Warning").exists():
+                Notification.objects.create(
+                    user=test.user,
+                    test=test,
+                    header="Test Expiry Warning",
+                    message="Your patient has not started or completed the test yet. "
+                            "The test link ({test.link}) will expire in 24 hours if not completed.",
+                )
+
+        # Send expiration notification if the test is now expired
         elif time_until_expiry <= timedelta(0) and not test.finished_at:
-            # Update test status to 'invalid' and notify
-            test.status = 'invalid'
-            test.save()
-            Notification.objects.create(
-                user=test.user,
-                test=test,
-                header="Test Expired",
-                message=f"Test link {test.link} has expired because it was not completed in one week.",
-            )
-
+            if not Notification.objects.filter(test=test, header="Test Expired").exists():
+                Notification.objects.create(
+                    user=test.user,
+                    test=test,
+                    header="Test Expired",
+                    message=f"Test link {test.link} has expired because it was not completed in one week.",
+                )
 def start_test(request, link):
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
@@ -265,7 +265,12 @@ def start_test(request, link):
         test.started_at = timezone.now()  # Set the start time
         test.save()
 
-        create_test_notification(test)
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Started",
+            message=f"The patient has officially started the test for link: {test.link}."
+        )
         return JsonResponse({'status': 'success', 'message': 'Test start time recorded.'})
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
@@ -343,19 +348,18 @@ def get_stimuli(request):
 
 @login_required
 def test_results(request, test_id):
-    # Step 1: Retrieve test and result data
+    # Retrieve test and result data
     test = get_object_or_404(Test, id=test_id)
     result = Result.objects.filter(test=test).first()
     
     if not result:
         return JsonResponse({"error": "No test results available for this test."}, status=404)
 
-    # Step 2: Retrieve age group aggregate data
+    # Retrieve age group aggregate data
     age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
     if not age_group:
         return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
 
-    # Define the metrics list
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -363,58 +367,55 @@ def test_results(request, test_id):
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
 
-    # Exclude positions for practice questions
     excluded_positions = {"1", "2", "9", "10"}
-    
     test_results = []
     aggregate_results = []
-    metric_position = 3  # Start at position 3, as requested
+    metric_position = 3
 
-    # Step 3: Loop through each metric and calculate averages, excluding practice positions
+    # Loop through each metric and calculate averages, excluding practice positions
     for metric in metrics:
-        # Find the next valid metric position by skipping excluded positions
         while str(metric_position) in excluded_positions:
             metric_position += 1
 
-        # Retrieve data for each metric, ignoring practice positions
+        # Retrieve user data for accuracies and latencies
         user_accuracies = result.character_accuracies.get(str(metric_position), [])
         user_latencies = result.character_latencies.get(str(metric_position), [])
-        
-        # Calculate averages
-        user_accuracy_avg = mean(user_accuracies) if user_accuracies else "N/A"
-        user_latency_avg = mean(user_latencies) if user_latencies else "N/A"
-        
-        # Retrieve age group averages
-        avg_accuracy = age_group.average_accuracies.get(metric, "N/A")
-        avg_latency = age_group.average_latencies.get(metric, "N/A")
 
-        # Determine comparison labels with "Neutral/Equal" case
-        accuracy_comparison = (
-            "Above average" if user_accuracy_avg != "N/A" and avg_accuracy != "N/A" and user_accuracy_avg > avg_accuracy
-            else "Below average" if user_accuracy_avg != "N/A" and avg_accuracy != "N/A" and user_accuracy_avg < avg_accuracy
-            else "Average" if user_accuracy_avg == avg_accuracy and user_accuracy_avg != "N/A"
-            else "N/A"
-        )
+        # Calculate accuracy and latency averages, using mean with 0 as fallback for empty lists
+        user_accuracy_avg = mean(user_accuracies) if user_accuracies else 0
+        user_latency_avg = mean(user_latencies) if user_latencies else 0
 
-        # Adjust latency comparison: lower user latency is better (below average), higher is worse (above average)
-        latency_comparison = (
-            "Below average" if user_latency_avg != "N/A" and avg_latency != "N/A" and user_latency_avg < avg_latency
-            else "Above average" if user_latency_avg != "N/A" and avg_latency != "N/A" and user_latency_avg > avg_latency
-            else "Average" if user_latency_avg == avg_latency and user_latency_avg != "N/A"
-            else "N/A"
-        )
+        # Retrieve aggregate data for comparison
+        avg_accuracy = age_group.average_accuracies.get(metric, 0)
+        avg_latency = age_group.average_latencies.get(metric, 0)
 
-        # Append the data for each metric
+        # Comparison logic for accuracy
+        if user_accuracy_avg > avg_accuracy:
+            accuracy_comparison = "Above average"
+        elif user_accuracy_avg < avg_accuracy:
+            accuracy_comparison = "Below average"
+        else:
+            accuracy_comparison = "Average"
+
+        # Comparison logic for latency
+        if user_latency_avg < avg_latency:  # Lower latency is better
+            latency_comparison = "Below average"
+        elif user_latency_avg > avg_latency:
+            latency_comparison = "Above average"
+        else:
+            latency_comparison = "Average"
+
+        # Append accuracy and latency results
         test_results.append({
             "metric": f"{metric} Accuracy",
-            "values": user_accuracies if user_accuracies else ["N/A"],
+            "values": user_accuracies,
             "average": user_accuracy_avg,
             "aggregate_average": avg_accuracy,
             "comparison": accuracy_comparison
         })
         test_results.append({
             "metric": f"{metric} Latency",
-            "values": user_latencies if user_latencies else ["N/A"],
+            "values": user_latencies,
             "average": user_latency_avg,
             "aggregate_average": avg_latency,
             "comparison": latency_comparison
@@ -429,20 +430,19 @@ def test_results(request, test_id):
             "average": avg_latency
         })
 
-        # Move to the next metric position
         metric_position += 1
 
-    amount_correct = 0
-    for pos, accuracy in result.character_accuracies.items():
-        # Only count non-practice positions and correct answers
-        if pos not in excluded_positions and all(a == 1 for a in accuracy):  # All correct answers
-            amount_correct += 1
+    # Calculate amount correct for non-practice questions
+    amount_correct = sum(
+        1 for pos, accuracy in result.character_accuracies.items()
+        if pos not in excluded_positions and all(a == 1 for a in accuracy)
+    )
 
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
-        "amount_correct": amount_correct  # Return non-practice correct count
+        "amount_correct": amount_correct
     })
 
 def get_test_comparison_data(request, test_id):
@@ -646,61 +646,6 @@ def get_user_info(request):
         return JsonResponse(user_info)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
-def create_test_notification(test):
-    """
-    Creates a notification based on the current status of the test.
-    """
-    # 1. If the test is completed
-    if test.status == 'Completed' and test.finished_at:
-        Notification.objects.create(
-            user=test.user,
-            test=test,
-            header="Test Completed",
-            message="The test has been completed. Results are available to view."
-        )
-        return
-    
-    # 2. If the test is 1 day from becoming invalid
-    one_day_before_expiry = test.created_at + timezone.timedelta(days=6)
-    if timezone.now() >= one_day_before_expiry and test.status == 'Pending' and not test.started_at:
-        Notification.objects.create(
-            user=test.user,
-            test=test,
-            header="Test Expiration Warning",
-            message="The test link will expire in 1 day if not taken."
-        )
-        return
-    
-    # 3. If the test becomes invalid after 1 week without being taken
-    if test.status == 'Invalid' and not test.started_at:
-        Notification.objects.create(
-            user=test.user,
-            test=test,
-            header="Test Expired",
-            message="The test is invalid due to the link expiring. Do you wish to create a new test for the patient?"
-        )
-        return
-
-    # 4. If the test becomes invalid after the patient started but exited without completing
-    if test.status == 'Invalid' and test.started_at and not test.finished_at:
-        Notification.objects.create(
-            user=test.user,
-            test=test,
-            header="Test Not Completed",
-            message="The patient started the test but did not complete it in one sitting. Do you want to create a new test for the patient?"
-        )
-        return
-
-    # 5. If the test has been started by the patient
-    if test.started_at and not test.finished_at:
-        Notification.objects.create(
-            user=test.user,
-            test=test,
-            header="Test Started",
-            message="The patient has officially started the test."
-        )
-        return
 
 @login_required
 def get_user_notifications(request):

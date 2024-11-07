@@ -311,8 +311,8 @@ function renderTestResultsTable(data, testId) {
                     <tr>
                         <td>${result.metric.replace(/_/g, ' ')}</td>
                         <td>${result.values.join(", ")}</td>  <!-- Display all values -->
-                        <td>${result.average || "N/A"}</td>   <!-- Display user average -->
-                        <td>${result.aggregate_average || "N/A"}</td>   <!-- Display aggregate average -->
+                        <td>${result.average}</td>   <!-- Display user average -->
+                        <td>${result.aggregate_average}</td>   <!-- Display aggregate average -->
                         <td style="${colorStyle}">  <!-- Apply inline color style here -->
                             ${comparisonText}
                         </td>
