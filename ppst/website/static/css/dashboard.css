@@ -155,6 +155,24 @@ body {
     padding: 10px;
 }
 
+.notif-tab-header {
+    display: flex;
+    justify-content: space-around;
+    background-color: #ccc;
+    margin-bottom: 10px;
+}
+.notif-tab {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    background: #f0f0f0;
+    font-weight: bold;
+}
+.notif-tab.active {
+    background: #dcdcdc;
+    color: #000;
+}
+
 
 .test-buttons {
     margin-top: 20px;

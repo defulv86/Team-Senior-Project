@@ -388,10 +388,14 @@ def get_user_info(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
-def get_user_notifications(request):
+def get_user_notifications(request, load_type):
+    
     if request.method == 'GET':
         tests = Test.objects.filter(user=request.user)
-        notifications = Notification.objects.filter(test__in=tests, is_dismissed=False).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
+        if load_type == 'read':
+            notifications = Notification.objects.filter(test__in=tests, is_dismissed=False, is_viewed=True).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
+        elif load_type == 'unread':
+            notifications = Notification.objects.filter(test__in=tests, is_dismissed=False, is_viewed=False).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
         return JsonResponse(list(notifications), safe=False)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)

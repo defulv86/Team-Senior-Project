@@ -457,10 +457,10 @@ function closeNotifications() {
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
     event.preventDefault();
-    
+
     //Load notifications if visible
     if (!isNotificationsOpen) {
-        loadNotifications();
+        loadNotifications("unread");
     }
 
     // Toggle the display of the notification popout
@@ -478,23 +478,39 @@ function toggleNotifications(event) {
     
     // Update the isNotificationsOpen variable based on the visibility of the popout
     isNotificationsOpen = notificationPopout.style.display === 'block';
+    
+
+    
 }
 isNotificationsOpen = false;
 
+function update_notifications(event) {
+    const action = event.target.getAttribute('data-action');
+    //whether we want to load show just unread notifications or read notifications
+    loadNotifications(action);
+    if(action == 'unread'){
+        document.getElementById('unread-tab').classList.add('active');
+        document.getElementById('read-tab').classList.remove('active');
+    }
+    else if(action == 'read'){
+        document.getElementById('unread-tab').classList.remove('active');
+        document.getElementById('read-tab').classList.add('active');
+    }
+}
+
 // function that loads in notifications based on the current logged in user
-function loadNotifications(){
+function loadNotifications(loadType){
     const notificationList = document.getElementById('notification-list');
     notificationList.innerHTML = '';
 
 
-    fetch('/get_user_notifications/')
+    fetch(`/get_user_notifications/${loadType}`)
     .then(response => response.json())
     .then(data => {
         if (data.length === 0) {
             notificationList.innerHTML = '<li> No new Notifications </li>';
         } else {
             data.forEach(notif => {
-                if (notif.is_dismissed == false) {
                     
                     const notifItem = document.createElement('li');
 
@@ -505,8 +521,8 @@ function loadNotifications(){
                     const notificationTime = new Date(notif.time_created);
                     const now = new Date();
 
-                    const current_date = now.getDay() + now.getMonth() + now.getFullYear()
-                    const notif_date = notificationTime.getDay() + notificationTime.getMonth() + notificationTime.getFullYear()
+                    const current_date = now.getDate() + now.getMonth() + now.getFullYear()
+                    const notif_date = notificationTime.getDate() + notificationTime.getMonth() + notificationTime.getFullYear()
                     
                     const dateSpan = document.createElement('span');
                     if (current_date == notif_date) {
@@ -536,7 +552,6 @@ function loadNotifications(){
                     notifItem.appendChild(dismissButton);
                     
                     notificationList.appendChild(notifItem);
-                }
             });
         }
     })

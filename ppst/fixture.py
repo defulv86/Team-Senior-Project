@@ -61,7 +61,8 @@ Notification.objects.create(
     header="Reminder: Patient Test Incomplete", 
     message="Patient test at ppst.com/testLink1 has not been taken yet. Please follow up.",
     time_created=datetime(2024, 10, 25, 9, 0, 0),
-    is_dismissed=False
+    is_dismissed=False,
+    is_viewed=False
 )
 
 
