@@ -26,7 +26,7 @@ completed_test = Test.objects.create(
     age=54,
     created_at=timezone.now() - timedelta(days=5),
     started_at=timezone.now() - timedelta(days=4),
-    finished_at=timezone.now() - timedelta(days=4) + timedelta(minutes=20),
+    finished_at=timezone.now() - timedelta(days=4) + timedelta(minutes=4),
     status='completed'
 )
 
@@ -38,21 +38,22 @@ pending_test = Test.objects.create(
     status='pending'
 )
 
-# 3. Invalid Test (created a week ago, started but not completed)
-invalid_test_1 = Test.objects.create(
+# 3. Pending Test (Testing notification send out if the test has 24 hours left until expiration)
+pending_test_2 = Test.objects.create(
     user=doctor_who,
-    age=67,
-    created_at=timezone.now() - timedelta(weeks=1),
+    age=88,
+    created_at=timezone.now() - timedelta(days=5, hours=23, minutes=59),
     status='pending'
 )
+
 # 4. Invalid Test (created 6 days, 23 hours, and 59 minutes ago. Testing to see if it updates when a minute passes)
-invalid_test_2 = Test.objects.create(
+invalid_test_1 = Test.objects.create(
     user=doctor_who,
     age=64,
     created_at=timezone.now() - timedelta(days=6, hours=23, minutes=59)
 )
 
-test_instance=completed_test
+
 
 # Create a Ticket instance submitted by DoctorWho
 Ticket.objects.create(
@@ -61,16 +62,6 @@ Ticket.objects.create(
     description="This is a sample issue reported by DoctorWho.",
     created_at=timezone.now()
 )
-
-Notification.objects.create(
-    user=doctor_who,
-    test=invalid_test_1,
-    header="Reminder: Patient Test Incomplete", 
-    message="Patient test at ppst.com/testLink1 has not been taken yet. Please follow up.",
-    time_created=datetime(2024, 10, 25, 9, 0, 0),
-    is_dismissed=False
-)
-
 
 aggregates_data = [
     {
