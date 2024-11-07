@@ -726,3 +726,8 @@ def dismiss_notification(request, id):
 def errorpage(request):
     # Have testpage redirect to here if user exits out of browser during the test.
     return render(request, 'errorpage.html')
+
+def completionpage(request):
+    # Have testpage redirect to here if the test has already been completed.
+    return render(request, 'completionpage.html')
+

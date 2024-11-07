@@ -27,7 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'completed') {
-                window.location.href = '/TestError1/'; // Redirect to another page
+                window.location.href = '/completed/'; // Redirect to another page
+            }
+
+            if (data.status === 'invalid') {
+                window.location.href = '/errorpage/'; // Redirect to another page
             }
         })
         .catch(error => {
