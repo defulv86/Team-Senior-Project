@@ -182,7 +182,6 @@ body {
 }
 
 .notification-popout {
-    display: none;
     position: absolute;
     right: 20px;
     top: 60px;
@@ -191,7 +190,21 @@ body {
     border: 1px solid #ccc;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    cursor: move;
+    user-select: none;
+
+    /* Initially hidden */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+
+.notification-popout.show {
+    /* Show when 'show' class is added */
+    opacity: 1;
+    visibility: visible;
+}
+
 
 .notification-header {
     padding: 10px;
@@ -233,6 +246,25 @@ body {
     margin: 5px 0;
     border-radius: 6px;
     padding: 10px;
+}
+
+.notif-tab-header {
+    display: flex;
+    justify-content: space-around;
+    background-color: #ccc;
+    margin-bottom: 10px;
+}
+.notif-tab {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    background: #dcdcdc;
+    font-weight: bold;
+}
+.notif-tab.active {
+    background: #f0f0f0;
+    text-decoration: underline;
+    color: #000;
 }
 
 

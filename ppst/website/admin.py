@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import Test, Result, Response, Stimulus, Aggregate, Stimulus_Type, Notification, Ticket
 
 class UserAdmin(admin.ModelAdmin):
@@ -27,11 +28,24 @@ class ResultAdmin(admin.ModelAdmin):
 class TestResponse(admin.ModelAdmin):
     readonly_fields = ('time_submitted',)
 
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'test', 'header', 'message', 'time_created', 'is_archived', 'is_read')
+
+    def mark_as_unread(modeladmin, request, queryset):
+        queryset.update(is_read=False)
+        modeladmin.message_user(request, "Selected notifications have been marked as unread.")
+
+    def mark_as_unarchived(modeladmin, request, queryset):
+        queryset.update(is_archived=False)
+        modeladmin.message_user(request, "Selected notifications have been marked as unarchived.")
+
+    actions = [mark_as_unread, mark_as_unarchived]
+
 admin.site.register(Stimulus)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Result)
 admin.site.register(Response, TestResponse)
 admin.site.register(Aggregate)
 admin.site.register(Stimulus_Type)
-admin.site.register(Notification)
+admin.site.register(Notification, NotificationAdmin)
 admin.site.register(Ticket)

@@ -41,6 +41,10 @@ class Test(models.Model):
         """Determine if a test should be invalid based on conditions."""
         expiration_date = self.created_at + timedelta(weeks=1)
         return timezone.now() >= expiration_date or self.premature_exit
+    
+    def  __str__(self):
+        return f"Test Link: {self.link}, Administerd By: {self.user}, Status: {self.status}"
+
 
 class Result(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -120,7 +124,8 @@ class Notification(models.Model):
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
     time_created = models.DateTimeField(auto_now_add=True)
-    is_dismissed = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
 
     def  __str__(self):
         return   str(self.id) + " Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)

@@ -86,15 +86,19 @@
                 <h3>Notifications</h3>
                 <button onclick="closeNotifications()" class="close-btn">&times;</button>
             </div>
+            <div class="notif-tab-header">
+                <button data-action="unread" onclick="update_notifications(event)" id="unread-tab" class="notif-tab active">Unread</button>
+                <button data-action="read" onclick="update_notifications(event)" id="read-tab" class="notif-tab">Read</button>
+            </div>
             <div class="notification-body" id="notification-body">
                 <ul id="notification-list">
                     <!-- Notifications will be dynamically loaded here -->
 
                 </ul>
             </div>
-            <div class="notification-footer"><!-- Notification options-->
-                <button onclick="markAllRead()">Read All</button>
-                <button onclick="clearNotifications()">Clear</button>
+            <div class="notification-footer">
+                <!-- <button onclick="markAllRead()">Read All</button>
+                <button onclick="clearNotifications()">Clear</button> -->
             </div>
         </div>
     </div>
