@@ -119,8 +119,7 @@ def submit_response(request):
                 for index in range(1, len(timestamps)):
                     if index < len(response_text) + 1:
                         current_timestamp = timestamps[index]
-                        latency = (parser.isoparse(current_timestamp) - 
-                            parser.isoparse(reference_timestamp)).total_seconds() * 1000  # Convert to milliseconds
+                        latency = current_timestamp - reference_timestamp
                         character_latencies.append(latency)
             
                         reference_timestamp = current_timestamp
