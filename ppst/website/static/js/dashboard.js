@@ -322,7 +322,7 @@ function renderTestResultsTable(data, testId) {
         </table>
     </div>
     <div class="table-container">
-        <h3>Aggregate Results for Age Group</h3>
+        <h3>Aggregate Results for Age Group ${data.min_age}-${data.max_age}</h3>
         <table class="results-table">
             <thead>
                 <tr>

@@ -60,6 +60,9 @@ def create_test(request):
         if not age or int(age) < 18:
             return JsonResponse({'error': 'Invalid age: Age must be 18 or older to create a test.'}, status=400)
 
+        if not age or int(age) > 99:
+            return JsonResponse({'error': "Invalid age: Age must be between 18 and 99."}, status=400)
+
         # Explicitly set created_at to the current time
         test = Test.objects.create(
             user=request.user,
@@ -247,8 +250,7 @@ def check_and_notify_test_status():
                     user=test.user,
                     test=test,
                     header="Test Expiry Warning",
-                    message="Your patient has not started or completed the test yet. "
-                            "The test link ({test.link}) will expire in 24 hours if not completed.",
+                    message=f"Your patient has not started or completed the test yet. The test link ({test.link}) will expire in 24 hours if not completed.",
                 )
 
         # Send expiration notification if the test is now expired
@@ -384,9 +386,9 @@ def test_results(request, test_id):
         user_latencies = result.character_latencies.get(str(metric_position), [])
 
         # Calculate accuracy and latency averages, using mean with 0 as fallback for empty lists
-        user_accuracy_avg = mean(user_accuracies) if user_accuracies else 0
-        user_latency_avg = mean(user_latencies) if user_latencies else 0
-
+        user_accuracy_avg = round(sum(user_accuracies) / len(user_accuracies), 2) if user_accuracies else 0
+        user_latency_avg = round(sum(user_latencies) / len(user_latencies), 2) if user_latencies else 0
+        
         # Retrieve aggregate data for comparison
         avg_accuracy = age_group.average_accuracies.get(metric, 0)
         avg_latency = age_group.average_latencies.get(metric, 0)
