@@ -19,7 +19,7 @@ function getFontSize() {
     return document.getElementById("fontSize").value;
 }
 
-// Check if the test is already complete when the page loads
+// Check the test status when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     testLink = document.getElementById('test-link').value; // Retrieve the test link
 
@@ -27,7 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'completed') {
-                window.location.href = '/TestError1/'; // Redirect to another page
+                window.location.href = '/completed/';
+            }
+
+            if (data.status === 'invalid') {
+                window.location.href = '/errorpage/';
             }
         })
         .catch(error => {

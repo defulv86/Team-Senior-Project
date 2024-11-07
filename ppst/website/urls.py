@@ -24,5 +24,6 @@ urlpatterns = [
     path('invalidate_test/<str:link>/', views.invalidate_test, name='invalidate_test'),
     path('errorpage/', views.errorpage, name="errorpage"),
     path('get_test_comparison_data/<int:test_id>/', views.get_test_comparison_data, name='get_test_comparison_data'),
+    path('completed/', views.completionpage, name="completionpage"),
 
 ]

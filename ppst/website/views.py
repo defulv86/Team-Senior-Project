@@ -673,5 +673,8 @@ def dismiss_notification(request, id):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def errorpage(request):
-    # Have testpage redirect to here if user exits out of browser during the test.
     return render(request, 'errorpage.html')
+
+def completionpage(request):
+    return render(request, 'completionpage.html')
+
