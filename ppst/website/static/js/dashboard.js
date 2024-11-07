@@ -448,11 +448,11 @@ document.addEventListener('mouseup', () => {
 
 // Close notifications with the close button
 function closeNotifications() {
-    document.getElementById('notification-popout').style.display = 'none';
-    document.getElementById('notification-body').style.display = 'none';
-    document.getElementById('notification-list').style.display = 'none';
+    notificationPopout.classList.toggle('show');
+    notificationBody.classList.toggle('show');
+    notificationList.classList.toggle('show');
 }
-
+lastNotifLoadType = 'read'
 // Show or hide the notification popout
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
@@ -465,23 +465,22 @@ function toggleNotifications(event) {
 
     // Toggle the display of the notification popout
     const notificationPopout = document.getElementById('notification-popout');
-    notificationPopout.style.display = 
-    notificationPopout.style.display === 'block' ? 'none' : 'block';
-    
     const notificationBody = document.getElementById('notification-body');
-    notificationBody.style.display = 
-    notificationBody.style.display === 'block' ? 'none' : 'block';
-
     const notificationList = document.getElementById('notification-list');
-    notificationList.style.display = 
-    notificationList.style.display === 'block' ? 'none' : 'block';
+  
+    // Toggle the "show" class for each element
+    notificationPopout.classList.toggle('show');
+    notificationBody.classList.toggle('show');
+    notificationList.classList.toggle('show');
     
     // Update the isNotificationsOpen variable based on the visibility of the popout
-    isNotificationsOpen = notificationPopout.style.display === 'block';
+    isNotificationsOpen = notificationPopout.classList.contains('show');
+    console.log("Popout visibility:", notificationPopout.classList.contains('show'));
     
 
     
 }
+
 isNotificationsOpen = false;
 
 function update_notifications(event) {
@@ -497,20 +496,26 @@ function update_notifications(event) {
         document.getElementById('read-tab').classList.add('active');
     }
 }
-
 // function that loads in notifications based on the current logged in user
 function loadNotifications(loadType){
     const notificationList = document.getElementById('notification-list');
+    if (!(lastNotifLoadType == loadType)){
     notificationList.innerHTML = '';
-
+    }
 
     fetch(`/get_user_notifications/${loadType}`)
     .then(response => response.json())
     .then(data => {
-        if (data.length === 0) {
-            notificationList.innerHTML = '<li> No new Notifications </li>';
-        } else {
-            data.forEach(notif => {
+        const notifications = data.notifications;
+        if (notifications.length === 0) {
+            if (loadType == 'unread') {
+                notificationList.innerHTML = '<li> No new Notifications </li>';
+            }
+            else{
+                notificationList.innerHTML = '<li> No Notifications </li>';
+            }
+        } else if (!(lastNotifLoadType == loadType)){
+            notifications.forEach(notif => {
                     
                     const notifItem = document.createElement('li');
 
@@ -538,21 +543,39 @@ function loadNotifications(loadType){
     
                     const messageSpan = document.createElement('span');
                     messageSpan.textContent = `${notif.message}`;
-    
-                    const dismissButton = document.createElement(`button`);
-                    dismissButton.textContent = 'Dismiss';
-                    dismissButton.onclick = () => dismissNotification(notif.id, notifItem);
-
+                    
                     notifItem.appendChild(dateSpan);
                     notifItem.appendChild(document.createElement('br'));
                     notifItem.appendChild(headerSpan);
                     notifItem.appendChild(document.createElement('br'));
                     notifItem.appendChild(messageSpan);
                     notifItem.appendChild(document.createElement('br'));
-                    notifItem.appendChild(dismissButton);
+                    if (notif.is_read) {
+                        const archiveButton = document.createElement(`button`);
+                        archiveButton.textContent = 'Archive';
+                        archiveButton.onclick = () => dismissNotification(notif.id, notifItem);
+                        notifItem.appendChild(archiveButton);
+                    }
+                    else{
+                        const archiveButton = document.createElement(`button`);
+                        archiveButton.textContent = 'Archive';
+                        archiveButton.style.marginRight = '5px';
+                        archiveButton.onclick = () => dismissNotification(notif.id, notifItem);
+                        notifItem.appendChild(archiveButton);
+                        const readButton = document.createElement(`button`);
+                        readButton.textContent = 'Mark as Read';
+                        readButton.onclick = () => markAsRead(notif.id, notifItem);
+                        notifItem.appendChild(readButton);
+                    }
                     
                     notificationList.appendChild(notifItem);
             });
+        }
+
+        if (lastNotifLoadType == 'read' && loadType != 'read') {
+            lastNotifLoadType = 'unread';
+        } else if(lastNotifLoadType == 'unread' && loadType != 'unread'){
+            lastNotifLoadType = 'read';
         }
     })
     .catch(error => console.error('Error:', error));    
@@ -569,11 +592,31 @@ function dismissNotification(id ,notifItem){
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken'),
         },
-        body: JSON.stringify({ is_dismissed: true })
+        body: JSON.stringify({ is_archived: true })
     })
     .then(response => {
         if (!response.ok) {
             throw new Error('failed to dismiss notification')
+        }
+    })
+    .catch(error => console.error('Error updating notification', error))
+}
+// marks the notification as read based on the notifItem corrisponding to the button that was pressed
+function markAsRead(id ,notifItem){
+    const notificationList = document.getElementById('notification-list');
+    notificationList.removeChild(notifItem);
+
+    fetch(`/mark_as_read/${id}/`,{
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ is_read: true })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('failed to mark the notification as read')
         }
     })
     .catch(error => console.error('Error updating notification', error))

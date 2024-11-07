@@ -391,12 +391,18 @@ def get_user_info(request):
 def get_user_notifications(request, load_type):
     
     if request.method == 'GET':
+        if load_type != 'read' and load_type != 'unread':
+            return JsonResponse({'error': 'Invalid request'}, status=400)
+        
         tests = Test.objects.filter(user=request.user)
         if load_type == 'read':
-            notifications = Notification.objects.filter(test__in=tests, is_dismissed=False, is_viewed=True).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
+            notifications = Notification.objects.filter(test__in=tests, is_archived=False, is_read=True).values('id','header', 'message', 'time_created', 'is_archived','is_read').order_by('-time_created')
         elif load_type == 'unread':
-            notifications = Notification.objects.filter(test__in=tests, is_dismissed=False, is_viewed=False).values('id','header', 'message', 'time_created', 'is_dismissed').order_by('-time_created')
-        return JsonResponse(list(notifications), safe=False)
+            notifications = Notification.objects.filter(test__in=tests, is_archived=False, is_read=False).values('id','header', 'message', 'time_created', 'is_archived').order_by('-time_created')
+        data = {
+            "notifications": list(notifications),
+        }
+        return JsonResponse(data)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -404,7 +410,19 @@ def dismiss_notification(request, id):
     if request.method == 'PATCH':
         try:
             notif = Notification.objects.get(id=id)
-            notif.is_dismissed = True
+            notif.is_archived = True
+            notif.is_read = True
+            notif.save()
+            return JsonResponse({'status': 'success'})
+        except Notification.DoesNotExist:
+            return JsonResponse({'status': 'not found'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def mark_as_read(request, id):
+    if request.method == 'PATCH':
+        try:
+            notif = Notification.objects.get(id=id)
+            notif.is_read = True
             notif.save()
             return JsonResponse({'status': 'success'})
         except Notification.DoesNotExist:

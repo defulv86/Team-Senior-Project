@@ -17,5 +17,6 @@ urlpatterns = [
     path('update_account/', views.update_account, name='update_account'),
     path('get_user_info/', views.get_user_info, name='get_user_info'),
     path('get_user_notifications/<str:load_type>/', views.get_user_notifications, name='get_user_notifications'),
-    path('dismiss_notification/<int:id>/', views.dismiss_notification, name='dismiss_notification')
+    path('dismiss_notification/<int:id>/', views.dismiss_notification, name='dismiss_notification'),
+    path('mark_as_read/<int:id>/', views.mark_as_read, name='mark_as_read')
 ]

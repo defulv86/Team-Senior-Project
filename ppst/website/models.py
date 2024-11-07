@@ -44,7 +44,7 @@ class Test(models.Model):
         return has_expired or was_exited
 
     def __str__(self):
-        return f"Test Link: {self.link}, Patient's Age: {self.age}, Status: {self.status}"
+        return f"Test Link: {self.link}, Administerd By: {self.user}, Status: {self.status}"
 
     def get_test_details(self):
         """Returns test details as a dictionary."""
@@ -139,8 +139,8 @@ class Notification(models.Model):
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
     time_created = models.DateTimeField(auto_now_add=True)
-    is_dismissed = models.BooleanField(default=False)
-    is_viewed = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
 
     def  __str__(self):
         return   str(self.id) + " Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)

@@ -7,7 +7,7 @@
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink1 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T09:00:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -18,7 +18,7 @@
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink2 has been successfully completed.",
             "time_created": "2024-10-25T09:15:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -29,7 +29,7 @@
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink3 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T09:30:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -40,7 +40,7 @@
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink4 has been successfully completed.",
             "time_created": "2024-10-25T09:45:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -51,7 +51,7 @@
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink5 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T10:00:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -62,7 +62,7 @@
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink6 has been successfully completed.",
             "time_created": "2024-10-25T10:15:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -73,7 +73,7 @@
             "header": "Reminder: Patient Test Incomplete",
             "message": "Patient test at ppst.com/testLink7 has not been taken yet. Please follow up.",
             "time_created": "2024-10-25T10:30:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     },
     {
@@ -84,7 +84,7 @@
             "header": "Reminder: Patient Test Completed",
             "message": "Patient test at ppst.com/testLink8 has been successfully completed.",
             "time_created": "2024-10-25T10:45:00.000Z",
-            "is_dismissed": false
+            "is_archived": false
         }
     }
 ]
