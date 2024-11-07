@@ -6,3 +6,4 @@ ppst/website/__pycache__
 !**/migrations/__init__.py
 ppst/db.sqlite3
 venv
+ppst/check_tests.sh
