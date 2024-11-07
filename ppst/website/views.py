@@ -120,7 +120,7 @@ def submit_response(request):
                     if index < len(response_text) + 1:
                         current_timestamp = timestamps[index]
                         latency = current_timestamp - reference_timestamp
-                        character_latencies.append(latency)
+                        character_latencies.append(round(latency, 2))
             
                         reference_timestamp = current_timestamp
             else:
