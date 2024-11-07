@@ -145,6 +145,9 @@ def submit_response(request):
                 else:
                     accuracy.append(0.0)  # Incorrect character
 
+            if len(response_text) < len(expected_stimulus):
+                accuracy.extend([0.0] * (len(expected_stimulus) - len(response_text)))
+
             # Increment amount correct based on the accuracy
             amount_correct = 0
             if len(response_text) == expected_count and all(a == 1.0 for a in accuracy):
