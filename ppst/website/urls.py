@@ -18,5 +18,13 @@ urlpatterns = [
     path('get_user_info/', views.get_user_info, name='get_user_info'),
     path('get_user_notifications/<str:load_type>/', views.get_user_notifications, name='get_user_notifications'),
     path('dismiss_notification/<int:id>/', views.dismiss_notification, name='dismiss_notification'),
-    path('mark_as_read/<int:id>/', views.mark_as_read, name='mark_as_read')
+    path('mark_as_read/<int:id>/', views.mark_as_read, name='mark_as_read'),
+    path('dismiss_notification/<int:id>/', views.dismiss_notification, name='dismiss_notification'),
+    path('check-test-status/<str:link>/', views.check_test_status, name='check-test-status'),
+    path('start-test/<str:link>/', views.start_test, name='start_test'),
+    path('mark-test-complete/<str:link>/', views.mark_test_complete, name='mark_test_complete'),
+    path('invalidate_test/<str:link>/', views.invalidate_test, name='invalidate_test'),
+    path('errorpage/', views.errorpage, name="errorpage"),
+    path('get_test_comparison_data/<int:test_id>/', views.get_test_comparison_data, name='get_test_comparison_data'),
+
 ]

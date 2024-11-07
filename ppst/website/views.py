@@ -4,11 +4,12 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from datetime import timedelta
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
-from django.utils import timezone
+from statistics import mean
 import json
-
 def home(request):
     all_users = User.objects.all()  # Call the method to get all users
     return render(request, 'home.html', {
@@ -48,7 +49,6 @@ def dashboard(request):
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
 
-from django.utils.crypto import get_random_string  # For generating unique links
 
 @csrf_exempt
 @login_required
@@ -60,8 +60,12 @@ def create_test(request):
         if not age or int(age) < 18:
             return JsonResponse({'error': 'Invalid age: Age must be 18 or older to create a test.'}, status=400)
 
-        # Create the test object
-        test = Test.objects.create(user=request.user, age=age)
+        # Explicitly set created_at to the current time
+        test = Test.objects.create(
+            user=request.user,
+            age=age,
+            created_at=timezone.now()  # Explicitly setting created_at
+        )
         
         # Build the full URL using the test link
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
@@ -115,8 +119,7 @@ def submit_response(request):
                 for index in range(1, len(timestamps)):
                     if index < len(response_text) + 1:
                         current_timestamp = timestamps[index]
-                        latency = (parser.isoparse(current_timestamp) - 
-                            parser.isoparse(reference_timestamp)).total_seconds() * 1000  # Convert to milliseconds
+                        latency = current_timestamp - reference_timestamp
                         character_latencies.append(latency)
             
                         reference_timestamp = current_timestamp
@@ -141,6 +144,9 @@ def submit_response(request):
                     accuracy.append(1.0)  # Correct character
                 else:
                     accuracy.append(0.0)  # Incorrect character
+
+            if len(response_text) < len(expected_stimulus):
+                accuracy.extend([0.0] * (len(expected_stimulus) - len(response_text)))
 
             # Increment amount correct based on the accuracy
             amount_correct = 0
@@ -174,6 +180,103 @@ def submit_response(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+def check_test_status(request, link):
+    if request.method == 'GET':  # Ensure the request is a GET request
+        test = get_object_or_404(Test, link=link)  # Fetch the test by link
+        test.check_status()  # Call any status update logic
+        return JsonResponse({'status': test.status})
+    else:
+        # Return an error if the request method is not GET
+        return JsonResponse({'error': 'Invalid request method. Only GET is allowed.'}, status=405)
+
+def mark_test_complete(request, link):
+    if request.method == 'POST':
+        test = get_object_or_404(Test, link=link)
+        test.finished_at = timezone.now()  # Set the finish time
+        test.status = 'Completed'
+        test.save()
+
+        # Update or create the aggregate for the test's age group
+        update_or_create_aggregate(test)
+
+        # Create a notification for test completion
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Completed",
+            message=f"Your patient has completed the test for link: {test.link}. Results are available to view."
+        )
+
+        return JsonResponse({'status': 'success', 'message': 'Test marked as complete with finish time recorded.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
+    
+def invalidate_test(request, link):
+    if request.method == 'POST':
+        test = get_object_or_404(Test, link=link)
+        test.premature_exit = True  # Mark as exited prematurely
+        test.save()
+        check_test_status(request, link)
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Invalidated",
+            message=f"Your patient has exited the test without completion for link: {test.link}. Do you want to create a test?"
+        )
+        
+        return JsonResponse({"status": "canceled"})
+    return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
+
+def check_and_notify_test_status():
+    """
+    Periodically checks each test status to see if a warning or expiration notification should be sent.
+    """
+    now = timezone.now()
+    tests = Test.objects.all()
+
+    for test in tests:
+        expiration_date = test.created_at + timedelta(weeks=1)
+        time_until_expiry = expiration_date - now
+
+        # Adjust the time checks to ensure precision with 24-hour notifications
+        if timedelta(hours=23, minutes=59) < time_until_expiry <= timedelta(hours=24) and not test.finished_at:
+            # Warning if time left is between 23 hours 59 minutes and exactly 24 hours
+            if not Notification.objects.filter(test=test, header="Test Expiry Warning").exists():
+                Notification.objects.create(
+                    user=test.user,
+                    test=test,
+                    header="Test Expiry Warning",
+                    message="Your patient has not started or completed the test yet. "
+                            "The test link ({test.link}) will expire in 24 hours if not completed.",
+                )
+
+        # Send expiration notification if the test is now expired
+        elif time_until_expiry <= timedelta(0) and not test.finished_at:
+            if not Notification.objects.filter(test=test, header="Test Expired").exists():
+                Notification.objects.create(
+                    user=test.user,
+                    test=test,
+                    header="Test Expired",
+                    message=f"Test link {test.link} has expired because it was not completed in one week.",
+                )
+def start_test(request, link):
+    if request.method == 'POST':
+        test = get_object_or_404(Test, link=link)
+        test.status = 'Pending'
+        test.started_at = timezone.now()  # Set the start time
+        test.save()
+
+        Notification.objects.create(
+            user=test.user,
+            test=test,
+            header="Test Started",
+            message=f"The patient has officially started the test for link: {test.link}."
+        )
+        return JsonResponse({'status': 'success', 'message': 'Test start time recorded.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
+
 
 @login_required
 def get_test_results(request):
@@ -247,16 +350,18 @@ def get_stimuli(request):
 
 @login_required
 def test_results(request, test_id):
+    # Retrieve test and result data
     test = get_object_or_404(Test, id=test_id)
-    result = Result.objects.filter(test=test).first()  # Assuming a single Result per test
-
-    # Fetch the aggregate data for the relevant age group
-    age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
-
-    # Prepare test results with comparison to aggregate data
-    test_results = []
+    result = Result.objects.filter(test=test).first()
     
-    # Full list of relevant fields for comparisons
+    if not result:
+        return JsonResponse({"error": "No test results available for this test."}, status=404)
+
+    # Retrieve age group aggregate data
+    age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
+    if not age_group:
+        return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
+
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -264,51 +369,76 @@ def test_results(request, test_id):
         'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
     ]
 
+    excluded_positions = {"1", "2", "9", "10"}
+    test_results = []
+    aggregate_results = []
+    metric_position = 3
+
+    # Loop through each metric and calculate averages, excluding practice positions
     for metric in metrics:
-        # Retrieve the patient's accuracy and latency for each metric
-        user_accuracy = result.character_accuracies.get(metric)
-        user_latency = result.character_latencies.get(metric)
-        
-        # Retrieve the average values from the Aggregate model JSON fields
-        avg_accuracy = age_group.average_accuracies.get(metric) if age_group else None
-        avg_latency = age_group.average_latencies.get(metric) if age_group else None
+        while str(metric_position) in excluded_positions:
+            metric_position += 1
 
-        # Only add if both values are available for accuracy and latency
-        if user_accuracy is not None and avg_accuracy is not None:
-            comparison = "above average" if user_accuracy > avg_accuracy else "below average"
-            test_results.append({
-                "metric": f"{metric}_accuracy",
-                "value": user_accuracy,
-                "average": avg_accuracy,
-                "comparison": comparison
-            })
-        
-        if user_latency is not None and avg_latency is not None:
-            comparison = "above average" if user_latency > avg_latency else "below average"
-            test_results.append({
-                "metric": f"{metric}_latency",
-                "value": user_latency,
-                "average": avg_latency,
-                "comparison": comparison
-            })
+        # Retrieve user data for accuracies and latencies
+        user_accuracies = result.character_accuracies.get(str(metric_position), [])
+        user_latencies = result.character_latencies.get(str(metric_position), [])
 
-    # Prepare aggregate data for a separate table
-    aggregate_results = [
-        {
-            "metric": f"{metric}_accuracy",
-            "average": age_group.average_accuracies.get(metric) if age_group else None
-        }
-        for metric in metrics
-    ] + [
-        {
-            "metric": f"{metric}_latency",
-            "average": age_group.average_latencies.get(metric) if age_group else None
-        }
-        for metric in metrics
-    ]
+        # Calculate accuracy and latency averages, using mean with 0 as fallback for empty lists
+        user_accuracy_avg = mean(user_accuracies) if user_accuracies else 0
+        user_latency_avg = mean(user_latencies) if user_latencies else 0
 
-    # Use `amount_correct` directly for the correct answers count
-    amount_correct = result.amount_correct if result else 0
+        # Retrieve aggregate data for comparison
+        avg_accuracy = age_group.average_accuracies.get(metric, 0)
+        avg_latency = age_group.average_latencies.get(metric, 0)
+
+        # Comparison logic for accuracy
+        if user_accuracy_avg > avg_accuracy:
+            accuracy_comparison = "Above average"
+        elif user_accuracy_avg < avg_accuracy:
+            accuracy_comparison = "Below average"
+        else:
+            accuracy_comparison = "Average"
+
+        # Comparison logic for latency
+        if user_latency_avg < avg_latency:  # Lower latency is better
+            latency_comparison = "Below average"
+        elif user_latency_avg > avg_latency:
+            latency_comparison = "Above average"
+        else:
+            latency_comparison = "Average"
+
+        # Append accuracy and latency results
+        test_results.append({
+            "metric": f"{metric} Accuracy",
+            "values": user_accuracies,
+            "average": user_accuracy_avg,
+            "aggregate_average": avg_accuracy,
+            "comparison": accuracy_comparison
+        })
+        test_results.append({
+            "metric": f"{metric} Latency",
+            "values": user_latencies,
+            "average": user_latency_avg,
+            "aggregate_average": avg_latency,
+            "comparison": latency_comparison
+        })
+
+        aggregate_results.append({
+            "metric": f"{metric} Accuracy",
+            "average": avg_accuracy
+        })
+        aggregate_results.append({
+            "metric": f"{metric} Latency",
+            "average": avg_latency
+        })
+
+        metric_position += 1
+
+    # Calculate amount correct for non-practice questions
+    amount_correct = sum(
+        1 for pos, accuracy in result.character_accuracies.items()
+        if pos not in excluded_positions and all(a == 1 for a in accuracy)
+    )
 
     return JsonResponse({
         "test_id": test_id,
@@ -316,6 +446,138 @@ def test_results(request, test_id):
         "aggregate_results": aggregate_results,
         "amount_correct": amount_correct
     })
+
+def get_test_comparison_data(request, test_id):
+    test = Test.objects.get(id=test_id)
+    result = Result.objects.get(test=test)
+    age = test.age
+
+    # Find the matching aggregate based on age
+    aggregate = Aggregate.objects.filter(min_age__lte=age, max_age__gte=age).first()
+
+    if not aggregate:
+        return JsonResponse({'error': 'No matching aggregate data found'}, status=404)
+
+    # Define positions to exclude (practice questions)
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Calculate averages for patient data excluding practice questions
+    patient_latencies = {
+        pos: mean(values) for pos, values in result.character_latencies.items()
+        if pos not in excluded_positions and values
+    }
+    patient_accuracies = {
+        pos: mean(values) for pos, values in result.character_accuracies.items()
+        if pos not in excluded_positions and values
+    }
+    
+    # Calculate averages for aggregate data in the same way
+    aggregate_latencies = {
+        pos: avg for pos, avg in aggregate.average_latencies.items() if pos not in excluded_positions
+    }
+    aggregate_accuracies = {
+        pos: avg for pos, avg in aggregate.average_accuracies.items() if pos not in excluded_positions
+    }
+
+    # Prepare data for chart
+    data = {
+        "patient": {
+            "latencies": patient_latencies,
+            "accuracies": patient_accuracies,
+            "amount_correct": result.amount_correct,
+        },
+        "aggregate": {
+            "latencies": aggregate_latencies,
+            "accuracies": aggregate_accuracies,
+        },
+    }
+    return JsonResponse(data)
+
+def update_or_create_aggregate(test):
+    """
+    Updates or creates an aggregate entry for the age group associated with the completed test.
+    """
+    # Define the special age group for ages 18-29
+    age = test.age
+    if 18 <= age <= 29:
+        min_age, max_age = 18, 29
+    else:
+        min_age = (age // 10) * 10
+        max_age = min_age + 9
+
+    # Check if an aggregate for this age group already exists
+    age_group, created = Aggregate.objects.get_or_create(
+        min_age=min_age,
+        max_age=max_age,
+        defaults={"average_latencies": {}, "average_accuracies": {}}
+    )
+
+    # Retrieve all relevant results within this age group
+    results_in_age_group = Result.objects.filter(test__age__gte=min_age, test__age__lte=max_age)
+
+    # Initialize dictionaries to store sums and counts for averages
+    latencies_sums = {}
+    accuracies_sums = {}
+    counts = {}
+
+    # Define the metrics and excluded positions
+    metrics = [
+        'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+        'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+        'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+        'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
+    ]
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Start metric_position at 3 as specified
+    metric_position = 3
+
+    # Initialize sums and counts for each metric
+    for metric in metrics:
+        latencies_sums[metric] = 0
+        accuracies_sums[metric] = 0
+        counts[metric] = 0
+
+    # Aggregate data from each result in the age group
+    for result in results_in_age_group:
+        metric_position = 3  # Reset to 3 for each result
+        for metric in metrics:
+            # Skip excluded positions
+            while str(metric_position) in excluded_positions:
+                metric_position += 1
+
+            # Retrieve accuracy and latency lists for each metric by position
+            accuracy_values = result.character_accuracies.get(str(metric_position), [])
+            latency_values = result.character_latencies.get(str(metric_position), [])
+
+            # Sum values and count entries to calculate averages only if lists are not empty
+            if accuracy_values:
+                accuracies_sums[metric] += sum(accuracy_values)
+                counts[metric] += len(accuracy_values)
+            if latency_values:
+                latencies_sums[metric] += sum(latency_values)
+
+            # Move to the next metric position
+            metric_position += 1
+
+    # Calculate the average for each metric and update the age group data
+    average_accuracies = {}
+    average_latencies = {}
+
+    for metric in metrics:
+        if counts[metric] > 0:
+            average_accuracies[metric] = round(accuracies_sums[metric] / counts[metric], 2)
+            average_latencies[metric] = round(latencies_sums[metric] / counts[metric], 2)
+        else:
+            average_accuracies[metric] = "N/A"
+            average_latencies[metric] = "N/A"
+
+    # Update or create the aggregate entry
+    age_group.average_accuracies = average_accuracies
+    age_group.average_latencies = average_latencies
+    age_group.save()
+
+    return age_group
 
 
 # Handle ticket submission (for non-staff users)
@@ -428,3 +690,7 @@ def mark_as_read(request, id):
         except Notification.DoesNotExist:
             return JsonResponse({'status': 'not found'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def errorpage(request):
+    # Have testpage redirect to here if user exits out of browser during the test.
+    return render(request, 'errorpage.html')

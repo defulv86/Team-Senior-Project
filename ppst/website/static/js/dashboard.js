@@ -1,7 +1,7 @@
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
-    
+
     if (section === 'account') {
         dynamicContent.innerHTML = `
             <h2>My Account</h2>
@@ -51,6 +51,7 @@ function loadContent(section) {
             <div id="support-section">
                 <div id="create-ticket">
                     <h3>Create a Support Ticket</h3>
+                    <br>
                     <form id="ticketForm">
                         <label for="category">Category:</label>
                         <select id="category" required>
@@ -59,9 +60,12 @@ function loadContent(section) {
                             <option value="account">Account Management</option>
                             <option value="bug/error">Bug/Error Report</option>
                         </select>
+                        <br><br>
                         <label for="description">Issue Description:</label>
+                        <br>
                         <textarea id="description" rows="4" required></textarea>
-                        <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                        <br><br>
+                        <button style="background-color: #0099ff; color: white;" type="button" onclick="submitTicket()">Submit Ticket</button>
                     </form>
                     <div id="error-message" style="color: red; display: none;"></div>
                 </div>
@@ -81,8 +85,8 @@ function submitTicket() {
     const description = document.getElementById('description').value;
     const errorMessage = document.getElementById('error-message');
 
-    // Ensure the form is not empty
-    if (!category || !description) {
+    // Ensure the form is not empty or the description doesn't contain only spaces.
+    if (!category || !description || description.trim() === "") {
         errorMessage.textContent = 'Please fill in all required fields.';
         errorMessage.style.display = 'block';
         return;
@@ -101,18 +105,18 @@ function submitTicket() {
         },
         body: formData // Send form data
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            errorMessage.textContent = data.error;
-            errorMessage.style.display = 'block';
-        } else {
-            errorMessage.style.display = 'none';
-            loadUserTickets(); // Reload tickets
-            document.getElementById('ticketForm').reset(); // Clear the form
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                errorMessage.textContent = data.error;
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+                loadUserTickets(); // Reload tickets
+                document.getElementById('ticketForm').reset(); // Clear the form
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Function to load the user's tickets
@@ -122,19 +126,19 @@ function loadUserTickets() {
 
     // Fetch the user's tickets
     fetch('/get_user_tickets/')
-    .then(response => response.json())
-    .then(data => {
-        if (data.length === 0) {
-            ticketList.innerHTML = '<li>No tickets found.</li>';
-        } else {
-            data.forEach(ticket => {
-                const ticketItem = document.createElement('li');
-                ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
-                ticketList.appendChild(ticketItem);
-            });
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                ticketList.innerHTML = '<li>No tickets found.</li>';
+            } else {
+                data.forEach(ticket => {
+                    const ticketItem = document.createElement('li');
+                    ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                    ticketList.appendChild(ticketItem);
+                });
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // CSRF token helper function
@@ -178,49 +182,49 @@ function generateTestLink() {
             },
             body: JSON.stringify({ age: age })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
-            } else {
-                const testLink = data.test_link;
-                linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    const testLink = data.test_link;
+                    linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
                                            <a href="${testLink}" target="_blank">${testLink}</a>`;
-            }
-        })
-        .catch(error => console.error('Error:', error));
+                }
+            })
+            .catch(error => console.error('Error:', error));
     } else {
         linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
     }
 }
+
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `
-        <h2>Retrieve Patient Test Results</h2>
-    `;
+    testContent.innerHTML = `<h2>Retrieve Patient Test Results</h2>`;
 
-    // Load test results
+    // Fetch the test results
     fetch('/get_test_results/')
-    .then(response => response.json())
-    .then(data => {
-        data.tests.forEach(test => {
-            let colorClass = 'incomplete';  // Default to in-progress (gray)
-            let onclickAttr = '';  // Default to no click event
+        .then(response => response.json())
+        .then(data => {
+            data.tests.forEach(test => {
+                let colorClass = 'incomplete';
+                let onclickAttr = '';
 
-            if (test.status === 'completed') {
-                colorClass = 'completed';  // Blue button for completed
-                onclickAttr = `onclick="viewTestResults(${test.id})"`;  // Make clickable
-            } else if (test.status === 'invalid') {
-                colorClass = 'invalid';  // Red button for invalid
-            }
+                if (test.status === 'completed') {
+                    colorClass = 'completed';
+                    onclickAttr = `onclick="viewTestResults(${test.id})"`;
+                } else if (test.status === 'invalid') {
+                    colorClass = 'invalid';
+                }
 
-            testContent.innerHTML += `
-                <button class="${colorClass}" ${onclickAttr}>
-                    Test ID ${test.id} Results
-                </button><br>`;
-        });
-    })
-    .catch(error => console.error('Error:', error));
+                testContent.innerHTML += `
+                    <button class="${colorClass}" ${onclickAttr}>
+                        Test ID ${test.id} | Link: ${test.link}
+                    </button><br>
+                `;
+            });
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Track if we're in test viewing mode
@@ -231,69 +235,291 @@ function viewTestResults(testId) {
     isViewingTest = true;
     toggleTestButtons();
 
-    // Fetch the test results for the selected test ID
     fetch(`/test_results/${testId}/`)
-    .then(response => response.json())
-    .then(data => {
-        const testResultsTable = `
-            <div class="table-container">
-                <h2>Test Results for ID ${testId}</h2>
-                <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th>Value</th>
-                            <th>Average</th>
-                            <th>Comparison</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.test_results.map(result => `
-                            <tr>
-                                <td>${result.metric.replace(/_/g, ' ')}</td>
-                                <td>${result.value}</td>
-                                <td>${result.average || "N/A"}</td>
-                                <td class="${result.comparison === 'above average' ? 'above-average' : 'below-average'}">
-                                    ${result.comparison}
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
+        .then(response => response.json())
+        .then(data => {
+            if (!data.test_results || data.test_results.length === 0) {
+                testContent.innerHTML = `<p style="color:red;">No test results available for this test.</p>`;
+                return;
+            }
 
-        const aggregateTable = `
-            <div class="table-container">
-                <h3>Aggregate Results for Age Group</h3>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th>Average</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.aggregate_results.map(result => `
-                            <tr>
-                                <td>${result.metric.replace("avg_", "").replace(/_/g, ' ')}</td>
-                                <td>${result.average}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
+            // Render the table view by default
+            renderTestResultsTable(data, testId);
 
-        // Render results and provide navigation buttons
-        testContent.innerHTML = testResultsTable + aggregateTable + `
-            <button onclick="retrieveTestResults()">Back to Test Results</button>
-            <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
-        `;
-    })
-    .catch(error => console.error('Error:', error));
+            // Ensure only one "View as Graph" button is added
+            if (!document.getElementById('viewGraphButton')) {
+                const toggleButton = document.createElement("button");
+                toggleButton.id = 'viewGraphButton'; // Add an ID to the button
+                toggleButton.textContent = "View as Graph";
+                toggleButton.onclick = () => toggleResultsView(testId, data);
+                testContent.appendChild(toggleButton);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            testContent.innerHTML = `<p style="color:red;">Failed to load test results.</p>`;
+        });
 }
+
+function renderTestResultsTable(data, testId) {
+    const testContent = document.getElementById('test-content');
+    testContent.innerHTML = `
+    <div class="table-container">
+        <h2>Test Results for ID ${testId}</h2>
+        <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Result Values</th>
+                    <th>Result Value Avg</th>
+                    <th>Aggregate Avg</th>
+                    <th>Comparison</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.test_results.map(result => {
+                    let comparisonText = result.comparison || "N/A";
+                    let colorStyle = '';  // Inline styles for color coding
+
+                    // Determine if the metric is for latency or accuracy
+                    const isLatency = result.metric.toLowerCase().includes("latency");
+                    const isAccuracy = result.metric.toLowerCase().includes("accuracy");
+
+                    // Apply color rules based on metric type and comparison value
+                    if (isLatency) {
+                        // Latency: Above average = red, Below average = green
+                        if (comparisonText === 'Above average') {
+                            colorStyle = 'color: red; font-weight: bold;';
+                        } else if (comparisonText === 'Below average') {
+                            colorStyle = 'color: green; font-weight: bold;';
+                        } else if (comparisonText === 'Average') {
+                            colorStyle = 'color: black; font-weight: bold;';
+                        }
+                    } else if (isAccuracy) {
+                        // Accuracy: Above average = green, Below average = red
+                        if (comparisonText === 'Above average') {
+                            colorStyle = 'color: green; font-weight: bold;';
+                        } else if (comparisonText === 'Below average') {
+                            colorStyle = 'color: red; font-weight: bold;';
+                        } else if (comparisonText === 'Average') {
+                            colorStyle = 'color: black; font-weight: bold;';
+                        }
+                    }
+
+                    return `
+                    <tr>
+                        <td>${result.metric.replace(/_/g, ' ')}</td>
+                        <td>${result.values.join(", ")}</td>  <!-- Display all values -->
+                        <td>${result.average}</td>   <!-- Display user average -->
+                        <td>${result.aggregate_average}</td>   <!-- Display aggregate average -->
+                        <td style="${colorStyle}">  <!-- Apply inline color style here -->
+                            ${comparisonText}
+                        </td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+    </div>
+    <div class="table-container">
+        <h3>Aggregate Results for Age Group</h3>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.aggregate_results.map(result => `
+                    <tr>
+                        <td>${result.metric.replace(/_/g, ' ')}</td>
+                        <td>${result.average}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+    <button onclick="retrieveTestResults()">Back to Test Results</button>
+    <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+    `;
+    // Check if the View as Graph button is already present
+    if (!document.getElementById('viewGraphButton')) {
+        const toggleButton = document.createElement("button");
+        toggleButton.id = 'viewGraphButton'; // Add an ID to the button
+        toggleButton.textContent = "View as Graph";
+        toggleButton.onclick = () => toggleResultsView(testId, data);
+        testContent.appendChild(toggleButton);
+    }
+}
+
+function toggleResultsView(testId, data) {
+    const testContent = document.getElementById('test-content');
+
+    if (data) {
+        currentTestData = data;
+    }
+    // If currently in the table view, switch to the graph view with latency chart as default
+    if (testContent.querySelector('.results-table')) {
+        testContent.innerHTML = `
+            <h2>Patient vs Aggregate Comparison</h2>
+            <div class="chart-toggle-buttons">
+                <button onclick="loadLatencyChart(${testId})">Latency Comparison</button>
+                <button onclick="loadAccuracyChart(${testId})">Accuracy Comparison</button>
+            </div>
+            <canvas id="comparisonChart"></canvas>
+            <div class="view-toggle-buttons">
+                <button onclick="retrieveTestResults()">Back to Patient's Results Tab</button>
+                <button onclick="toggleResultsView(${testId})">Back to Table View</button>
+            </div>
+        `;
+        loadLatencyChart(testId);  // Load latency chart by default
+    } else {
+        // Switch back to table view
+        if (currentTestData) {
+            renderTestResultsTable(currentTestData, testId);
+        } else {
+            console.error("No test data found to render table view.");
+        }
+    }
+}
+
+
+// Function to load latency comparison chart
+function loadLatencyChart(testId) {
+    fetch(`/get_test_comparison_data/${testId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('test-content').innerHTML = `<p style="color:red;">${data.error}</p>`;
+                return;
+            }
+
+            const labels = Object.keys(data.patient.latencies).map(pos => `Position ${pos}`);
+            const patientLatencies = Object.values(data.patient.latencies);
+            const aggregateLatencies = Object.values(data.aggregate.latencies);
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+
+            // Check if comparisonChart exists and has a destroy method
+            if (window.comparisonChart && typeof window.comparisonChart.destroy === 'function') {
+                window.comparisonChart.destroy();  // Destroy any existing chart instance
+            }
+
+            window.comparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Patient Latencies',
+                            data: patientLatencies,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Aggregate Latencies',
+                            data: aggregateLatencies,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Metrics'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Latency (ms)'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Function to load accuracy comparison chart
+function loadAccuracyChart(testId) {
+    fetch(`/get_test_comparison_data/${testId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('test-content').innerHTML = `<p style="color:red;">${data.error}</p>`;
+                return;
+            }
+
+            const labels = Object.keys(data.patient.accuracies).map(pos => `Position ${pos}`);
+            const patientAccuracies = Object.values(data.patient.accuracies);
+            const aggregateAccuracies = Object.values(data.aggregate.accuracies);
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            if (window.comparisonChart) {
+                window.comparisonChart.destroy();  // Destroy any existing chart instance
+            }
+            window.comparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Patient Accuracies',
+                            data: patientAccuracies,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Aggregate Accuracies',
+                            data: aggregateAccuracies,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Metrics'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Accuracy (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
 
 function backToTestResults() {
     isViewingTest = false; // Reset when going back
@@ -311,47 +537,47 @@ function toggleTestButtons() {
 
 function exportToSpreadsheet(testId) {
     fetch(`/test_results/${testId}/`)
-    .then(response => response.json())
-    .then(data => {
-        // Initialize workbook and worksheet
-        const workbook = XLSX.utils.book_new();
+        .then(response => response.json())
+        .then(data => {
+            // Initialize workbook and worksheet
+            const workbook = XLSX.utils.book_new();
 
-        // Prepare Patient Test Results Sheet
-        const patientResults = [
-            ['Metric', 'Value', 'Average', 'Comparison']
-        ];
-        data.test_results.forEach(result => {
-            patientResults.push([
-                result.metric.replace(/_/g, ' '),
-                result.value,
-                result.average || "N/A",
-                result.comparison
-            ]);
-        });
+            // Prepare Patient Test Results Sheet
+            const patientResults = [
+                ['Metric', 'Value', 'Average', 'Comparison']
+            ];
+            data.test_results.forEach(result => {
+                patientResults.push([
+                    result.metric.replace(/_/g, ' '),
+                    result.value,
+                    result.average || "N/A",
+                    result.comparison
+                ]);
+            });
 
-        // Add patient results to the workbook
-        const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
-        XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
+            // Add patient results to the workbook
+            const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
+            XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
 
-        // Prepare Aggregate Results Sheet
-        const aggregateResults = [
-            ['Metric', 'Average']
-        ];
-        data.aggregate_results.forEach(result => {
-            aggregateResults.push([
-                result.metric.replace("avg_", "").replace(/_/g, ' '),
-                result.average
-            ]);
-        });
+            // Prepare Aggregate Results Sheet
+            const aggregateResults = [
+                ['Metric', 'Average']
+            ];
+            data.aggregate_results.forEach(result => {
+                aggregateResults.push([
+                    result.metric.replace("avg_", "").replace(/_/g, ' '),
+                    result.average
+                ]);
+            });
 
-        // Add aggregate results to the workbook
-        const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
-        XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+            // Add aggregate results to the workbook
+            const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
+            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
 
-        // Export the workbook to a file
-        XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
-    })
-    .catch(error => console.error('Error:', error));
+            // Export the workbook to a file
+            XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Function to save account changes for the user.
@@ -379,19 +605,19 @@ function saveAccountChanges() {
         },
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            accountErrorMessage.textContent = data.error;
-            accountErrorMessage.style.display = 'block';
-            accountMessage.style.display = 'none';
-        } else {
-            accountMessage.textContent = 'Account updated successfully!';
-            accountMessage.style.display = 'block';
-            accountErrorMessage.style.display = 'none';
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                accountErrorMessage.textContent = data.error;
+                accountErrorMessage.style.display = 'block';
+                accountMessage.style.display = 'none';
+            } else {
+                accountMessage.textContent = 'Account updated successfully!';
+                accountMessage.style.display = 'block';
+                accountErrorMessage.style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Function to get user information
@@ -402,20 +628,20 @@ function getUserInfo() {
             'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF protection, if needed
         },
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            console.error(data.error);
-        } else {
-            // Populate the fields with user info
-            document.getElementById('first-name').value = data.first_name || '';
-            document.getElementById('last-name').value = data.last_name || '';
-            document.getElementById('email').value = data.email || '';
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching user info:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                // Populate the fields with user info
+                document.getElementById('first-name').value = data.first_name || '';
+                document.getElementById('last-name').value = data.last_name || '';
+                document.getElementById('email').value = data.email || '';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching user info:', error);
+        });
 }
 
 
@@ -582,11 +808,11 @@ function loadNotifications(loadType){
 }
 
 // removes the notification based on the notifItem corrisponding to the button that was pressed
-function dismissNotification(id ,notifItem){
+function dismissNotification(id, notifItem) {
     const notificationList = document.getElementById('notification-list');
     notificationList.removeChild(notifItem);
 
-    fetch(`/dismiss_notification/${id}/`,{
+    fetch(`/dismiss_notification/${id}/`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -594,12 +820,12 @@ function dismissNotification(id ,notifItem){
         },
         body: JSON.stringify({ is_archived: true })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('failed to dismiss notification')
-        }
-    })
-    .catch(error => console.error('Error updating notification', error))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('failed to dismiss notification')
+            }
+        })
+        .catch(error => console.error('Error updating notification', error))
 }
 // marks the notification as read based on the notifItem corrisponding to the button that was pressed
 function markAsRead(id ,notifItem){

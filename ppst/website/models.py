@@ -19,11 +19,12 @@ class Test(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     link = models.CharField(default=generate_link, max_length=100, null=True)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(null=True)
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
     age = models.IntegerField(default=0)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    premature_exit = models.BooleanField(default=False)  # New field to mark premature exit
 
     def check_status(self):
         """Update the status based on test conditions."""
@@ -38,24 +39,12 @@ class Test(models.Model):
     @property
     def is_invalid(self):
         """Determine if a test should be invalid based on conditions."""
-        one_week_later = self.created_at + timedelta(weeks=1)
-        has_expired = timezone.now() > one_week_later
-        was_exited = self.started_at is not None and self.finished_at is None
-        return has_expired or was_exited
-
-    def __str__(self):
+        expiration_date = self.created_at + timedelta(weeks=1)
+        return timezone.now() >= expiration_date or self.premature_exit
+    
+    def  __str__(self):
         return f"Test Link: {self.link}, Administerd By: {self.user}, Status: {self.status}"
 
-    def get_test_details(self):
-        """Returns test details as a dictionary."""
-        return {
-            "link": self.link,
-            "age": self.age,
-            "created_at": self.created_at,
-            "started_at": self.started_at,
-            "finished_at": self.finished_at,
-            "status": self.status
-        }
 
 class Result(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -69,8 +58,6 @@ class Result(models.Model):
     def __str__(self):
         return self.test.link
 
-from django.db import models
-
 class Stimulus_Type(models.Model):
     stimulus_type = models.CharField(max_length=15, default='')
 
@@ -83,8 +70,6 @@ class Stimulus(models.Model):
 
     def __str__(self):
         return f"{self.stimulus_content} ({self.stimulus_type})"
-
-from django.utils import timezone
 
 class Response(models.Model):
     response = models.CharField(max_length=5, default='')
@@ -134,7 +119,7 @@ class Ticket(models.Model):
         return f"Ticket {self.id} - {self.category} by {self.user.username}"
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     test = models.ForeignKey(Test, on_delete=models.CASCADE, default=1)
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
