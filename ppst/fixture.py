@@ -3,6 +3,7 @@ from website.models import Ticket, Test, Notification, Aggregate, Response, Resu
 from django.utils import timezone
 from datetime import timedelta, datetime
 
+
 # Delete existing records
 User.objects.all().delete()
 Test.objects.all().delete()
@@ -27,6 +28,15 @@ completed_test = Test.objects.create(
     created_at=timezone.now() - timedelta(days=5),
     started_at=timezone.now() - timedelta(days=4),
     finished_at=timezone.now() - timedelta(days=4) + timedelta(minutes=4),
+    status='completed'
+)
+
+completed_test_2 = Test.objects.create(
+    user=doctor_who,
+    age=48,
+    created_at=timezone.now() - timedelta(minutes=30),
+    started_at=timezone.now() - timedelta(minutes=24),
+    finished_at=timezone.now() - timedelta(minutes=15),
     status='completed'
 )
 
@@ -75,6 +85,7 @@ Notification.objects.create(
 
 
 aggregates_data = [
+    # Existing entry for age group 50-59
     {
         "min_age": 50,
         "max_age": 59,
@@ -107,14 +118,44 @@ aggregates_data = [
             "fivemixed_3": 1.0
         }
     },
+    # New entry for age group 40-49
+    {
+        "min_age": 40,
+        "max_age": 49,
+        "average_latencies": {
+            "fourdigit_1": 1786.55,
+            "fourdigit_2": 1464.22,
+            "fourdigit_3": 1057.03,
+            "fivedigit_1": 1280.04,
+            "fivedigit_2": 1060.78,
+            "fivedigit_3": 1133.62,
+            "fourmixed_1": 1417.53,
+            "fourmixed_2": 1552.5,
+            "fourmixed_3": 1487.47,
+            "fivemixed_1": 2298.44,
+            "fivemixed_2": 2232.94,
+            "fivemixed_3": 2129.44
+        },
+        "average_accuracies": {
+            "fourdigit_1": 1.0,
+            "fourdigit_2": 1.0,
+            "fourdigit_3": 1.0,
+            "fivedigit_1": 1.0,
+            "fivedigit_2": 1.0,
+            "fivedigit_3": 1.0,
+            "fourmixed_1": 1.0,
+            "fourmixed_2": 1.0,
+            "fourmixed_3": 1.0,
+            "fivemixed_1": 0.6,
+            "fivemixed_2": 0.8,
+            "fivemixed_3": 0.4
+        }
+    }
     # Add more dictionaries for other age groups as needed
 ]
 
 for aggregate_data in aggregates_data:
     Aggregate.objects.create(**aggregate_data)
-
-
-
 
 # Results data
 results_data = [
@@ -157,11 +198,52 @@ results_data = [
             "16": [1.0, 1.0, 1.0, 1.0, 1.0]
         },
         "amount_correct": 15  # Adjust this based on the correct responses as needed
+    },
+    # New entry for completed_test_2
+    {
+        "test": completed_test_2,
+        "character_latencies": {
+            "1": [3213.5, 1334.5, 1140.1],
+            "2": [2149.6, 1204.9, 1376.3, 1251.8, 965.4],
+            "3": [3257.0, 1182.6, 1582.7, 1123.9],
+            "4": [2363.6, 1142.3, 1188.9, 1162.1],
+            "5": [1397.5, 826.0, 815.7, 1188.9],
+            "6": [2164.4, 934.2, 1098.9, 1110.9, 1091.8],
+            "7": [1252.0, 1035.7, 1094.8, 910.5, 1010.9],
+            "8": [1439.7, 924.9, 1167.6, 1158.1, 977.8],
+            "9": [3659.8, 2147.4, 878.3, 1420.7],
+            "10": [6415.1, 999.6, 965.2, 1800.1, 1014.3],
+            "11": [2425.6, 1282.7, 1109.9, 851.9],
+            "12": [2069.0, 1006.9, 2032.9, 1101.2],
+            "13": [2861.6, 1111.6, 1001.0, 975.7],
+            "14": [1851.0, 955.4, 1189.7, 6336.7, 1159.4],
+            "15": [2418.5, 962.3, 1162.3, 5496.0, 1125.6],
+            "16": [3621.9, 1218.5, 1185.4, 3793.4, 828.0]
+        },
+        "character_accuracies": {
+            "1": [0.0, 0.0, 0.0, 0.0],
+            "2": [0.0, 0.0, 0.0, 0.0, 0.0],
+            "3": [1.0, 1.0, 1.0, 1.0],
+            "4": [1.0, 1.0, 1.0, 1.0],
+            "5": [1.0, 1.0, 1.0, 1.0],
+            "6": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "7": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "8": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "9": [1.0, 0.0, 0.0, 0.0],
+            "10": [1.0, 1.0, 1.0, 0.0, 1.0],
+            "11": [1.0, 1.0, 1.0, 1.0],
+            "12": [1.0, 1.0, 1.0, 1.0],
+            "13": [1.0, 1.0, 1.0, 1.0],
+            "14": [1.0, 1.0, 1.0, 0.0, 0.0],
+            "15": [1.0, 1.0, 1.0, 0.0, 1.0],
+            "16": [1.0, 0.0, 1.0, 0.0, 0.0]
+        },
+        "amount_correct": 9
     }
 ]
 
-for result_data in results_data:
-    Result.objects.create(**result_data)
+for results_data in results_data:
+    Result.objects.create(**results_data)
 
 # Create Stimulus_Type instances
 four_span_digit_type = Stimulus_Type.objects.create(stimulus_type='4_Span_Digit')
@@ -255,7 +337,7 @@ stimulus_instance_16 = Stimulus.objects.create(
 )
 
 
-test_response_1 = [
+test1_response_1 = [
     {
         "response": "2456",
         "test": completed_test,
@@ -264,10 +346,10 @@ test_response_1 = [
         "time_submitted": "2024-10-25T11:00:00.000Z"
     }
 ]
-for test_response_1 in test_response_1:
-    Response.objects.create(**test_response_1)
+for test1_response_1 in test1_response_1:
+    Response.objects.create(**test1_response_1)
 
-test_response_2 = [
+test1_response_2 = [
     {
         "response": "23456",
         "test": completed_test,
@@ -276,10 +358,10 @@ test_response_2 = [
         "time_submitted": "2024-10-25T11:05:00.000Z"
     }
 ]
-for test_response_2 in test_response_2:
-    Response.objects.create(**test_response_2)
+for test1_response_2 in test1_response_2:
+    Response.objects.create(**test1_response_2)
 
-test_response_3 = [
+test1_response_3 = [
     {
         "response": "2346",
         "test": completed_test,
@@ -288,10 +370,10 @@ test_response_3 = [
         "time_submitted": "2024-10-25T11:10:00.000Z"
     }
 ]
-for test_response_3 in test_response_3:
-    Response.objects.create(**test_response_3)
+for test1_response_3 in test1_response_3:
+    Response.objects.create(**test1_response_3)
 
-test_response_4 = [
+test1_response_4 = [
     {
         "response": "1356",
         "test": completed_test,
@@ -300,10 +382,10 @@ test_response_4 = [
         "time_submitted": "2024-10-25T11:15:00.000Z"
     }
 ]
-for test_response_4 in test_response_4:
-    Response.objects.create(**test_response_4)
+for test1_response_4 in test1_response_4:
+    Response.objects.create(**test1_response_4)
 
-test_response_5 = [
+test1_response_5 = [
     {
         "response": "1245",
         "test": completed_test,
@@ -312,10 +394,10 @@ test_response_5 = [
         "time_submitted": "2024-10-25T11:20:00.000Z"
     }
 ]
-for test_response_5 in test_response_5:
-    Response.objects.create(**test_response_5)
+for test1_response_5 in test1_response_5:
+    Response.objects.create(**test1_response_5)
 
-test_response_6 = [
+test1_response_6 = [
     {
         "response": "2456",
         "test": completed_test,
@@ -324,10 +406,10 @@ test_response_6 = [
         "time_submitted": "2024-10-25T11:25:00.000Z"
     }
 ]
-for test_response_6 in test_response_6:
-    Response.objects.create(**test_response_6)
+for test1_response_6 in test1_response_6:
+    Response.objects.create(**test1_response_6)
 
-test_response_7 = [
+test1_response_7 = [
     {
         "response": "13456",
         "test": completed_test,
@@ -336,10 +418,10 @@ test_response_7 = [
         "time_submitted": "2024-10-25T11:30:00.000Z"
     }
 ]
-for test_response_7 in test_response_7:
-    Response.objects.create(**test_response_7)
+for test1_response_7 in test1_response_7:
+    Response.objects.create(**test1_response_7)
 
-test_response_8 = [
+test1_response_8 = [
     {
         "response": "13456",
         "test": completed_test,
@@ -348,10 +430,10 @@ test_response_8 = [
         "time_submitted": "2024-10-25T11:35:00.000Z"
     }
 ]
-for test_response_8 in test_response_8:
-    Response.objects.create(**test_response_8)
+for test1_response_8 in test1_response_8:
+    Response.objects.create(**test1_response_8)
 
-test_response_9 = [
+test1_response_9 = [
     {
         "response": "56RK",
         "test": completed_test,
@@ -360,10 +442,10 @@ test_response_9 = [
         "time_submitted": "2024-10-25T11:40:00.000Z"
     }
 ]
-for test_response_9 in test_response_9:
-    Response.objects.create(**test_response_9)
+for test1_response_9 in test1_response_9:
+    Response.objects.create(**test1_response_9)
 
-test_response_10 = [
+test1_response_10 = [
     {
         "response": "346LY",
         "test": completed_test,
@@ -372,10 +454,10 @@ test_response_10 = [
         "time_submitted": "2024-10-25T11:45:00.000Z"
     }
 ]
-for test_response_10 in test_response_10:
-    Response.objects.create(**test_response_10)
+for test1_response_10 in test1_response_10:
+    Response.objects.create(**test1_response_10)
 
-test_response_11 = [
+test1_response_11 = [
     {
         "response": "56FP",
         "test": completed_test,
@@ -384,10 +466,10 @@ test_response_11 = [
         "time_submitted": "2024-10-25T11:50:00.000Z"
     }
 ]
-for test_response_11 in test_response_11:
-    Response.objects.create(**test_response_11)
+for test1_response_11 in test1_response_11:
+    Response.objects.create(**test1_response_11)
 
-test_response_12 = [
+test1_response_12 = [
     {
         "response": "25RY",
         "test": completed_test,
@@ -396,10 +478,10 @@ test_response_12 = [
         "time_submitted": "2024-10-25T11:55:00.000Z"
     }
 ]
-for test_response_12 in test_response_12:
-    Response.objects.create(**test_response_12)
+for test1_response_12 in test1_response_12:
+    Response.objects.create(**test1_response_12)
 
-test_response_13 = [
+test1_response_13 = [
     {
         "response": "56LP",
         "test": completed_test,
@@ -408,10 +490,10 @@ test_response_13 = [
         "time_submitted": "2024-10-25T12:00:00.000Z"
     }
 ]
-for test_response_13 in test_response_13:
-    Response.objects.create(**test_response_13) 
+for test1_response_13 in test1_response_13:
+    Response.objects.create(**test1_response_13) 
 
-test_response_14 = [
+test1_response_14 = [
     {
         "response": "134FR",
         "test": completed_test,
@@ -420,10 +502,10 @@ test_response_14 = [
         "time_submitted": "2024-10-25T12:05:00.000Z"
     }
 ]
-for test_response_14 in test_response_14:
-    Response.objects.create(**test_response_14)
+for test1_response_14 in test1_response_14:
+    Response.objects.create(**test1_response_14)
 
-test_response_15 = [
+test1_response_15 = [
     {
         "response": "136LP",
         "test": completed_test,
@@ -432,10 +514,10 @@ test_response_15 = [
         "time_submitted": "2024-10-25T12:10:00.000Z"
     }
 ]
-for test_response_15 in test_response_15:
-    Response.objects.create(**test_response_15)
+for test1_response_15 in test1_response_15:
+    Response.objects.create(**test1_response_15)
 
-test_response_16 = [
+test1_response_16 = [
     {
         "response": "246KP",
         "test": completed_test,
@@ -444,7 +526,197 @@ test_response_16 = [
         "time_submitted": "2024-10-25T12:15:00.000Z"
     }
 ]
-for test_response_16 in test_response_16:
-    Response.objects.create(**test_response_16)
+for test1_response_16 in test1_response_16:
+    Response.objects.create(**test1_response_16)
+
+test2_response_1 = [
+    {
+        "response": "654",
+        "test": completed_test_2,
+        "response_position": 1,
+        "stimulus": stimulus_instance_1,
+        "time_submitted": timezone.now() - timedelta(minutes=24)
+    }
+]
+for test2_response_1 in test2_response_1:
+    Response.objects.create(**test2_response_1)
+
+test2_response_2 = [
+    {
+        "response": "46523",
+        "test": completed_test_2,
+        "response_position": 2,
+        "stimulus": stimulus_instance_2,
+        "time_submitted": timezone.now() - timedelta(minutes=23)
+    }
+]
+for test2_response_2 in test2_response_2:
+    Response.objects.create(**test2_response_2)
+
+test2_response_3 = [
+    {
+        "response": "2346",
+        "test": completed_test_2,
+        "response_position": 3,
+        "stimulus": stimulus_instance_3,
+        "time_submitted": timezone.now() - timedelta(minutes=22)
+    }
+]
+for test2_response_3 in test2_response_3:
+    Response.objects.create(**test2_response_3)
+
+test2_response_4 = [
+    {
+        "response": "1356",
+        "test": completed_test_2,
+        "response_position": 4,
+        "stimulus": stimulus_instance_4,
+        "time_submitted": timezone.now() - timedelta(minutes=21)
+    }
+]
+
+test2_response_5 = [
+    {
+        "response": "1245",
+        "test": completed_test_2,
+        "response_position": 5,
+        "stimulus": stimulus_instance_5,
+        "time_submitted": timezone.now() - timedelta(minutes=21)
+    }
+]
+for test2_response_5 in test2_response_5:    
+    Response.objects.create(**test2_response_5)
+
+test2_response_6 = [
+    {
+        "response": "12345",
+        "test": completed_test_2,
+        "response_position": 6,
+        "stimulus": stimulus_instance_6,
+        "time_submitted": timezone.now() - timedelta(minutes=21)
+    }
+]
+for test2_response_6 in test2_response_6:
+    Response.objects.create(**test2_response_6)
+
+test2_response_7 = [
+    {
+        "response": "13456",
+        "test": completed_test_2,
+        "response_position": 7,
+        "stimulus": stimulus_instance_7,
+        "time_submitted": timezone.now() - timedelta(minutes=21)
+    }
+]
+for test2_response_7 in test2_response_7:
+    Response.objects.create(**test2_response_7)
+
+test2_response_8 = [
+    {
+        "response": "12345",
+        "test": completed_test_2,
+        "response_position": 8,
+        "stimulus": stimulus_instance_8,
+        "time_submitted": timezone.now() - timedelta(minutes=20)
+    }
+]
+for test2_response_8 in test2_response_8:
+    Response.objects.create(**test2_response_8)
+
+test2_response_9 = [
+    {
+        "response": "5KR6",
+        "test": completed_test_2,
+        "response_position": 9,
+        "stimulus": stimulus_instance_9,
+        "time_submitted": timezone.now() - timedelta(minutes=16)
+    }
+]
+for test2_response_9 in test2_response_9:
+    Response.objects.create(**test2_response_9)
+
+test2_response_10 = [
+    {
+        "response": "346KY",
+        "test": completed_test_2,
+        "response_position": 10,
+        "stimulus": stimulus_instance_10,
+        "time_submitted": timezone.now() - timedelta(minutes=16)
+    }
+]
+for test2_response_10 in test2_response_10:
+    Response.objects.create(**test2_response_10)
+
+test2_response_11 = [
+    {
+        "response": "56FP",
+        "test": completed_test_2,
+        "response_position": 11,
+        "stimulus": stimulus_instance_11,
+        "time_submitted": timezone.now() - timedelta(minutes=16)
+    }
+]
+for test2_response_11 in test2_response_11:
+    Response.objects.create(**test2_response_11)
+
+test2_response_12 = [
+    {
+        "response": "25RY",
+        "test": completed_test_2,
+        "response_position": 12,
+        "stimulus": stimulus_instance_12,
+        "time_submitted": timezone.now() - timedelta(minutes=16)
+    }
+]
+for test2_response_12 in test2_response_12:
+    Response.objects.create(**test2_response_12)
+
+test2_response_13 = [
+    {
+        "response": "56LP",
+        "test": completed_test_2,
+        "response_position": 13,
+        "stimulus": stimulus_instance_13,
+        "time_submitted": timezone.now() - timedelta(minutes=14)
+    }
+]
+for test2_response_13 in test2_response_13:
+    Response.objects.create(**test2_response_13)
+
+test2_response_14 = [
+    {
+        "response": "134RY",
+        "test": completed_test_2,
+        "response_position": 14,
+        "stimulus": stimulus_instance_14,
+        "time_submitted": timezone.now() - timedelta(minutes=14)
+    }
+]
+for test2_response_14 in test2_response_14:
+    Response.objects.create(**test2_response_14)
+
+test2_response_15 = [
+    {
+        "response": "136RY",
+        "test": completed_test_2,
+        "response_position": 15,
+        "stimulus": stimulus_instance_15,
+        "time_submitted": timezone.now() - timedelta(minutes=13)
+    }
+]
+for test2_response_15 in test2_response_15:
+    Response.objects.create(**test2_response_15)
+
+test2_response_16 = [
+    {
+        "response": "246PR",
+        "test": completed_test_2,
+        "response_position": 16,
+        "stimulus": stimulus_instance_16,
+        "time_submitted": timezone.now() - timedelta(minutes=13)
+    }
+]
+for test2_response_16 in test2_response_16:
+    Response.objects.create(**test2_response_16)
 
 

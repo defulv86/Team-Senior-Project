@@ -266,6 +266,7 @@ function renderTestResultsTable(data, testId) {
     testContent.innerHTML = `
     <div class="table-container">
         <h2>Test Results for ID ${testId}</h2>
+        <p><strong>Patient's Age:</strong> ${data.patient_age}</p>
         <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
         <table class="results-table">
             <thead>

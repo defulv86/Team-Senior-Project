@@ -78,8 +78,16 @@ def create_test(request):
 def test_page_view(request, link):
     try:
         test = Test.objects.get(link=link)
-        stimuli = Stimulus.objects.all()
-        return render(request, 'testpage.html', {'test': test, 'stimuli': stimuli})
+        # Call different view functions based on test status
+        if test.status == 'completed':
+            return completionpage(request)
+        elif test.status == 'invalid':
+            return errorpage(request)
+        elif test.status == 'pending':
+            stimuli = Stimulus.objects.all()
+            return render(request, 'testpage.html', {'test': test, 'stimuli': stimuli})
+        else:
+            return errorpage(request)  # For any other undefined statuses
     except Test.DoesNotExist:
         return render(request, '404.html')
 
@@ -364,6 +372,10 @@ def test_results(request, test_id):
     if not age_group:
         return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
 
+    min_age = age_group.min_age
+    max_age = age_group.max_age
+    patient_age = test.age
+
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
         'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
@@ -446,7 +458,10 @@ def test_results(request, test_id):
         "test_id": test_id,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
-        "amount_correct": amount_correct
+        "amount_correct": amount_correct,
+        "min_age": min_age,
+        "max_age": max_age,
+        "patient_age": patient_age
     })
 
 def get_test_comparison_data(request, test_id):
