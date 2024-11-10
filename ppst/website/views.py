@@ -454,6 +454,21 @@ def test_results(request, test_id):
         if pos not in excluded_positions and all(a == 1 for a in accuracy)
     )
 
+
+    # Retrieve stimuli and associated responses for the export
+    stimuli_responses = []
+    responses = Response.objects.filter(test=test).select_related('stimulus')
+    for response in responses:
+        stimulus = response.stimulus
+        stimuli_responses.append({
+            "stimulus_id": stimulus.id,
+            "stimulus_content": stimulus.stimulus_content,
+            "stimulus_type": stimulus.stimulus_type.stimulus_type,
+            "response": response.response,
+            "response_position": response.response_position,
+            "time_submitted": response.time_submitted
+        })
+
     return JsonResponse({
         "test_id": test_id,
         "test_results": test_results,
@@ -461,7 +476,9 @@ def test_results(request, test_id):
         "amount_correct": amount_correct,
         "min_age": min_age,
         "max_age": max_age,
-        "patient_age": patient_age
+        "patient_age": patient_age,
+        # Include the stimuli_responses only for export purposes
+        "stimuli_responses": stimuli_responses
     })
 
 def get_test_comparison_data(request, test_id):

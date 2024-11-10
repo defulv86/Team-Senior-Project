@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from website.models import Ticket, Test, Notification, Aggregate, Response, Result, Stimulus, Stimulus_Type
+from website.views import update_or_create_aggregate
 from django.utils import timezone
 from datetime import timedelta, datetime
 
@@ -37,6 +38,25 @@ completed_test_2 = Test.objects.create(
     created_at=timezone.now() - timedelta(minutes=30),
     started_at=timezone.now() - timedelta(minutes=24),
     finished_at=timezone.now() - timedelta(minutes=15),
+    status='completed'
+)
+
+
+completed_test_3 = Test.objects.create(
+    user=doctor_who,
+    age=45,
+    created_at=timezone.now() - timedelta(minutes=50),
+    started_at=timezone.now() - timedelta(minutes=45),
+    finished_at=timezone.now() - timedelta(minutes=37 ),
+    status='completed'
+)
+
+completed_test_4 = Test.objects.create(
+    user=doctor_who,
+    age=47,
+    created_at=timezone.now() - timedelta(minutes=45),
+    started_at=timezone.now() - timedelta(minutes=40),
+    finished_at=timezone.now() - timedelta(minutes=30),
     status='completed'
 )
 
@@ -239,12 +259,93 @@ results_data = [
             "16": [1.0, 0.0, 1.0, 0.0, 0.0]
         },
         "amount_correct": 9
+    },
+    {
+        "test": completed_test_3,
+        "character_latencies": {
+            "1": [1050.2, 700.1, 920.5, 680.2],
+            "2": [1280.1, 1200.9, 850.7, 780.2, 670.6],
+            "3": [990.3, 770.4, 600.6, 1120.9],
+            "4": [1450.1, 810.3, 790.2, 660.1],
+            "5": [1100.2, 640.3, 720.3, 980.1],
+            "6": [980.5, 1020.1, 880.2, 750.2, 720.7],
+            "7": [1230.0, 1035.0, 880.4, 990.9, 940.5],
+            "8": [1050.2, 890.0, 1065.3, 920.2, 1031.4],
+            "9": [760.0, 820.0, 950.5, 1020.4],
+            "10": [1500.0, 990.0, 1010.3, 1045.7, 968.3],
+            "11": [920.0, 850.0, 790.2, 1015.9],
+            "12": [1170.0, 1005.1, 980.8, 910.2],
+            "13": [1055.3, 970.4, 940.9, 890.3],
+            "14": [1330.5, 1110.0, 1060.0, 980.4, 984.2],
+            "15": [1140.7, 1095.4, 1180.6, 1040.4, 923.1],
+            "16": [920.1, 1030.6, 1150.9, 1175.5, 1079.2]
+        },
+        "character_accuracies": {
+            "1": [1.0, 1.0, 1.0, 1.0],
+            "2": [1.0, 1.0, 1.0, 0.0, 1.0],
+            "3": [1.0, 1.0, 0.0, 1.0],
+            "4": [1.0, 1.0, 1.0, 1.0],
+            "5": [1.0, 1.0, 1.0, 1.0],
+            "6": [1.0, 0.0, 1.0, 1.0, 0.0],
+            "7": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "8": [1.0, 1.0, 1.0, 1.0, 0.0],
+            "9": [1.0, 0.0, 1.0, 1.0],
+            "10": [1.0, 1.0, 1.0, 0.0, 0.0],
+            "11": [1.0, 1.0, 1.0, 1.0],
+            "12": [1.0, 1.0, 1.0, 1.0],
+            "13": [1.0, 1.0, 1.0, 1.0],
+            "14": [1.0, 1.0, 1.0, 0.0, 0.0],
+            "15": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "16": [1.0, 1.0, 1.0, 1.0, 1.0]
+        },
+        "amount_correct": 14
+    },
+    {
+        "test": completed_test_4,
+        "character_latencies": {
+            "1": [990.2, 1150.1, 1070.4, 1220.0],
+            "2": [1230.7, 1080.4, 1130.3, 1010.6, 963.2],
+            "3": [1120.4, 880.5, 920.6, 1030.9],
+            "4": [970.5, 1040.4, 870.2, 960.7],
+            "5": [910.1, 1020.2, 1150.3, 1100.2],
+            "6": [1030.0, 930.2, 860.0, 1060.1, 1022.4],
+            "7": [940.4, 990.9, 980.4, 890.6, 912.0],
+            "8": [1170.2, 1020.4, 910.6, 960.9, 999.2],
+            "9": [980.8, 990.2, 1040.8, 1010.5],
+            "10": [910.2, 1130.1, 980.4, 1020.8, 1271.9],
+            "11": [930.2, 920.1, 940.4, 1040.7],
+            "12": [1120.1, 1070.4, 1020.3, 950.5],
+            "13": [1060.2, 980.4, 940.3, 970.2],
+            "14": [1000.4, 1110.1, 1040.1, 1090.5, 929.8],
+            "15": [1080.8, 970.5, 1050.2, 990.2, 732.1],
+            "16": [1070.2, 1030.1, 1000.7, 1050.4, 854.7]
+        },
+        "character_accuracies": {
+            "1": [1.0, 1.0, 1.0, 1.0],
+            "2": [1.0, 1.0, 0.0, 1.0],
+            "3": [1.0, 0.0, 1.0, 1.0],
+            "4": [1.0, 1.0, 1.0, 1.0],
+            "5": [1.0, 1.0, 1.0, 1.0],
+            "6": [1.0, 1.0, 0.0, 1.0],
+            "7": [1.0, 1.0, 1.0, 0.0],
+            "8": [1.0, 1.0, 1.0, 1.0],
+            "9": [1.0, 1.0, 0.0, 1.0],
+            "10": [1.0, 1.0, 1.0, 1.0],
+            "11": [1.0, 1.0, 1.0, 1.0],
+            "12": [1.0, 1.0, 1.0, 1.0],
+            "13": [1.0, 1.0, 1.0, 1.0],
+            "14": [1.0, 1.0, 1.0, 0.0],
+            "15": [1.0, 1.0, 0.0, 1.0],
+            "16": [1.0, 1.0, 1.0, 1.0]
+        },
+        "amount_correct": 13
     }
 ]
 
 for results_data in results_data:
     Result.objects.create(**results_data)
 
+update_or_create_aggregate(completed_test_3)
 # Create Stimulus_Type instances
 four_span_digit_type = Stimulus_Type.objects.create(stimulus_type='4_Span_Digit')
 four_span_mixed_type = Stimulus_Type.objects.create(stimulus_type='4_Span_Mixed')
@@ -719,4 +820,194 @@ test2_response_16 = [
 for test2_response_16 in test2_response_16:
     Response.objects.create(**test2_response_16)
 
+test3_response_1 = [
+    {
+        "response": "2456",
+        "test": completed_test_3,
+        "response_position": 1,
+        "stimulus": stimulus_instance_1,
+        "time_submitted": timezone.now() - timedelta(minutes=45),
+    }
+]
+for test3_response_1 in test3_response_1:
+    Response.objects.create(**test3_response_1)
 
+test3_response_2 = [
+    {
+        "response": "23416",
+        "test": completed_test_3,
+        "response_position": 2,
+        "stimulus": stimulus_instance_2,
+        "time_submitted": timezone.now() - timedelta(minutes=45),
+    }
+]
+for test3_response_2 in test3_response_2:
+    Response.objects.create(**test3_response_2)
+
+test3_response_3 = [
+    {
+        "response": "2356",
+        "test": completed_test_3,
+        "response_position": 3,
+        "stimulus": stimulus_instance_3,
+        "time_submitted": timezone.now() - timedelta(minutes=44),
+    }
+]
+for test3_response_3 in test3_response_3:
+    Response.objects.create(**test3_response_3)
+
+test3_response_4 = [
+    {
+        "response": "1356",
+        "test": completed_test_3,
+        "response_position": 4,
+        "stimulus": stimulus_instance_4,
+        "time_submitted": timezone.now() - timedelta(minutes=44),
+    }
+]
+for test3_response_4 in test3_response_4:
+    Response.objects.create(**test3_response_4)
+
+test3_response_5 = [
+    {
+        "response": "1245",
+        "test": completed_test_3,
+        "response_position": 5,
+        "stimulus": stimulus_instance_5,
+        "time_submitted": timezone.now() - timedelta(minutes=44),
+    }
+]
+for test3_response_5 in test3_response_5:
+    Response.objects.create(**test3_response_5)
+
+test3_response_6 = [
+    {
+        "response": "11346",
+        "test": completed_test_3,
+        "response_position": 6,
+        "stimulus": stimulus_instance_6,
+        "time_submitted": timezone.now() - timedelta(minutes=43),
+    }
+]
+for test3_response_6 in test3_response_6:
+    Response.objects.create(**test3_response_6)
+
+test3_response_7 = [
+    {
+        "response": "13456",
+        "test": completed_test_3,
+        "response_position": 7,
+        "stimulus": stimulus_instance_7,
+        "time_submitted": timezone.now() - timedelta(minutes=43),
+    }
+]
+for test3_response_7 in test3_response_7:
+    Response.objects.create(**test3_response_7)
+
+test3_response_8 = [
+    {
+        "response": "12346",
+        "test": completed_test_3,
+        "response_position": 8,
+        "stimulus": stimulus_instance_8,
+        "time_submitted": timezone.now() - timedelta(minutes=43),
+    }
+]
+for test3_response_8 in test3_response_8:
+    Response.objects.create(**test3_response_8)
+
+test3_response_9 = [
+    {
+        "response": "54KR",
+        "test": completed_test_3,
+        "response_position": 9,
+        "stimulus": stimulus_instance_9,
+        "time_submitted": timezone.now() - timedelta(minutes=41),
+    }
+]
+for test3_response_9 in test3_response_9:
+    Response.objects.create(**test3_response_9)
+
+test3_response_10 = [
+    {
+        "response": "346KP",
+        "test": completed_test_3,
+        "response_position": 10,
+        "stimulus": stimulus_instance_10,
+        "time_submitted": timezone.now() - timedelta(minutes=40),
+    }
+]
+for test3_response_10 in test3_response_10:
+    Response.objects.create(**test3_response_10)
+
+test3_response_11 = [
+    {
+        "response": "56FP",
+        "test": completed_test_3,
+        "response_position": 11,
+        "stimulus": stimulus_instance_11,
+        "time_submitted": timezone.now() - timedelta(minutes=39),
+    }
+]
+for test3_response_11 in test3_response_11:
+    Response.objects.create(**test3_response_11)
+
+test3_response_12 = [
+    {
+        "response": "25RY",
+        "test": completed_test_3,
+        "response_position": 12,
+        "stimulus": stimulus_instance_12,
+        "time_submitted": timezone.now() - timedelta(minutes=39),
+    }
+]
+for test3_response_12 in test3_response_12:
+    Response.objects.create(**test3_response_12)
+
+test3_response_13 = [
+    {
+        "response": "56LP",
+        "test": completed_test_3,
+        "response_position": 13,
+        "stimulus": stimulus_instance_13,
+        "time_submitted": timezone.now() - timedelta(minutes=38),
+    }
+]
+for test3_response_13 in test3_response_13:
+    Response.objects.create(**test3_response_13)
+
+test3_response_14 = [
+    {
+        "response": "134RY",
+        "test": completed_test_3,
+        "response_position": 14,
+        "stimulus": stimulus_instance_14,
+        "time_submitted": timezone.now() - timedelta(minutes=37),
+    }
+]
+for test3_response_14 in test3_response_14:
+    Response.objects.create(**test3_response_14)
+
+test3_response_15 = [
+    {
+        "response": "136LY",
+        "test": completed_test_3,
+        "response_position": 15,
+        "stimulus": stimulus_instance_15,
+        "time_submitted": timezone.now() - timedelta(minutes=37),
+    }
+]
+for test3_response_15 in test3_response_15:
+    Response.objects.create(**test3_response_15)
+
+test3_response_16 = [
+    {
+        "response": "246KP",
+        "test": completed_test_3,
+        "response_position": 16,
+        "stimulus": stimulus_instance_16,
+        "time_submitted": timezone.now() - timedelta(minutes=37),
+    }
+]
+for test3_response_16 in test3_response_16:
+    Response.objects.create(**test3_response_16)

@@ -540,42 +540,55 @@ function exportToSpreadsheet(testId) {
     fetch(`/test_results/${testId}/`)
         .then(response => response.json())
         .then(data => {
-            // Initialize workbook and worksheet
+            // Initialize workbook
             const workbook = XLSX.utils.book_new();
 
-            // Prepare Patient Test Results Sheet
+            // Patient Test Results Sheet
             const patientResults = [
                 ['Metric', 'Value', 'Average', 'Comparison']
             ];
             data.test_results.forEach(result => {
                 patientResults.push([
                     result.metric.replace(/_/g, ' '),
-                    result.value,
+                    result.values.join(', '),
                     result.average || "N/A",
                     result.comparison
                 ]);
             });
-
-            // Add patient results to the workbook
             const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
             XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
 
-            // Prepare Aggregate Results Sheet
+            // Aggregate Results Sheet
             const aggregateResults = [
                 ['Metric', 'Average']
             ];
             data.aggregate_results.forEach(result => {
                 aggregateResults.push([
-                    result.metric.replace("avg_", "").replace(/_/g, ' '),
+                    result.metric.replace(/_/g, ' '),
                     result.average
                 ]);
             });
-
-            // Add aggregate results to the workbook
             const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
             XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
 
-            // Export the workbook to a file
+            // Stimuli and Responses Sheet
+            const stimuliResponses = [
+                ['Stimulus ID', 'Stimulus Content', 'Stimulus Type', 'PatientResponse', 'Question 1', 'Time Submitted']
+            ];
+            data.stimuli_responses.forEach(item => {
+                stimuliResponses.push([
+                    item.stimulus_id,
+                    item.stimulus_content,
+                    item.stimulus_type,
+                    item.response,
+                    item.response_position,
+                    item.time_submitted || "N/A"  // Use "N/A" if time_submitted is null
+                ]);
+            });
+            const stimuliSheet = XLSX.utils.aoa_to_sheet(stimuliResponses);
+            XLSX.utils.book_append_sheet(workbook, stimuliSheet, `Stimuli and Responses`);
+
+            // Export workbook
             XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
         })
         .catch(error => console.error('Error:', error));
