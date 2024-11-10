@@ -396,7 +396,7 @@ function loadLatencyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.latencies).map(pos => `Position ${pos}`);
+            const labels = Object.keys(data.patient.latencies).map(pos => `Question: ${pos}`);
             const patientLatencies = Object.values(data.patient.latencies);
             const aggregateLatencies = Object.values(data.aggregate.latencies);
 
@@ -465,7 +465,7 @@ function loadAccuracyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.accuracies).map(pos => `Position ${pos}`);
+            const labels = Object.keys(data.patient.accuracies).map(pos => `Question: ${pos}`);
             const patientAccuracies = Object.values(data.patient.accuracies);
             const aggregateAccuracies = Object.values(data.aggregate.accuracies);
 
@@ -573,7 +573,7 @@ function exportToSpreadsheet(testId) {
 
             // Stimuli and Responses Sheet
             const stimuliResponses = [
-                ['Stimulus ID', 'Stimulus Content', 'Stimulus Type', 'PatientResponse', 'Question 1', 'Time Submitted']
+                ['Stimulus ID', 'Stimulus Content', 'Stimulus Type', 'PatientResponse', 'Response Position', 'Time Submitted']
             ];
             data.stimuli_responses.forEach(item => {
                 stimuliResponses.push([

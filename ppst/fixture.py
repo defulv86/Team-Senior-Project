@@ -368,43 +368,43 @@ stimulus_instance_2 = Stimulus.objects.create(
 )
 
 stimulus_instance_3 = Stimulus.objects.create(
-    stimulus_content = "6R5K",
-    stimulus_type = four_span_mixed_type_pr
-)
-
-stimulus_instance_4 = Stimulus.objects.create(
-    stimulus_content = "4L6Y3",
-    stimulus_type = five_span_mixed_type_pr
-)
-
-stimulus_instance_5 = Stimulus.objects.create(
     stimulus_content = "2463",
     stimulus_type = four_span_digit_type
 )
 
-stimulus_instance_6 = Stimulus.objects.create(
+stimulus_instance_4 = Stimulus.objects.create(
     stimulus_content = "6135",
     stimulus_type = four_span_digit_type
 )
 
-stimulus_instance_7 = Stimulus.objects.create(
+stimulus_instance_5 = Stimulus.objects.create(
     stimulus_content = "4125",
     stimulus_type = four_span_digit_type
 )
 
-stimulus_instance_8 = Stimulus.objects.create(
+stimulus_instance_6 = Stimulus.objects.create(
     stimulus_content = "43512",
     stimulus_type = five_span_digit_type
 )
 
-stimulus_instance_9 = Stimulus.objects.create(
+stimulus_instance_7 = Stimulus.objects.create(
     stimulus_content = "53416",
     stimulus_type = five_span_digit_type
 )
 
-stimulus_instance_10 = Stimulus.objects.create(
+stimulus_instance_8 = Stimulus.objects.create(
     stimulus_content = "45231",
     stimulus_type = five_span_digit_type
+)
+
+stimulus_instance_9 = Stimulus.objects.create(
+    stimulus_content = "6R5K",
+    stimulus_type = four_span_mixed_type_pr
+)
+
+stimulus_instance_10 = Stimulus.objects.create(
+    stimulus_content = "4L6Y3",
+    stimulus_type = five_span_mixed_type_pr
 )
 
 stimulus_instance_11 = Stimulus.objects.create(
