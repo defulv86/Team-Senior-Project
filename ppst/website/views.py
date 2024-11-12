@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
 from statistics import mean
@@ -358,6 +358,17 @@ def get_stimuli(request):
     return JsonResponse(response_data, safe=False)
 
 
+
+# Helper function to format timestamps
+def format_timestamp(timestamp):
+    if isinstance(timestamp, str):  # Parse the ISO format string to datetime
+        try:
+            timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        except ValueError:
+            return timestamp  # Return original if it can't be parsed
+    if isinstance(timestamp, datetime):
+        return timestamp.strftime("%Y-%m-%d | %I:%M %p")
+    return timestamp
 @login_required
 def test_results(request, test_id):
     # Retrieve test and result data
@@ -375,6 +386,83 @@ def test_results(request, test_id):
     min_age = age_group.min_age
     max_age = age_group.max_age
     patient_age = test.age
+
+
+    # Retrieve stimuli and associated responses for the export
+    responses = Response.objects.filter(test=test).select_related('stimulus')
+    stimuli_responses = []
+    for response in responses:
+        stimulus = response.stimulus
+        stimuli_responses.append({
+            "stimulus_id": stimulus.id,
+            "stimulus_content": stimulus.stimulus_content,
+            "stimulus_type": stimulus.stimulus_type.stimulus_type,
+            "response": response.response,
+            "response_position": response.response_position,
+            "time_submitted": response.time_submitted
+        })
+
+    # Retrieve completed tests
+    completed_tests = Test.objects.filter(status="completed").values(
+        "id", "link", "age", "user__username", "created_at", "started_at", "finished_at"
+    )
+
+    # Format the timestamps
+    formatted_completed_tests = [
+        {
+            "id": test["id"],
+            "link": test["link"],
+            "age": test["age"], 
+            "user__username": test["user__username"],
+            "created_at": format_timestamp(test["created_at"]),
+            "started_at": format_timestamp(test["started_at"]),
+            "finished_at": format_timestamp(test["finished_at"]),
+        }
+        for test in completed_tests
+    ]
+
+# Retrieve pending tests
+    pending_tests = Test.objects.filter(status="pending").values(
+        "id", "link", "age", "user__username", "created_at"
+    )
+
+    # Format the timestamps for pending tests, with expiration and time remaining
+    formatted_pending_tests = []
+    for test in pending_tests:
+        created_at = test["created_at"]
+        expiration_date = created_at + timedelta(weeks=1)
+        time_remaining = expiration_date - timezone.now()
+
+        if time_remaining.total_seconds() > 0:
+            days = time_remaining.days
+            hours, remainder = divmod(time_remaining.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            # Format time_remaining with conditions for non-zero units
+            formatted_time_remaining = []
+            if days > 0:
+                formatted_time_remaining.append(f"{days} days")
+            if hours > 0 or days > 0:  # Show hours if any prior unit is non-zero
+                formatted_time_remaining.append(f"{hours} hours")
+            if minutes > 0 or hours > 0 or days > 0:  # Show minutes if any prior unit is non-zero
+                formatted_time_remaining.append(f"{minutes} minutes")
+            formatted_time_remaining.append(f"{seconds} seconds")
+
+            formatted_time_remaining = ", ".join(formatted_time_remaining)
+        else:
+            formatted_time_remaining = "Expired"
+
+        formatted_pending_tests.append({
+            "id": test["id"],
+            "link": test["link"],
+            "age": test["age"],
+            "user__username": test["user__username"],
+            "created_at": format_timestamp(created_at),
+            "expiration_date": format_timestamp(expiration_date),
+            "time_remaining": formatted_time_remaining
+        })
+
+
 
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
@@ -455,19 +543,6 @@ def test_results(request, test_id):
     )
 
 
-    # Retrieve stimuli and associated responses for the export
-    stimuli_responses = []
-    responses = Response.objects.filter(test=test).select_related('stimulus')
-    for response in responses:
-        stimulus = response.stimulus
-        stimuli_responses.append({
-            "stimulus_id": stimulus.id,
-            "stimulus_content": stimulus.stimulus_content,
-            "stimulus_type": stimulus.stimulus_type.stimulus_type,
-            "response": response.response,
-            "response_position": response.response_position,
-            "time_submitted": response.time_submitted
-        })
 
     return JsonResponse({
         "test_id": test_id,
@@ -477,8 +552,10 @@ def test_results(request, test_id):
         "min_age": min_age,
         "max_age": max_age,
         "patient_age": patient_age,
-        # Include the stimuli_responses only for export purposes
-        "stimuli_responses": stimuli_responses
+        # Below is only needed for spreadsheet exportation.
+        "stimuli_responses": stimuli_responses,
+        "completed_tests": formatted_completed_tests,
+        "pending_tests": formatted_pending_tests
     })
 
 def get_test_comparison_data(request, test_id):
