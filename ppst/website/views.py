@@ -386,7 +386,7 @@ def test_results(request, test_id):
     min_age = age_group.min_age
     max_age = age_group.max_age
     patient_age = test.age
-
+    test_link = test.link
 
     # Retrieve stimuli and associated responses for the export
     responses = Response.objects.filter(test=test).select_related('stimulus')
@@ -399,7 +399,7 @@ def test_results(request, test_id):
             "stimulus_type": stimulus.stimulus_type.stimulus_type,
             "response": response.response,
             "response_position": response.response_position,
-            "time_submitted": response.time_submitted
+            "time_submitted": format_timestamp(response.time_submitted)
         })
 
     # Retrieve completed tests
@@ -546,6 +546,7 @@ def test_results(request, test_id):
 
     return JsonResponse({
         "test_id": test_id,
+        "test_link": test_link,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
         "amount_correct": amount_correct,

@@ -219,7 +219,7 @@ function retrieveTestResults() {
 
                 testContent.innerHTML += `
                     <button class="${colorClass}" ${onclickAttr}>
-                        Test ID ${test.id} | Link: ${test.link}
+                        Test ID ${test.id} | Link: ${test.link} | Status: ${test.status}
                     </button><br>
                 `;
             });
@@ -265,7 +265,7 @@ function renderTestResultsTable(data, testId) {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
     <div class="table-container">
-        <h2>Test Results for ID ${testId}</h2>
+        <h2>Test Results for Link: ${data.test_link}</h2>
         <p><strong>Patient's Age:</strong> ${data.patient_age}</p>
         <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
         <table class="results-table">
@@ -569,7 +569,7 @@ function exportToSpreadsheet(testId) {
                 ]);
             });
             const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
-            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results ${data.min_age}-${data.max_age}`);
 
             // Stimuli and Responses Sheet
             const stimuliResponses = [
@@ -625,7 +625,7 @@ function exportToSpreadsheet(testId) {
             XLSX.utils.book_append_sheet(workbook, pendingTestsSheet, "Pending Patient Tests");
 
             // Export workbook
-            XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+            XLSX.writeFile(workbook, `TestResults_${data.test_link}.xlsx`);
         })
         .catch(error => console.error('Error:', error));
 }
