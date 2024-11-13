@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
 from dateutil import parser
 from statistics import mean
@@ -102,8 +102,16 @@ def create_test(request):
 def test_page_view(request, link):
     try:
         test = Test.objects.get(link=link)
-        stimuli = Stimulus.objects.all()
-        return render(request, 'testpage.html', {'test': test, 'stimuli': stimuli})
+        # Call different view functions based on test status
+        if test.status == 'completed':
+            return completionpage(request)
+        elif test.status == 'invalid':
+            return errorpage(request)
+        elif test.status == 'pending':
+            stimuli = Stimulus.objects.all()
+            return render(request, 'testpage.html', {'test': test, 'stimuli': stimuli})
+        else:
+            return errorpage(request)  # For any other undefined statuses
     except Test.DoesNotExist:
         return render(request, '404.html')
 
@@ -374,6 +382,48 @@ def get_stimuli(request):
     return JsonResponse(response_data, safe=False)
 
 
+
+# Helper function to format timestamps with seconds case.
+def format_timestamp(timestamp):
+    if isinstance(timestamp, str):  # Parse the ISO format string to datetime
+        try:
+            timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        except ValueError:
+            return timestamp  # Return original if it can't be parsed
+    
+    if isinstance(timestamp, datetime):
+        # Include seconds only if not zero
+        formatted_time = timestamp.strftime("%Y-%m-%d | %I:%M")
+        if timestamp.second > 0:
+            formatted_time += f":{timestamp.second:02d}"  # Add seconds to the formatted time if non-zero
+        formatted_time += f" {timestamp.strftime('%p')}"  # Append AM/PM
+        return formatted_time
+    
+    return timestamp
+
+# Helper function to format durations
+def format_duration(duration):
+    hours = duration.total_seconds() // 3600
+    minutes = (duration.total_seconds() % 3600) // 60
+    seconds = duration.total_seconds() % 60
+
+    formatted_time = ''
+
+    if hours > 0:
+        formatted_time += f"{int(hours)} hour{'s' if hours > 1 else ''}"
+
+    if minutes > 0 or hours > 0:  # Show minutes if hours or prior units are non-zero
+        if formatted_time:
+            formatted_time += ' '
+        formatted_time += f"{int(minutes)} minute{'s' if minutes > 1 else ''}"
+
+    if seconds > 0 or (not hours and not minutes):  # Show seconds if no hours and minutes
+        if formatted_time:
+            formatted_time += ' '
+        formatted_time += f"{int(seconds)} second{'s' if seconds > 1 else ''}"
+
+    return formatted_time or "0 seconds"
+
 @login_required
 def test_results(request, test_id):
     # Retrieve test and result data
@@ -387,6 +437,137 @@ def test_results(request, test_id):
     age_group = Aggregate.objects.filter(min_age__lte=test.age, max_age__gte=test.age).first()
     if not age_group:
         return JsonResponse({"error": "No aggregate data available for this age group."}, status=404)
+
+    min_age = age_group.min_age
+    max_age = age_group.max_age
+    patient_age = test.age
+    test_link = test.link
+
+    # Retrieve stimuli and associated responses for the export
+    responses = Response.objects.filter(test=test).select_related('stimulus')
+    stimuli_responses = []
+
+    for index, response in enumerate(responses, start=1):
+        stimulus = response.stimulus
+
+        # Sort alphanumerically for "Correct Answer for Stimuli"
+        correct_answer = ''.join(sorted(stimulus.stimulus_content))
+
+        stimuli_responses.append({
+            "stimulus_id": stimulus.id,
+            "stimulus_content": stimulus.stimulus_content,
+            "correct_answer": correct_answer,
+            "stimulus_type": stimulus.stimulus_type.stimulus_type,
+            "response": response.response,
+            "response_position": response.response_position,
+            "time_submitted": format_timestamp(response.time_submitted)
+        })
+
+    # Retrieve completed tests and calculate completion times
+    completed_tests = Test.objects.filter(status="completed").values(
+        "id", "link", "age", "user__username", "created_at", "started_at", "finished_at"
+    )
+
+    # Format the timestamps and calculate completion time
+    formatted_completed_tests = []
+    for test in completed_tests:
+        # Calculate completion time if both started_at and finished_at are present
+        if test["started_at"] and test["finished_at"]:
+            started_at = test["started_at"]
+            finished_at = test["finished_at"]
+            completion_time = finished_at - started_at
+            completion_time_str = format_duration(completion_time)  # Format duration including seconds
+        else:
+            completion_time_str = ""  # Leave empty if either timestamp is missing
+
+        formatted_completed_tests.append({
+            "id": test["id"],
+            "link": test["link"],
+            "age": test["age"],
+            "user__username": test["user__username"],
+            "created_at": format_timestamp(test["created_at"]),
+            "started_at": format_timestamp(test["started_at"]),
+            "finished_at": format_timestamp(test["finished_at"]),
+            "completion_time": completion_time_str,  # Add completion time here
+        })
+
+
+    # Retrieve pending tests
+    pending_tests = Test.objects.filter(status="pending").values(
+        "id", "link", "age", "user__username", "created_at"
+    )
+
+    # Format the timestamps for pending tests, with expiration and time remaining
+    formatted_pending_tests = []
+    for test in pending_tests:
+        created_at = test["created_at"]
+        expiration_date = created_at + timedelta(weeks=1)
+        time_remaining = expiration_date - timezone.now()
+
+        if time_remaining.total_seconds() > 0:
+            days = time_remaining.days
+            hours, remainder = divmod(time_remaining.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            # Format time_remaining with conditions for non-zero units
+            formatted_time_remaining = []
+            if days > 0:
+                formatted_time_remaining.append(f"{days} days")
+            if hours > 0 or days > 0:  # Show hours if any prior unit is non-zero
+                formatted_time_remaining.append(f"{hours} hours")
+            if minutes > 0 or hours > 0 or days > 0:  # Show minutes if any prior unit is non-zero
+                formatted_time_remaining.append(f"{minutes} minutes")
+            formatted_time_remaining.append(f"{seconds} seconds")
+
+            formatted_time_remaining = ", ".join(formatted_time_remaining)
+        else:
+            formatted_time_remaining = "Expired"
+
+        formatted_pending_tests.append({
+            "id": test["id"],
+            "link": test["link"],
+            "age": test["age"],
+            "user__username": test["user__username"],
+            "created_at": format_timestamp(created_at),
+            "expiration_date": format_timestamp(expiration_date),
+            "time_remaining": formatted_time_remaining
+        })
+
+    # Retrieve invalid tests
+    invalid_tests = Test.objects.filter(status="invalid").values(
+        "id", "link", "age", "user__username", "created_at", "premature_exit"
+    )
+
+
+
+    # Format invalid tests with time since invalidation
+    formatted_invalid_tests = []
+    for test in invalid_tests:
+        created_at = test["created_at"]
+        if test["premature_exit"]:
+            invalidated_at = created_at  # Invalidated at creation due to premature exit
+        else:
+            invalidated_at = created_at + timedelta(weeks=1)  # Invalidated after expiration
+
+        # Calculate time since invalidation
+        time_since_invalid = timezone.now() - invalidated_at
+        days, remainder = divmod(time_since_invalid.total_seconds(), 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        formatted_time_since_invalid = f"{int(days)} days, {int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds"
+        formatted_invalid_tests.append({
+            "id": test["id"],
+            "link": test["link"],
+            "age": test["age"],
+            "user__username": test["user__username"],
+            "created_at": format_timestamp(created_at),
+            "invalidated_at": format_timestamp(invalidated_at),
+            "time_since_invalid": formatted_time_since_invalid
+        })
+
+    
+
 
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
@@ -466,11 +647,22 @@ def test_results(request, test_id):
         if pos not in excluded_positions and all(a == 1 for a in accuracy)
     )
 
+
+
     return JsonResponse({
         "test_id": test_id,
+        "test_link": test_link,
         "test_results": test_results,
         "aggregate_results": aggregate_results,
-        "amount_correct": amount_correct
+        "amount_correct": amount_correct,
+        "min_age": min_age,
+        "max_age": max_age,
+        "patient_age": patient_age,
+        # Below is only needed for spreadsheet exportation.
+        "stimuli_responses": stimuli_responses,
+        "completed_tests": formatted_completed_tests,
+        "pending_tests": formatted_pending_tests,
+        "invalid_tests": formatted_invalid_tests
     })
 
 def get_test_comparison_data(request, test_id):

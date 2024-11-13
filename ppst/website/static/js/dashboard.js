@@ -219,7 +219,7 @@ function retrieveTestResults() {
 
                 testContent.innerHTML += `
                     <button class="${colorClass}" ${onclickAttr}>
-                        Test ID ${test.id} | Link: ${test.link}
+                        Test ID ${test.id} | Link: ${test.link} | Status: ${test.status}
                     </button><br>
                 `;
             });
@@ -265,7 +265,8 @@ function renderTestResultsTable(data, testId) {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
     <div class="table-container">
-        <h2>Test Results for ID ${testId}</h2>
+        <h2>Test Results for Link: ${data.test_link}</h2>
+        <p><strong>Patient's Age:</strong> ${data.patient_age}</p>
         <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
         <table class="results-table">
             <thead>
@@ -395,7 +396,7 @@ function loadLatencyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.latencies).map(pos => `Position ${pos}`);
+            const labels = Object.keys(data.patient.latencies).map(pos => `Question: ${pos}`);
             const patientLatencies = Object.values(data.patient.latencies);
             const aggregateLatencies = Object.values(data.aggregate.latencies);
 
@@ -464,7 +465,7 @@ function loadAccuracyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.accuracies).map(pos => `Position ${pos}`);
+            const labels = Object.keys(data.patient.accuracies).map(pos => `Question: ${pos}`);
             const patientAccuracies = Object.values(data.patient.accuracies);
             const aggregateAccuracies = Object.values(data.aggregate.accuracies);
 
@@ -539,43 +540,112 @@ function exportToSpreadsheet(testId) {
     fetch(`/test_results/${testId}/`)
         .then(response => response.json())
         .then(data => {
-            // Initialize workbook and worksheet
+            // Initialize workbook
             const workbook = XLSX.utils.book_new();
 
-            // Prepare Patient Test Results Sheet
+            // Patient Test Results Sheet
             const patientResults = [
                 ['Metric', 'Value', 'Average', 'Comparison']
             ];
             data.test_results.forEach(result => {
                 patientResults.push([
                     result.metric.replace(/_/g, ' '),
-                    result.value,
+                    result.values.join(', '),
                     result.average || "N/A",
                     result.comparison
                 ]);
             });
-
-            // Add patient results to the workbook
             const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
             XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
 
-            // Prepare Aggregate Results Sheet
+            // Aggregate Results Sheet
             const aggregateResults = [
                 ['Metric', 'Average']
             ];
             data.aggregate_results.forEach(result => {
                 aggregateResults.push([
-                    result.metric.replace("avg_", "").replace(/_/g, ' '),
+                    result.metric.replace(/_/g, ' '),
                     result.average
                 ]);
             });
-
-            // Add aggregate results to the workbook
             const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
-            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results ${data.min_age}-${data.max_age}`);
 
-            // Export the workbook to a file
-            XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+            // Stimuli and Responses Sheet
+            const stimuliResponses = [
+                ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Response Position', 'Time Submitted']
+            ];
+            data.stimuli_responses.forEach(item => {
+                stimuliResponses.push([
+                    item.stimulus_id,
+                    item.stimulus_type,
+                    item.stimulus_content,
+                    item.correct_answer,  // New column for correct answer
+                    item.response,
+                    item.response_position,
+                    item.time_submitted || "N/A"
+                ]);
+            });
+            const stimuliSheet = XLSX.utils.aoa_to_sheet(stimuliResponses);
+            XLSX.utils.book_append_sheet(workbook, stimuliSheet, `Stimuli and Responses`);
+
+            // Completed Patient Tests Sheet
+            const completedTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Started At', 'Finished At', 'Completion Time']
+            ];
+            data.completed_tests.forEach(test => {
+                completedTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.started_at,
+                    test.finished_at,
+                    test.completion_time || "N/A"  // Add completion time here
+                ]);
+            });
+            const completedTestsSheet = XLSX.utils.aoa_to_sheet(completedTests);
+            XLSX.utils.book_append_sheet(workbook, completedTestsSheet, `Completed Patient Tests`);
+
+            // Pending Patient Tests Sheet
+            const pendingTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Expiration Date', 'Time Remaining']
+            ];
+            data.pending_tests.forEach(test => {
+                pendingTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.expiration_date,
+                    test.time_remaining
+                ]);
+            });
+            const pendingTestsSheet = XLSX.utils.aoa_to_sheet(pendingTests);
+            XLSX.utils.book_append_sheet(workbook, pendingTestsSheet, "Pending Patient Tests");
+
+            // Invalid Patient Tests Sheet
+            const invalidTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Invalidated At', 'Time Since Invalid']
+            ];
+            data.invalid_tests.forEach(test => {
+                invalidTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.invalidated_at,
+                    test.time_since_invalid
+                ]);
+            });
+            const invalidTestsSheet = XLSX.utils.aoa_to_sheet(invalidTests);
+            XLSX.utils.book_append_sheet(workbook, invalidTestsSheet, "Invalid Patient Tests");
+
+            // Export workbook
+            XLSX.writeFile(workbook, `TestResults_${data.test_link}.xlsx`);
         })
         .catch(error => console.error('Error:', error));
 }
