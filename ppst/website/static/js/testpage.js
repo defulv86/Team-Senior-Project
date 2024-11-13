@@ -156,6 +156,11 @@ function nextStimulus() {
         
     } else {
         document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
+        document.getElementById('stimulus').style.fontSize = '2.5em';
+        document.getElementById('stimulus').style.fontWeight = 'bold';
+        document.getElementById('stimulus').style.fontFamily = 'Montserrat';
+        document.getElementById('stimulus').style.color = '#0077b3';
+        document.getElementById('stimulus').style.marginTop = '100px';
         document.getElementById('response-section').style.display = 'none';
 
 
