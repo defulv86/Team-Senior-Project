@@ -359,16 +359,47 @@ def get_stimuli(request):
 
 
 
-# Helper function to format timestamps
+# Helper function to format timestamps with seconds case.
 def format_timestamp(timestamp):
     if isinstance(timestamp, str):  # Parse the ISO format string to datetime
         try:
             timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
         except ValueError:
             return timestamp  # Return original if it can't be parsed
+    
     if isinstance(timestamp, datetime):
-        return timestamp.strftime("%Y-%m-%d | %I:%M %p")
+        # Include seconds only if not zero
+        formatted_time = timestamp.strftime("%Y-%m-%d | %I:%M")
+        if timestamp.second > 0:
+            formatted_time += f":{timestamp.second:02d}"  # Add seconds to the formatted time if non-zero
+        formatted_time += f" {timestamp.strftime('%p')}"  # Append AM/PM
+        return formatted_time
+    
     return timestamp
+
+# Helper function to format durations
+def format_duration(duration):
+    hours = duration.total_seconds() // 3600
+    minutes = (duration.total_seconds() % 3600) // 60
+    seconds = duration.total_seconds() % 60
+
+    formatted_time = ''
+
+    if hours > 0:
+        formatted_time += f"{int(hours)} hour{'s' if hours > 1 else ''}"
+
+    if minutes > 0 or hours > 0:  # Show minutes if hours or prior units are non-zero
+        if formatted_time:
+            formatted_time += ' '
+        formatted_time += f"{int(minutes)} minute{'s' if minutes > 1 else ''}"
+
+    if seconds > 0 or (not hours and not minutes):  # Show seconds if no hours and minutes
+        if formatted_time:
+            formatted_time += ' '
+        formatted_time += f"{int(seconds)} second{'s' if seconds > 1 else ''}"
+
+    return formatted_time or "0 seconds"
+
 @login_required
 def test_results(request, test_id):
     # Retrieve test and result data
@@ -391,37 +422,53 @@ def test_results(request, test_id):
     # Retrieve stimuli and associated responses for the export
     responses = Response.objects.filter(test=test).select_related('stimulus')
     stimuli_responses = []
-    for response in responses:
+
+    for index, response in enumerate(responses, start=1):
         stimulus = response.stimulus
+
+        # Sort alphanumerically for "Correct Answer for Stimuli"
+        correct_answer = ''.join(sorted(stimulus.stimulus_content))
+
         stimuli_responses.append({
             "stimulus_id": stimulus.id,
             "stimulus_content": stimulus.stimulus_content,
+            "correct_answer": correct_answer,
             "stimulus_type": stimulus.stimulus_type.stimulus_type,
             "response": response.response,
             "response_position": response.response_position,
             "time_submitted": format_timestamp(response.time_submitted)
         })
 
-    # Retrieve completed tests
+    # Retrieve completed tests and calculate completion times
     completed_tests = Test.objects.filter(status="completed").values(
         "id", "link", "age", "user__username", "created_at", "started_at", "finished_at"
     )
 
-    # Format the timestamps
-    formatted_completed_tests = [
-        {
+    # Format the timestamps and calculate completion time
+    formatted_completed_tests = []
+    for test in completed_tests:
+        # Calculate completion time if both started_at and finished_at are present
+        if test["started_at"] and test["finished_at"]:
+            started_at = test["started_at"]
+            finished_at = test["finished_at"]
+            completion_time = finished_at - started_at
+            completion_time_str = format_duration(completion_time)  # Format duration including seconds
+        else:
+            completion_time_str = ""  # Leave empty if either timestamp is missing
+
+        formatted_completed_tests.append({
             "id": test["id"],
             "link": test["link"],
-            "age": test["age"], 
+            "age": test["age"],
             "user__username": test["user__username"],
             "created_at": format_timestamp(test["created_at"]),
             "started_at": format_timestamp(test["started_at"]),
             "finished_at": format_timestamp(test["finished_at"]),
-        }
-        for test in completed_tests
-    ]
+            "completion_time": completion_time_str,  # Add completion time here
+        })
 
-# Retrieve pending tests
+
+    # Retrieve pending tests
     pending_tests = Test.objects.filter(status="pending").values(
         "id", "link", "age", "user__username", "created_at"
     )
@@ -462,6 +509,40 @@ def test_results(request, test_id):
             "time_remaining": formatted_time_remaining
         })
 
+    # Retrieve invalid tests
+    invalid_tests = Test.objects.filter(status="invalid").values(
+        "id", "link", "age", "user__username", "created_at", "premature_exit"
+    )
+
+
+
+    # Format invalid tests with time since invalidation
+    formatted_invalid_tests = []
+    for test in invalid_tests:
+        created_at = test["created_at"]
+        if test["premature_exit"]:
+            invalidated_at = created_at  # Invalidated at creation due to premature exit
+        else:
+            invalidated_at = created_at + timedelta(weeks=1)  # Invalidated after expiration
+
+        # Calculate time since invalidation
+        time_since_invalid = timezone.now() - invalidated_at
+        days, remainder = divmod(time_since_invalid.total_seconds(), 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        formatted_time_since_invalid = f"{int(days)} days, {int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds"
+        formatted_invalid_tests.append({
+            "id": test["id"],
+            "link": test["link"],
+            "age": test["age"],
+            "user__username": test["user__username"],
+            "created_at": format_timestamp(created_at),
+            "invalidated_at": format_timestamp(invalidated_at),
+            "time_since_invalid": formatted_time_since_invalid
+        })
+
+    
 
 
     metrics = [
@@ -556,7 +637,8 @@ def test_results(request, test_id):
         # Below is only needed for spreadsheet exportation.
         "stimuli_responses": stimuli_responses,
         "completed_tests": formatted_completed_tests,
-        "pending_tests": formatted_pending_tests
+        "pending_tests": formatted_pending_tests,
+        "invalid_tests": formatted_invalid_tests
     })
 
 def get_test_comparison_data(request, test_id):

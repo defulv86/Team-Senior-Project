@@ -573,13 +573,14 @@ function exportToSpreadsheet(testId) {
 
             // Stimuli and Responses Sheet
             const stimuliResponses = [
-                ['Stimulus ID', 'Stimulus Content', 'Stimulus Type', 'Patient Response', 'Response Position', 'Time Submitted']
+                ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Response Position', 'Time Submitted']
             ];
             data.stimuli_responses.forEach(item => {
                 stimuliResponses.push([
                     item.stimulus_id,
-                    item.stimulus_content,
                     item.stimulus_type,
+                    item.stimulus_content,
+                    item.correct_answer,  // New column for correct answer
                     item.response,
                     item.response_position,
                     item.time_submitted || "N/A"
@@ -590,7 +591,7 @@ function exportToSpreadsheet(testId) {
 
             // Completed Patient Tests Sheet
             const completedTests = [
-                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Started At', 'Finished At']
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Started At', 'Finished At', 'Completion Time']
             ];
             data.completed_tests.forEach(test => {
                 completedTests.push([
@@ -600,7 +601,8 @@ function exportToSpreadsheet(testId) {
                     test.user__username,
                     test.created_at,
                     test.started_at,
-                    test.finished_at
+                    test.finished_at,
+                    test.completion_time || "N/A"  // Add completion time here
                 ]);
             });
             const completedTestsSheet = XLSX.utils.aoa_to_sheet(completedTests);
@@ -623,6 +625,24 @@ function exportToSpreadsheet(testId) {
             });
             const pendingTestsSheet = XLSX.utils.aoa_to_sheet(pendingTests);
             XLSX.utils.book_append_sheet(workbook, pendingTestsSheet, "Pending Patient Tests");
+
+            // Invalid Patient Tests Sheet
+            const invalidTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Invalidated At', 'Time Since Invalid']
+            ];
+            data.invalid_tests.forEach(test => {
+                invalidTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.invalidated_at,
+                    test.time_since_invalid
+                ]);
+            });
+            const invalidTestsSheet = XLSX.utils.aoa_to_sheet(invalidTests);
+            XLSX.utils.book_append_sheet(workbook, invalidTestsSheet, "Invalid Patient Tests");
 
             // Export workbook
             XLSX.writeFile(workbook, `TestResults_${data.test_link}.xlsx`);

@@ -500,7 +500,7 @@ for test1_response_5 in test1_response_5:
 
 test1_response_6 = [
     {
-        "response": "2456",
+        "response": "12345",
         "test": completed_test,
         "response_position": 6,
         "stimulus": stimulus_instance_6,
@@ -524,7 +524,7 @@ for test1_response_7 in test1_response_7:
 
 test1_response_8 = [
     {
-        "response": "13456",
+        "response": "12345",
         "test": completed_test,
         "response_position": 8,
         "stimulus": stimulus_instance_8,
@@ -536,7 +536,7 @@ for test1_response_8 in test1_response_8:
 
 test1_response_9 = [
     {
-        "response": "56RK",
+        "response": "56KR",
         "test": completed_test,
         "response_position": 9,
         "stimulus": stimulus_instance_9,
