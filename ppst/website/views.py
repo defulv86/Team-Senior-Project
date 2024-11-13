@@ -37,6 +37,30 @@ def login_view(request):
     
     return render(request, 'login.html', {'error_message': error_message})
 
+def register_view(request):
+    error_message = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('passwd')
+        confirm_password = request.POST.get('confirm-passwd')
+
+        # Check if passwords don't match
+        if password != confirm_password:
+            error_message = 'Passwords do not match.'
+        # Check if username already exists in the database.
+        elif User.objects.filter(username=username).exists():
+            error_message = 'Username already exists.'
+        else:
+            # Change this part so that it makes a request registration that gets
+            # saved to a model and then gets transferred over to user creation
+            # if approved by admin or something like that.
+            new_user = User.objects.create_user(username=username, password=password) # Create new user
+            new_user.save() # Save new user to database
+            auth_login(request, new_user)
+            return redirect('dashboard')
+
+    return render(request, 'register.html', {'error_message': error_message})
+
 def logout_view(request):
     auth_logout(request)  # Logs out the user
     return redirect('login')  # Redirects to the login page after logout

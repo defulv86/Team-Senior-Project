@@ -4,7 +4,7 @@ let response = ''; // Store the response from the keyboard
 const timestamps = [];
 const form = document.querySelector('form');
 
-form.addEventListener('submit', function(e) {
+form.addEventListener('submit', function (e) {
     e.preventDefault();
     var selectedFontSize = document.getElementById("fontSize").value;
     changeFontSize(selectedFontSize);
@@ -49,15 +49,15 @@ function markTestComplete(testLink) {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            console.log('Test marked as complete.');
-        }
-    })
-    .catch(error => {
-        console.error('Error marking test as complete:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Test marked as complete.');
+            }
+        })
+        .catch(error => {
+            console.error('Error marking test as complete:', error);
+        });
 }
 
 
@@ -75,6 +75,26 @@ function flashStimulus(stimulus) {
     const stimulusContent = stimulus.stimulus_content;
     let currentCharIndex = 0;
 
+    // allow new voices to be selected: 77-94
+    let voices = [];
+    function populateVoices() {
+        voices = window.speechSynthesis.getVoices();
+        const voiceSelect = document.getElementById('voice-select');
+        voiceSelect.innerHTML = '';
+
+        // Populate the dropdown with available voices
+        voices.forEach((voice) => {
+            const option = document.createElement('option');
+            option.value = voice.name; 
+            option.textContent = `${voice.name} (${voice.lang})`; 
+            voiceSelect.appendChild(option);
+        });
+    }
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
+    //////////////////////////////////////////////
+
+    // comment out & remove the following lines once above works
     function speakCharacter(character) {
         const utterance = new SpeechSynthesisUtterance(character);
         window.speechSynthesis.speak(utterance);
@@ -153,9 +173,14 @@ function nextStimulus() {
 
         response = '';
         timestamps.length = 0;
-        
+
     } else {
         document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
+        document.getElementById('stimulus').style.fontSize = '2.5em';
+        document.getElementById('stimulus').style.fontWeight = 'bold';
+        document.getElementById('stimulus').style.fontFamily = 'Montserrat';
+        document.getElementById('stimulus').style.color = '#0077b3';
+        document.getElementById('stimulus').style.marginTop = '100px';
         document.getElementById('response-section').style.display = 'none';
 
 
@@ -240,7 +265,7 @@ document.getElementById('submit-response').addEventListener('click', () => {
 function playDemo() { // shows demo video and speaks/shows instructions
     var video = document.createElement("VIDEO");
     video.width = 420;
-    video.height = 300; 
+    video.height = 300;
     video.controls = true;
     video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
@@ -274,24 +299,24 @@ function startTest() {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            console.log('Test start time recorded.');
-            fetch('/get-stimuli/')
-                .then(response => response.json())
-                .then(data => {
-                    stimuli = data;
-                    nextStimulus();  // Proceed with the test
-                })
-                .catch(error => {
-                    console.error('Error fetching stimuli:', error);
-                });
-        }
-    })
-    .catch(error => {
-        console.error('Error recording start time:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Test start time recorded.');
+                fetch('/get-stimuli/')
+                    .then(response => response.json())
+                    .then(data => {
+                        stimuli = data;
+                        nextStimulus();  // Proceed with the test
+                    })
+                    .catch(error => {
+                        console.error('Error fetching stimuli:', error);
+                    });
+            }
+        })
+        .catch(error => {
+            console.error('Error recording start time:', error);
+        });
 }
 
 const subtitlesButton = document.getElementById("subtitles-button");
@@ -384,17 +409,17 @@ function invalidateTest(testLink) {
         body: JSON.stringify({ link: testLink }),
         keepalive: true  // Ensures fetch request completes even if the page is unloading
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            console.log('Test marked as invalid.');
-        } else {
-            console.warn('Failed to invalidate test:', data);
-        }
-    })
-    .catch(error => {
-        console.error('Error invalidating test:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Test marked as invalid.');
+            } else {
+                console.warn('Failed to invalidate test:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error invalidating test:', error);
+        });
 }
 let confirmUnload = false; // Flag to check if user confirmed the unload
 

@@ -16,11 +16,14 @@
     <div id="introduction">
         <h3><i class="fa-solid fa-laptop-medical icon-blue"></i>Online Philadelphia Pointing Span Test</h3>
         <form id="changeFont" name="changeFont">
-            Change Font Size: <select name="fontSize" id="fontSize">
+            Change Font Size: <select name="fontSize" id="fontSize"> 
                 <option value="16px">16px</option>
                 <option value="24px">24px</option>
                 <option value="32px">32px</option>
             </select>
+            Voices: <select id="voice-select">
+                
+            </select> <!--Choose a voice -->
             <input type="submit" value="Submit">
         </form>
         <h1>Welcome to the Philadelphia Pointing Span Test</h1>
@@ -47,18 +50,18 @@
             <button id="subtitles-button">Show Subtitles</button>
             <div id="show-subtitles" style="display: none; justify-content: center;">
                 <br><br><br>
-                Welcome to your online Philadelphia Pointing Span Test. 
-                When you click the "Start Test" button, you'll be presented with two practice stimuli.
-                Don't worry, your results from this section will not be recorded.
-                It's just to get you comfortable with the format of the test.
-                Each practice question is an exact replication of what a real question will look like.
-                Each question will begin with the stimuli, in this case, the numbers being flashed on screen.
-                Once the last stimulus is presented, the main test screen will appear.
-                On this screen, you will be presented with tiles containing the stimuli that were presented to you, 
-                along with other miscellaneous stimuli.
-                You must memorize the stimuli that were presented and click on each 
-                corresponding tile with the goal of ending up with the tiles in sequential order.
-                Once you're finished with the practice questions, the real test will begin.
+                Welcome to your <b>Online Philadelphia Pointing Span Test.</b> 
+                When you click the <b>"Start Test" </b> button, you'll be presented with <b>two practice stimuli</b>.
+                Don't worry, your results from this section <b>will not be recorded</b>.
+                It's just to get you comfortable with the <b>format of the test</b>.
+                Each practice question is an <b>exact replication </b> of what a <b> real question</b> will look like.
+                Each question will begin with the <b>stimuli</b>, in this case, the <b>numbers being flashed on screen</b>.
+                Once the <b>last stimulus</b> is presented, the <b>main test screen</b> will appear.
+                On this screen, you will be presented with <b>tiles containing the stimuli</b> that were presented to you, 
+                along with other <b>miscellaneous stimuli</b>.
+                You must <b>memorize the stimuli</b> that were presented and click on each 
+                <b>corresponding tile</b> with the goal of ending up with the tiles in <b>sequential order</b>.
+                Once you're finished with the practice questions, the <b>real test</b> will begin.
                 <br><br>
             </div>
         </div>
@@ -79,7 +82,7 @@
     <input type="hidden" id="test-link" value="{{ test.link }}">
     <div id="stimulus"></div>
     <div id="response-section">
-        <h2>Enter Your Answer:</h2>
+        <h2>Enter Your Response Using the Keyboard Below.</h2>
         <div id="digit-keyboard">
             <button class="key" data-value="6">6</button>
             <button class="key" data-value="2">2</button>
@@ -90,20 +93,23 @@
         </div>
 
         <div id="alphanumeric-keyboard" style="display: none;">
-            <button class="key" data-value="R">R</button>
-            <button class="key" data-value="K">K</button>
-            <button class="key" data-value="F">F</button>
-            <button class="key" data-value="P">P</button>
-            <button class="key" data-value="Y">Y</button>
-            <button class="key" data-value="L">L</button>
-            <button class="key" data-value="6">6</button>
-            <button class="key" data-value="2">2</button>
-            <button class="key" data-value="4">4</button>
-            <button class="key" data-value="1">1</button>
-            <button class="key" data-value="5">5</button>
-            <button class="key" data-value="3">3</button>
+            <div class="alphanumeric-row">
+                <button class="key" data-value="R">R</button>
+                <button class="key" data-value="K">K</button>
+                <button class="key" data-value="F">F</button>
+                <button class="key" data-value="P">P</button>
+                <button class="key" data-value="Y">Y</button>
+                <button class="key" data-value="L">L</button>
+              </div>
+              <div class="alphanumeric-row">
+                <button class="key" data-value="6">6</button>
+                <button class="key" data-value="2">2</button>
+                <button class="key" data-value="4">4</button>
+                <button class="key" data-value="1">1</button>
+                <button class="key" data-value="5">5</button>
+                <button class="key" data-value="3">3</button>
+              </div>
         </div>
-
         <button id="submit-response" class="btn btn-primary mt-3">Submit</button>
     </div>
 
