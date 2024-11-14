@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('logout/', views.logout_view, name='logout'),
     path('submit-response/', views.submit_response, name='submit_response'),
     path('get-stimuli/', views.get_stimuli, name='get_stimuli'),
@@ -28,5 +29,8 @@ urlpatterns = [
     path('errorpage/', views.errorpage, name="errorpage"),
     path('get_test_comparison_data/<int:test_id>/', views.get_test_comparison_data, name='get_test_comparison_data'),
     path('completed/', views.completionpage, name="completionpage"),
+    path('get_registration_requests/', views.get_registration_requests, name='get_registration_requests'),
+    path('approve_registration/<int:registration_id>/', views.approve_registration, name='approve_registration'),
+    path('deny_registration/<int:registration_id>/', views.deny_registration, name='deny_registration'),
 
 ]
