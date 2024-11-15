@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from datetime import timedelta, datetime
-from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification
+from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification, Registration
 from dateutil import parser
 from statistics import mean
 import json
@@ -29,7 +30,7 @@ def login_view(request):
             auth_login(request, user)
             # Redirect based on the user's staff status
             if user.is_staff:
-                return redirect('/admin/')
+                return redirect('admin_dashboard')
             else:
                 return redirect('dashboard')
         else:
@@ -37,29 +38,37 @@ def login_view(request):
     
     return render(request, 'login.html', {'error_message': error_message})
 
+
 def register_view(request):
     error_message = None
+    success_message = None
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('passwd')
         confirm_password = request.POST.get('confirm-passwd')
 
-        # Check if passwords don't match
         if password != confirm_password:
-            error_message = 'Passwords do not match.'
-        # Check if username already exists in the database.
-        elif User.objects.filter(username=username).exists():
-            error_message = 'Username already exists.'
+            error_message = "Passwords do not match."
         else:
-            # Change this part so that it makes a request registration that gets
-            # saved to a model and then gets transferred over to user creation
-            # if approved by admin or something like that.
-            new_user = User.objects.create_user(username=username, password=password) # Create new user
-            new_user.save() # Save new user to database
-            auth_login(request, new_user)
-            return redirect('dashboard')
+            # Check if the username already exists
+            if Registration.objects.filter(username=username).exists():
+                error_message = "Username already taken. Please choose a different username."
+            else:
+                # Save the registration request with plain text password (temporarily)
+                try:
+                    registration = Registration(username=username, password=password)
+                    registration.save()
+                    success_message = "Your registration request has been submitted for admin approval."
+                    return redirect('home')
+                except Exception as e:
+                    error_message = f"An error occurred: {e}"
 
-    return render(request, 'register.html', {'error_message': error_message})
+    return render(request, 'register.html', {
+        'error_message': error_message,
+        'success_message': success_message
+    })
+
 
 def logout_view(request):
     auth_logout(request)  # Logs out the user
@@ -73,6 +82,54 @@ def dashboard(request):
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
 
+def admin_dashboard(request):
+    if request.user.is_authenticated:
+        # Your logic for rendering the dashboard goes here
+        return render(request, 'admin_dashboard.html', {'user': request.user})
+    else:
+        return redirect('login')  # Redirect to the login page if not authenticated
+
+def get_registration_requests(request):
+    # Ensure the user is staff
+    if request.user.is_staff:
+        registrations = Registration.objects.filter(approved=False)
+        registration_data = [
+            {
+                "id": registration.id,
+                "username": registration.username,
+            }
+            for registration in registrations
+        ]
+        return JsonResponse(registration_data, safe=False)
+    else:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+@csrf_exempt
+def approve_registration(request, registration_id):
+    if request.user.is_staff and request.method == 'POST':
+        try:
+            registration = Registration.objects.get(id=registration_id)
+            # Create a new user with a hashed password
+            user = User.objects.create(
+                username=registration.username,
+                password=make_password(registration.password)  # Hash password here
+            )
+            registration.approved = True
+            registration.save()
+            return JsonResponse({"success": True})
+        except Registration.DoesNotExist:
+            return JsonResponse({"error": "Registration not found"}, status=404)
+    return JsonResponse({"error": "Unauthorized"}, status=403)
+@csrf_exempt
+def deny_registration(request, registration_id):
+    if request.user.is_staff and request.method == 'POST':
+        try:
+            registration = Registration.objects.get(id=registration_id)
+            registration.delete()
+            return JsonResponse({"success": True})
+        except Registration.DoesNotExist:
+            return JsonResponse({"error": "Registration not found"}, status=404)
+    return JsonResponse({"error": "Unauthorized"}, status=403)
 
 @csrf_exempt
 @login_required
@@ -385,18 +442,18 @@ def get_stimuli(request):
 
 # Helper function to format timestamps with seconds case.
 def format_timestamp(timestamp):
-    if isinstance(timestamp, str):  # Parse the ISO format string to datetime
+    if isinstance(timestamp, str):
         try:
             timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
         except ValueError:
-            return timestamp  # Return original if it can't be parsed
+            return timestamp
     
     if isinstance(timestamp, datetime):
-        # Include seconds only if not zero
+        timestamp = timezone.localtime(timestamp)  # Convert to local timezone (EST)
         formatted_time = timestamp.strftime("%Y-%m-%d | %I:%M")
         if timestamp.second > 0:
-            formatted_time += f":{timestamp.second:02d}"  # Add seconds to the formatted time if non-zero
-        formatted_time += f" {timestamp.strftime('%p')}"  # Append AM/PM
+            formatted_time += f":{timestamp.second:02d}"
+        formatted_time += f" {timestamp.strftime('%p')}"
         return formatted_time
     
     return timestamp
@@ -914,4 +971,5 @@ def errorpage(request):
 
 def completionpage(request):
     return render(request, 'completionpage.html')
+
 

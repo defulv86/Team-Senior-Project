@@ -129,3 +129,11 @@ class Notification(models.Model):
 
     def  __str__(self):
         return   str(self.id) + " Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)
+
+class Registration(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    password = models.CharField(max_length=128)  # Ideally hashed or a placeholder
+    approved = models.BooleanField(default=False)  # Add this line for approval tracking
+
+    def __str__(self):
+        return self.username
