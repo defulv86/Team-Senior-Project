@@ -467,20 +467,20 @@ button {
 
 /* Green Button for Approve in Registration */
 .btn-green {
-    background-color: #28a745; / Green /
+    background-color: #28a745; /* Green */
 }
 
 .btn-green:hover {
-    background-color: #218838; / Darker Green /
+    background-color: #218838; /* Darker Green */
 }
 
 /* Red Button for Deny in Registration */
 .btn-red {
-    background-color: #dc3545; / Red /
+    background-color: #dc3545; /* Red */
 }
 
 .btn-red:hover {
-    background-color: #c82333; / Darker Red */
+    background-color: #c82333; /* Darker Red */
 }
 
 /* Success and Error Message Styles */
