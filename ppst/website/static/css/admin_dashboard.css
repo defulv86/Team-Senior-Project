@@ -254,7 +254,7 @@ body {
 }
 
 .sidebar .menu li a:hover {
-    background-color: #286aab;
+    background-color: #ad4f4f;
 }
 
 .sidebar .menu a {
@@ -454,9 +454,9 @@ textarea:focus {
     margin-top: 15px;
 }
 
+/* Base Button Style */
 button {
     padding: 10px 15px;
-    background-color: #0099ff;
     color: white;
     border: none;
     border-radius: 4px;
@@ -465,8 +465,22 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #0077cc;
+/* Green Button for Approve in Registration */
+.btn-green {
+    background-color: #28a745; / Green /
+}
+
+.btn-green:hover {
+    background-color: #218838; / Darker Green /
+}
+
+/* Red Button for Deny in Registration */
+.btn-red {
+    background-color: #dc3545; / Red /
+}
+
+.btn-red:hover {
+    background-color: #c82333; / Darker Red */
 }
 
 /* Success and Error Message Styles */
