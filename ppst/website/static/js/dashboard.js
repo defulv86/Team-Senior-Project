@@ -4,27 +4,47 @@ function loadContent(section) {
 
     if (section === 'account') {
         dynamicContent.innerHTML = `
-            <h2>My Account</h2>
-            <form id="account-form">
-                <label for="first-name">First Name:</label>
-                <input type="text" id="first-name" name="first_name" required>
-                <br>
-                <label for="last-name">Last Name:</label>
-                <input type="text" id="last-name" name="last_name" required>
-                <br>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <br>
-                <label for="current-password">Current Password:</label>
-                <input type="password" id="current-password" name="current_password" required>
-                <br>
-                <label for="new-password">New Password:</label>
-                <input type="password" id="new-password" name="new_password">
-                <br>
-                <button type="button" onclick="saveAccountChanges()">Save Changes</button>
-            </form>
-            <div id="account-message" style="color: green;"></div>
-            <div id="account-error-message" style="color: red; display: none;"></div>
+<form id="account-form">
+<h2>My Account</h2>
+    <fieldset>
+        <legend>Update Your Information</legend>
+
+        <!-- Form fields (First Name, Last Name, etc.) -->
+        <div class="input-group">
+            <label for="first-name">First Name:</label>
+            <input type="text" id="first-name" name="first_name" placeholder="Enter your first name" required>
+        </div>
+
+        <div class="input-group">
+            <label for="last-name">Last Name:</label>
+            <input type="text" id="last-name" name="last_name" placeholder="Enter your last name" required>
+        </div>
+
+        <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="input-group">
+            <label for="current-password">Current Password:</label>
+            <input type="password" id="current-password" name="current_password" placeholder="Enter your current password" required>
+        </div>
+
+        <div class="input-group">
+            <label for="new-password">New Password:</label>
+            <input type="password" id="new-password" name="new_password" placeholder="Enter a new password">
+        </div>
+
+        <!-- Submit Button and Messages Container -->
+        <div class="form-actions">
+            <button type="button" onclick="saveAccountChanges()">Save Changes</button>
+
+            <!-- Success and Error messages (initially hidden) -->
+            <div id="account-message" class="message success" style="display: none;"></div>
+            <div id="account-error-message" class="message error" style="display: none;"></div>
+        </div>
+    </fieldset>
+</form>
         `;
 
         // calling getUserInfo() to populate the form with user info, such as first name, last name, and email.
@@ -47,33 +67,42 @@ function loadContent(section) {
         `;
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
-            <h2>Support</h2>
-            <div id="support-section">
-                <div id="create-ticket">
-                    <h3>Create a Support Ticket</h3>
-                    <br>
-                    <form id="ticketForm">
-                        <label for="category">Category:</label>
-                        <select id="category" required>
-                            <option value="general">General Issue</option>
-                            <option value="technical">Technical Issue</option>
-                            <option value="account">Account Management</option>
-                            <option value="bug/error">Bug/Error Report</option>
-                        </select>
-                        <br><br>
-                        <label for="description">Issue Description:</label>
-                        <br>
-                        <textarea id="description" rows="4" required></textarea>
-                        <br><br>
-                        <button style="background-color: #0099ff; color: white;" type="button" onclick="submitTicket()">Submit Ticket</button>
-                    </form>
-                    <div id="error-message" style="color: red; display: none;"></div>
-                </div>
-                <div id="ticket-list">
-                    <h3>Your Tickets</h3>
-                    <ul id="ticket-items"></ul>
-                </div>
+<section id="support-section">
+    <h2>Support</h2>
+
+    <!-- Create a Support Ticket Section -->
+    <div id="create-ticket">
+        <h3>Create a Support Ticket</h3>
+        <form id="ticketForm">
+            <div class="input-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="general">General Issue</option>
+                    <option value="technical">Technical Issue</option>
+                    <option value="account">Account Management</option>
+                    <option value="bug/error">Bug/Error Report</option>
+                </select>
             </div>
+
+            <div class="input-group">
+                <label for="description">Issue Description:</label>
+                <textarea id="description" name="description" rows="4" required placeholder="Describe the issue you are facing..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                <div id="ticket-message" class="message success" style="display: none;"></div>
+                <div id="ticket-error-message" class="message error" style="display: none;"></div>
+            </div>
+        </form>
+    </div>
+
+    <!-- List of Submitted Tickets -->
+    <div id="ticket-list">
+        <h3>Your Tickets</h3>
+        <ul id="ticket-items"></ul>
+    </div>
+</section>
         `;
         loadUserTickets();
     }
@@ -85,10 +114,14 @@ function submitTicket() {
     const description = document.getElementById('description').value;
     const errorMessage = document.getElementById('error-message');
 
+    document.getElementById("ticket-message").style.display = "none";
+    document.getElementById("ticket-error-message").style.display = "none";
+
     // Ensure the form is not empty or the description doesn't contain only spaces.
-    if (!category || !description || description.trim() === "") {
-        errorMessage.textContent = 'Please fill in all required fields.';
-        errorMessage.style.display = 'block';
+    if (!category || !description) {
+        // Show error message if validation fails
+        document.getElementById("ticket-error-message").textContent = "All fields are required!";
+        document.getElementById("ticket-error-message").style.display = "block";
         return;
     }
 
@@ -108,10 +141,11 @@ function submitTicket() {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                errorMessage.textContent = data.error;
-                errorMessage.style.display = 'block';
+                document.getElementById("ticket-error-message").textContent = "All fields are required!";
+                document.getElementById("ticket-error-message").style.display = "block";
             } else {
-                errorMessage.style.display = 'none';
+                document.getElementById("ticket-message").textContent = "Your support ticket has been submitted!";
+                document.getElementById("ticket-message").style.display = "block"; // Show success message
                 loadUserTickets(); // Reload tickets
                 document.getElementById('ticketForm').reset(); // Clear the form
             }
@@ -280,35 +314,35 @@ function renderTestResultsTable(data, testId) {
             </thead>
             <tbody>
                 ${data.test_results.map(result => {
-                    let comparisonText = result.comparison || "N/A";
-                    let colorStyle = '';  // Inline styles for color coding
+        let comparisonText = result.comparison || "N/A";
+        let colorStyle = '';  // Inline styles for color coding
 
-                    // Determine if the metric is for latency or accuracy
-                    const isLatency = result.metric.toLowerCase().includes("latency");
-                    const isAccuracy = result.metric.toLowerCase().includes("accuracy");
+        // Determine if the metric is for latency or accuracy
+        const isLatency = result.metric.toLowerCase().includes("latency");
+        const isAccuracy = result.metric.toLowerCase().includes("accuracy");
 
-                    // Apply color rules based on metric type and comparison value
-                    if (isLatency) {
-                        // Latency: Above average = red, Below average = green
-                        if (comparisonText === 'Above average') {
-                            colorStyle = 'color: red; font-weight: bold;';
-                        } else if (comparisonText === 'Below average') {
-                            colorStyle = 'color: green; font-weight: bold;';
-                        } else if (comparisonText === 'Average') {
-                            colorStyle = 'color: black; font-weight: bold;';
-                        }
-                    } else if (isAccuracy) {
-                        // Accuracy: Above average = green, Below average = red
-                        if (comparisonText === 'Above average') {
-                            colorStyle = 'color: green; font-weight: bold;';
-                        } else if (comparisonText === 'Below average') {
-                            colorStyle = 'color: red; font-weight: bold;';
-                        } else if (comparisonText === 'Average') {
-                            colorStyle = 'color: black; font-weight: bold;';
-                        }
-                    }
+        // Apply color rules based on metric type and comparison value
+        if (isLatency) {
+            // Latency: Above average = red, Below average = green
+            if (comparisonText === 'Above average') {
+                colorStyle = 'color: red; font-weight: bold;';
+            } else if (comparisonText === 'Below average') {
+                colorStyle = 'color: green; font-weight: bold;';
+            } else if (comparisonText === 'Average') {
+                colorStyle = 'color: black; font-weight: bold;';
+            }
+        } else if (isAccuracy) {
+            // Accuracy: Above average = green, Below average = red
+            if (comparisonText === 'Above average') {
+                colorStyle = 'color: green; font-weight: bold;';
+            } else if (comparisonText === 'Below average') {
+                colorStyle = 'color: red; font-weight: bold;';
+            } else if (comparisonText === 'Average') {
+                colorStyle = 'color: black; font-weight: bold;';
+            }
+        }
 
-                    return `
+        return `
                     <tr>
                         <td>${result.metric.replace(/_/g, ' ')}</td>
                         <td>${result.values.join(", ")}</td>  <!-- Display all values -->
@@ -318,7 +352,7 @@ function renderTestResultsTable(data, testId) {
                             ${comparisonText}
                         </td>
                     </tr>`;
-                }).join('')}
+    }).join('')}
             </tbody>
         </table>
     </div>
@@ -714,8 +748,6 @@ function getUserInfo() {
         });
 }
 
-
-
 // Enable dragging for the notification popout
 let isDragging = false;
 let offsetX, offsetY;
@@ -763,18 +795,18 @@ function toggleNotifications(event) {
     const notificationPopout = document.getElementById('notification-popout');
     const notificationBody = document.getElementById('notification-body');
     const notificationList = document.getElementById('notification-list');
-  
+
     // Toggle the "show" class for each element
     notificationPopout.classList.toggle('show');
     notificationBody.classList.toggle('show');
     notificationList.classList.toggle('show');
-    
+
     // Update the isNotificationsOpen variable based on the visibility of the popout
     isNotificationsOpen = notificationPopout.classList.contains('show');
     console.log("Popout visibility:", notificationPopout.classList.contains('show'));
-    
 
-    
+
+
 }
 
 isNotificationsOpen = false;
@@ -783,63 +815,63 @@ function update_notifications(event) {
     const action = event.target.getAttribute('data-action');
     //whether we want to load show just unread notifications or read notifications
     loadNotifications(action);
-    if(action == 'unread'){
+    if (action == 'unread') {
         document.getElementById('unread-tab').classList.add('active');
         document.getElementById('read-tab').classList.remove('active');
     }
-    else if(action == 'read'){
+    else if (action == 'read') {
         document.getElementById('unread-tab').classList.remove('active');
         document.getElementById('read-tab').classList.add('active');
     }
 }
 // function that loads in notifications based on the current logged in user
-function loadNotifications(loadType){
+function loadNotifications(loadType) {
     const notificationList = document.getElementById('notification-list');
-    if (!(lastNotifLoadType == loadType)){
-    notificationList.innerHTML = '';
+    if (!(lastNotifLoadType == loadType)) {
+        notificationList.innerHTML = '';
     }
 
     fetch(`/get_user_notifications/${loadType}`)
-    .then(response => response.json())
-    .then(data => {
-        const notifications = data.notifications;
-        if (notifications.length === 0) {
-            if (loadType == 'unread') {
-                notificationList.innerHTML = '<li> No new Notifications </li>';
-            }
-            else{
-                notificationList.innerHTML = '<li> No Notifications </li>';
-            }
-        } else if (!(lastNotifLoadType == loadType)){
-            notifications.forEach(notif => {
-                    
+        .then(response => response.json())
+        .then(data => {
+            const notifications = data.notifications;
+            if (notifications.length === 0) {
+                if (loadType == 'unread') {
+                    notificationList.innerHTML = '<li> No new Notifications </li>';
+                }
+                else {
+                    notificationList.innerHTML = '<li> No Notifications </li>';
+                }
+            } else if (!(lastNotifLoadType == loadType)) {
+                notifications.forEach(notif => {
+
                     const notifItem = document.createElement('li');
 
                     const separator = document.createElement('li');
                     notifItem.className = 'separator';
                     notificationList.appendChild(separator);
-    
+
                     const notificationTime = new Date(notif.time_created);
                     const now = new Date();
 
                     const current_date = now.getDate() + now.getMonth() + now.getFullYear()
                     const notif_date = notificationTime.getDate() + notificationTime.getMonth() + notificationTime.getFullYear()
-                    
+
                     const dateSpan = document.createElement('span');
                     if (current_date == notif_date) {
                         dateSpan.textContent = `Today at ${new Date(notif.time_created).toLocaleString([], { hour: 'numeric', minute: '2-digit' })}`;
                     }
-                    else{
-                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString([], {year:'2-digit', month:'2-digit', day:'2-digit', hour:'numeric', minute: '2-digit'})}`;
+                    else {
+                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString([], { year: '2-digit', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit' })}`;
                     }
 
                     const headerSpan = document.createElement('span');
                     headerSpan.textContent = `${notif.header}`;
                     headerSpan.style.fontWeight = 'bold';
-    
+
                     const messageSpan = document.createElement('span');
                     messageSpan.textContent = `${notif.message}`;
-                    
+
                     notifItem.appendChild(dateSpan);
                     notifItem.appendChild(document.createElement('br'));
                     notifItem.appendChild(headerSpan);
@@ -852,7 +884,7 @@ function loadNotifications(loadType){
                         archiveButton.onclick = () => dismissNotification(notif.id, notifItem);
                         notifItem.appendChild(archiveButton);
                     }
-                    else{
+                    else {
                         const archiveButton = document.createElement(`button`);
                         archiveButton.textContent = 'Archive';
                         archiveButton.style.marginRight = '5px';
@@ -863,18 +895,18 @@ function loadNotifications(loadType){
                         readButton.onclick = () => markAsRead(notif.id, notifItem);
                         notifItem.appendChild(readButton);
                     }
-                    
-                    notificationList.appendChild(notifItem);
-            });
-        }
 
-        if (lastNotifLoadType == 'read' && loadType != 'read') {
-            lastNotifLoadType = 'unread';
-        } else if(lastNotifLoadType == 'unread' && loadType != 'unread'){
-            lastNotifLoadType = 'read';
-        }
-    })
-    .catch(error => console.error('Error:', error));    
+                    notificationList.appendChild(notifItem);
+                });
+            }
+
+            if (lastNotifLoadType == 'read' && loadType != 'read') {
+                lastNotifLoadType = 'unread';
+            } else if (lastNotifLoadType == 'unread' && loadType != 'unread') {
+                lastNotifLoadType = 'read';
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // removes the notification based on the notifItem corrisponding to the button that was pressed
@@ -898,11 +930,11 @@ function dismissNotification(id, notifItem) {
         .catch(error => console.error('Error updating notification', error))
 }
 // marks the notification as read based on the notifItem corrisponding to the button that was pressed
-function markAsRead(id ,notifItem){
+function markAsRead(id, notifItem) {
     const notificationList = document.getElementById('notification-list');
     notificationList.removeChild(notifItem);
 
-    fetch(`/mark_as_read/${id}/`,{
+    fetch(`/mark_as_read/${id}/`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -910,16 +942,15 @@ function markAsRead(id ,notifItem){
         },
         body: JSON.stringify({ is_read: true })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('failed to mark the notification as read')
-        }
-    })
-    .catch(error => console.error('Error updating notification', error))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('failed to mark the notification as read')
+            }
+        })
+        .catch(error => console.error('Error updating notification', error))
 }
 
 // Automatically load the "Dashboard" tab when the page is first loaded
 window.addEventListener('load', () => {
     loadContent('dashboard');
 });
-

@@ -65,8 +65,8 @@ function loadRegistrationRequests() {
                     const listItem = document.createElement('li');
                     listItem.innerHTML = `
                         Username: ${request.username}
-                        <button onclick="approveRegistration(${request.id})">Approve</button>
-                        <button onclick="denyRegistration(${request.id})">Deny</button>
+                        <button class="btn-green" onclick="approveRegistration(${request.id})">Approve</button>
+                        <button class="btn-red" onclick="denyRegistration(${request.id})">Deny</button>
                     `;
                     registrationList.appendChild(listItem);
                 });
@@ -130,19 +130,6 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
-// Add admin panel button
-window.addEventListener('load', () => {
-    loadContent('dashboard');
-    const adminButton = document.createElement('button');
-    adminButton.textContent = "Admin Panel";
-    adminButton.onclick = () => {
-        window.location.href = '/admin/';
-    };
-    document.body.appendChild(adminButton);
-});
-
-
 
 // Enable dragging for the notification popout
 let isDragging = false;
