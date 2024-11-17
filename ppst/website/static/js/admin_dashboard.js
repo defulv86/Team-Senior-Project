@@ -11,8 +11,13 @@ function loadContent(section) {
         dynamicContent.innerHTML = `
             <h2>Support Tickets</h2>
             <div id="support-section">
+                <label for="sort-select">Sort by:</label>
+                <select id="sort-select" onchange="loadUserTickets(this.value)">
+                    <option value="created_at">Date Created</option>
+                    <option value="category">Category</option>
+                    <option value="user__username">Submitted By</option>
+                </select>
                 <div id="ticket-list">
-                    <h3>Your Tickets</h3>
                     <ul id="ticket-items"></ul>
                 </div>
             </div>
@@ -29,12 +34,33 @@ function loadContent(section) {
     }
 }
 
-// Function to load the user's support tickets
-function loadUserTickets() {
-    const ticketList = document.getElementById('ticket-items');
-    ticketList.innerHTML = '';  // Clear the list
+function updateTicketStatus(ticketId, newStatus) {
+    fetch(`/update_ticket_status/${ticketId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ status: newStatus }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Ticket status updated to ${data.status}.`);
+            loadUserTickets(); // Reload the ticket list
+        } else {
+            alert('Error updating ticket status: ' + (data.error || 'Unknown error.'));
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
 
-    fetch('/get_user_tickets/')
+// Enhance ticket rendering to include status dropdown
+function loadUserTickets(sortBy = 'created_at', statusFilter = '') {
+    const ticketList = document.getElementById('ticket-items');
+    ticketList.innerHTML = ''; // Clear the list
+
+    fetch(`/admin_tickets/?sort_by=${sortBy}&status=${statusFilter}`)
         .then(response => response.json())
         .then(data => {
             if (data.length === 0) {
@@ -42,12 +68,44 @@ function loadUserTickets() {
             } else {
                 data.forEach(ticket => {
                     const ticketItem = document.createElement('li');
-                    ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                    ticketItem.innerHTML = `
+                        <div><strong>Created by:</strong> ${ticket.user__username}</div>
+                        <div><strong>Category:</strong> ${ticket.category}</div>
+                        <div><strong>Description:</strong> ${ticket.description}</div>
+                        <div><strong>Submitted:</strong> ${new Date(ticket.created_at).toLocaleString()}</div>
+                        <div>
+                            <strong>Status:</strong>
+                            <select onchange="updateTicketStatus(${ticket.id}, this.value)">
+                                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
+                                <option value="in_progress" ${ticket.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+                                <option value="closed" ${ticket.status === 'closed' ? 'selected' : ''}>Closed</option>
+                            </select>
+                        </div>
+                    `;
                     ticketList.appendChild(ticketItem);
                 });
             }
         })
         .catch(error => console.error('Error:', error));
+}
+
+function markTicketCompleted(ticketId) {
+    fetch(`/complete_ticket/${ticketId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Ticket marked as completed.');
+            loadUserTickets();
+        } else {
+            alert('Error marking ticket as completed.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 // Function to load registration requests

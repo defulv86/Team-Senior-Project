@@ -167,7 +167,7 @@ function loadUserTickets() {
             } else {
                 data.forEach(ticket => {
                     const ticketItem = document.createElement('li');
-                    ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                    ticketItem.textContent = `Created by: ${ticket.user__username}, Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
                     ticketList.appendChild(ticketItem);
                 });
             }
