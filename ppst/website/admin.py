@@ -30,7 +30,7 @@ class TestResponse(admin.ModelAdmin):
     readonly_fields = ('time_submitted',)
 
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'test', 'header', 'message', 'time_created', 'is_archived', 'is_read')
+    list_display = ('id','user', 'info', 'header', 'message', 'time_created', 'is_archived', 'is_read')
 
     def mark_as_unread(modeladmin, request, queryset):
         queryset.update(is_read=False)

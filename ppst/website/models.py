@@ -120,7 +120,7 @@ class Ticket(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    test = models.ForeignKey(Test, on_delete=models.CASCADE, default=1)
+    info = models.CharField(max_length=50,default='')
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
     time_created = models.DateTimeField(auto_now_add=True)
@@ -128,7 +128,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     def  __str__(self):
-        return   str(self.id) + " Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)
+        return   str(self.id) + " Header: " + self.header  + " | " + str(self.time_created)
 
 class Registration(models.Model):
     username = models.CharField(max_length=150, unique=True)

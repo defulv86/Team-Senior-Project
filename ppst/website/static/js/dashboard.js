@@ -106,6 +106,7 @@ function loadContent(section) {
         `;
         loadUserTickets();
     }
+    closeNotifications();
 }
 
 // Function to submit a ticket
@@ -774,13 +775,17 @@ document.addEventListener('mouseup', () => {
     notificationPopout.style.cursor = 'default';
 });
 
+var isNotificationsOpen = false;
+var lastNotifLoadType = 'read'
+
 // Close notifications with the close button
 function closeNotifications() {
-    notificationPopout.classList.toggle('show');
-    notificationBody.classList.toggle('show');
-    notificationList.classList.toggle('show');
+    notificationPopout.classList.remove('show');
+    notificationBody.classList.remove('show');
+    notificationList.classList.remove('show');
+    isNotificationsOpen = notificationPopout.classList.contains('show');
 }
-lastNotifLoadType = 'read'
+
 // Show or hide the notification popout
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
@@ -809,7 +814,7 @@ function toggleNotifications(event) {
 
 }
 
-isNotificationsOpen = false;
+
 
 function update_notifications(event) {
     const action = event.target.getAttribute('data-action');

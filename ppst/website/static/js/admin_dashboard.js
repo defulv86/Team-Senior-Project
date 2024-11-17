@@ -1,7 +1,6 @@
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
-
     if (section === 'dashboard') {
         dynamicContent.innerHTML = `
             <h2>Dashboard</h2>
@@ -27,6 +26,7 @@ function loadContent(section) {
         `;
         loadRegistrationRequests();
     }
+    closeNotifications();
 }
 
 // Function to load the user's support tickets
@@ -136,7 +136,8 @@ let isDragging = false;
 let offsetX, offsetY;
 
 const notificationPopout = document.getElementById('notification-popout');
-const notificationHeader = document.querySelector('.notification-header');
+const notificationBody = document.getElementById('notification-body');
+const notificationList = document.getElementById('notification-list');
 
 notificationHeader.addEventListener('mousedown', (e) => {
     isDragging = true;
@@ -156,14 +157,17 @@ document.addEventListener('mouseup', () => {
     isDragging = false;
     notificationPopout.style.cursor = 'default';
 });
+var isNotificationsOpen = false;
+var lastNotifLoadType = 'read'
+
 
 // Close notifications with the close button
 function closeNotifications() {
-    notificationPopout.classList.toggle('show');
-    notificationBody.classList.toggle('show');
-    notificationList.classList.toggle('show');
+    notificationPopout.classList.remove('show');
+    notificationBody.classList.remove('show');
+    notificationList.classList.remove('show');
+    isNotificationsOpen = notificationPopout.classList.contains('show');
 }
-lastNotifLoadType = 'read'
 // Show or hide the notification popout
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
@@ -192,7 +196,7 @@ function toggleNotifications(event) {
     
 }
 
-isNotificationsOpen = false;
+
 
 function update_notifications(event) {
     const action = event.target.getAttribute('data-action');

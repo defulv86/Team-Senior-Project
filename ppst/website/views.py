@@ -55,8 +55,18 @@ def register_view(request):
             if Registration.objects.filter(username=username).exists():
                 error_message = "Username already taken. Please choose a different username."
             else:
-                # Save the registration request with plain text password (temporarily)
+                # Save the registration request with plain text password (temporarily) and send a notification to all staff members
                 try:
+                    admins = User.objects.filter(is_staff=True)
+                    for user in admins:
+                        Notification.objects.create(
+                            user=user,
+                            info = f"registration:{username}",
+                            header="New registration request",
+                            message=f"The user {username}, has requested the creation of a new account. Please proceed to the registration tab to approve or deny."
+                        )
+
+
                     registration = Registration(username=username, password=password)
                     registration.save()
                     success_message = "Your registration request has been submitted for admin approval."
@@ -104,11 +114,21 @@ def get_registration_requests(request):
     else:
         return JsonResponse({"error": "Unauthorized"}, status=403)
 
+#archive all unarchived notifications associated with a registration request
+def remove_reg_notifs(registration):
+            registration_notifications = Notification.objects.filter(info=f"registration:{registration.username}", is_archived=False)
+            for notification in registration_notifications:
+                notification.delete()
+
 @csrf_exempt
 def approve_registration(request, registration_id):
     if request.user.is_staff and request.method == 'POST':
         try:
+
             registration = Registration.objects.get(id=registration_id)
+
+            remove_reg_notifs(registration)
+
             # Create a new user with a hashed password
             user = User.objects.create(
                 username=registration.username,
@@ -125,6 +145,7 @@ def deny_registration(request, registration_id):
     if request.user.is_staff and request.method == 'POST':
         try:
             registration = Registration.objects.get(id=registration_id)
+            remove_reg_notifs(registration)
             registration.delete()
             return JsonResponse({"success": True})
         except Registration.DoesNotExist:
@@ -295,7 +316,6 @@ def mark_test_complete(request, link):
         # Create a notification for test completion
         Notification.objects.create(
             user=test.user,
-            test=test,
             header="Test Completed",
             message=f"Your patient has completed the test for link: {test.link}. Results are available to view."
         )
@@ -312,7 +332,6 @@ def invalidate_test(request, link):
         check_test_status(request, link)
         Notification.objects.create(
             user=test.user,
-            test=test,
             header="Test Invalidated",
             message=f"Your patient has exited the test without completion for link: {test.link}. Do you want to create a test?"
         )
@@ -337,7 +356,6 @@ def check_and_notify_test_status():
             if not Notification.objects.filter(test=test, header="Test Expiry Warning").exists():
                 Notification.objects.create(
                     user=test.user,
-                    test=test,
                     header="Test Expiry Warning",
                     message=f"Your patient has not started or completed the test yet. The test link ({test.link}) will expire in 24 hours if not completed.",
                 )
@@ -347,7 +365,6 @@ def check_and_notify_test_status():
             if not Notification.objects.filter(test=test, header="Test Expired").exists():
                 Notification.objects.create(
                     user=test.user,
-                    test=test,
                     header="Test Expired",
                     message=f"Test link {test.link} has expired because it was not completed in one week.",
                 )
@@ -360,7 +377,6 @@ def start_test(request, link):
 
         Notification.objects.create(
             user=test.user,
-            test=test,
             header="Test Started",
             message=f"The patient has officially started the test for link: {test.link}."
         )
@@ -931,11 +947,10 @@ def get_user_notifications(request, load_type):
         if load_type != 'read' and load_type != 'unread':
             return JsonResponse({'error': 'Invalid request'}, status=400)
         
-        tests = Test.objects.filter(user=request.user)
         if load_type == 'read':
-            notifications = Notification.objects.filter(test__in=tests, is_archived=False, is_read=True).values('id','header', 'message', 'time_created', 'is_archived','is_read').order_by('-time_created')
+            notifications = Notification.objects.filter(user=request.user, is_archived=False, is_read=True).values('id','header', 'message', 'time_created', 'is_archived','is_read').order_by('-time_created')
         elif load_type == 'unread':
-            notifications = Notification.objects.filter(test__in=tests, is_archived=False, is_read=False).values('id','header', 'message', 'time_created', 'is_archived').order_by('-time_created')
+            notifications = Notification.objects.filter(user=request.user, is_archived=False, is_read=False).values('id','header', 'message', 'time_created', 'is_archived').order_by('-time_created')
         data = {
             "notifications": list(notifications),
         }
