@@ -75,23 +75,40 @@ function flashStimulus(stimulus) {
     const stimulusContent = stimulus.stimulus_content;
     let currentCharIndex = 0;
 
-    // allow new voices to be selected: 77-94
-    let voices = [];
-    function populateVoices() {
-        voices = window.speechSynthesis.getVoices();
-        const voiceSelect = document.getElementById('voice-select');
-        voiceSelect.innerHTML = '';
+    // allow new voices to be selected: 79-111
+    var voices;
 
-        // Populate the dropdown with available voices
-        voices.forEach((voice) => {
-            const option = document.createElement('option');
-            option.value = voice.name; 
-            option.textContent = `${voice.name} (${voice.lang})`; 
-            voiceSelect.appendChild(option);
+    if (speechSynthesis) {
+      speechSynthesis.onvoiceschanged = function() {
+        voices = speechSynthesis.getVoices();
+        var $voiceSelect = $('#voiceSelect');
+        $voiceSelect.empty();
+        // Populate dropdown with voice options
+        voices.forEach(function (voice, index) {
+          $voiceSelect.append('<option value="' + index + '">' + voice.name + ' (' + voice.lang + ')</option>');
         });
+      };
+
+      $('#voiceSelect').change(function () {
+        var selectedVoiceIndex = $(this).val();
+
+        if (selectedVoiceIndex === '') {
+          alert('Please select a voice.');
+          return;
+        }
+
+        var voice = voices[selectedVoiceIndex];
+        say(predefinedText, voice);
+      });
+    } else {
+      alert("Your browser doesn't support the Speech Synthesis API.");
     }
-    window.speechSynthesis.onvoiceschanged = populateVoices;
-    populateVoices();
+
+    function say(text, voice) { //change to below fucntion
+      var speech = new SpeechSynthesisUtterance(text);
+      speech.voice = voice;
+      speechSynthesis.speak(speech);
+    }
     //////////////////////////////////////////////
 
     // comment out & remove the following lines once above works
