@@ -56,7 +56,6 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: left;
-    padding-right: 1100px;
     /* Align left */
 }
 
@@ -72,7 +71,7 @@ body {
 .header-center {
     display: flex;
     align-items: center;
-    flex-grow: 1;
+    flex-grow: 0.01;
 }
 
 /* Logo Styling */
