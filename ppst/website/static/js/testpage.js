@@ -63,12 +63,14 @@ function markTestComplete(testLink) {
 
 function flashStimulus(stimulus) {
     const stimulusDiv = document.getElementById('stimulus');
+    const logoDiv = document.getElementById('logo');
     const digitKeyboard = document.getElementById('digit-keyboard');
     const alphanumericKeyboard = document.getElementById('alphanumeric-keyboard');
     const responseSection = document.getElementById('response-section');
 
     // Hide both keyboards and the response section initially
     digitKeyboard.style.display = 'none';
+    logoDiv.style.display = 'block';
     alphanumericKeyboard.style.display = 'none';
     responseSection.style.display = 'none'; // Hide the response section
 
