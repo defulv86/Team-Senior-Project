@@ -593,8 +593,9 @@ textarea:focus {
 }
 
 .notification-body {
-    max-height: 220px;
-    padding: 10px 15px;
+    max-height: 250px;
+    padding-left: 10px;
+    padding-right: 10px;
     overflow-y: auto;
     background-color: #f9f9f9;
     border-bottom-left-radius: 8px;
@@ -603,7 +604,6 @@ textarea:focus {
 
 .notification-body>ul li {
     list-style-type: none;
-    padding: 8px 0;
     border-bottom: 1px solid #eee;
     font-size: 14px;
 }
@@ -673,6 +673,12 @@ textarea:focus {
     display: flex;
     gap: 15px;
     justify-content: center;
+}
+
+.test-status-filter{
+    display: flex;
+    max-width:500px;
+    padding-top: 25px;
 }
 
 #test-content {

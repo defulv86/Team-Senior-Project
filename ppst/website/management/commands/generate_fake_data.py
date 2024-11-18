@@ -82,7 +82,6 @@ class Command(BaseCommand):
         for _ in range(10):
             Notification.objects.create(
                 user=random.choice(users),
-                test=Test.objects.order_by('?').first(),
                 header=fake.sentence(nb_words=6),
                 message=fake.sentence(nb_words=12),
                 time_created=timezone.now(),
