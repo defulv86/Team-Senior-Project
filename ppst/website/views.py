@@ -883,7 +883,17 @@ def submit_ticket(request):
             return JsonResponse({'error': 'Please fill in all fields.'}, status=400)
 
         # Save ticket to the database
-        Ticket.objects.create(user=request.user, category=category, description=description)
+        new_ticket = Ticket.objects.create(user=request.user, category=category, description=description)
+
+        #create a notification to alert admins of the issue
+        admins = User.objects.filter(is_staff=True)
+        for admin in admins:
+            Notification.objects.create(
+                                user=admin,
+                                header=f"New support ticket",
+                                info = f"{new_ticket.id}",
+                                message=f"The user {new_ticket.user.username} has created a new {new_ticket.category} support ticket. Please review in the Support tab."
+                            )
         return JsonResponse({'message': 'Ticket submitted successfully!'}, status=200)
     
     return JsonResponse({'error': 'Invalid request.'}, status=400)
