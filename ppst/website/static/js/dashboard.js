@@ -57,9 +57,19 @@ function loadContent(section) {
     } else if (section === 'tests') {
         dynamicContent.innerHTML = `
             <h2>Tests</h2>
+            
             <div class="test-buttons">
                 <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
                 <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
+            </div>
+            <div class="test-status-filter">
+                <label for="test_status_menu">test status:</label>
+                <select id="test_status_menu" name="test_status_menu">
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="invalid">Invalid</option>
+                </select>
             </div>
             <div id="test-content">
                 <!-- Dynamic content for tests will be loaded here -->
@@ -235,10 +245,20 @@ function generateTestLink() {
 
 function retrieveTestResults() {
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `<h2>Retrieve Patient Test Results</h2>`;
+    testContent.innerHTML = `<h2>Patient Test Results</h2>`;
 
+    const test_status = document.getElementById('test_status_menu');
+    const test_status_selection = test_status.options[test_status.selectedIndex].text;
+
+    // load legend if all test statuses are loaded in
+    if (test_status_selection == 'All') {
+        testContent.innerHTML = `<h2>Patient Test Results</h2>
+        <h3>Blue - Complete</h3>
+        <h3>Red - Invalid</h3>
+        <h3>Grey - Pending</h3><br>`;
+    }
     // Fetch the test results
-    fetch('/get_test_results/')
+    fetch(`/get_test_results/${test_status_selection}`)
         .then(response => response.json())
         .then(data => {
             data.tests.forEach(test => {
@@ -254,7 +274,7 @@ function retrieveTestResults() {
 
                 testContent.innerHTML += `
                     <button class="${colorClass}" ${onclickAttr}>
-                        Test ID ${test.id} | Link: ${test.link} | Status: ${test.status}
+                        Test ID ${test.id} | Link: ${test.link}
                     </button><br>
                 `;
             });
@@ -566,8 +586,10 @@ function backToTestResults() {
 // Function to toggle visibility of test buttons
 function toggleTestButtons() {
     const testButtons = document.querySelector('.test-buttons');
+    const testStatusFilter = document.querySelector('.test-status-filter')
     if (testButtons) {
         testButtons.style.display = isViewingTest ? 'none' : 'block';
+        testStatusFilter.style.display = isViewingTest ? 'none' : 'block';
     }
 }
 
@@ -755,6 +777,8 @@ let offsetX, offsetY;
 
 const notificationPopout = document.getElementById('notification-popout');
 const notificationHeader = document.querySelector('.notification-header');
+const notificationBody = document.getElementById('notification-body');
+const notificationList = document.getElementById('notification-list');
 
 notificationHeader.addEventListener('mousedown', (e) => {
     isDragging = true;
@@ -795,11 +819,6 @@ function toggleNotifications(event) {
     if (!isNotificationsOpen) {
         loadNotifications("unread");
     }
-
-    // Toggle the display of the notification popout
-    const notificationPopout = document.getElementById('notification-popout');
-    const notificationBody = document.getElementById('notification-body');
-    const notificationList = document.getElementById('notification-list');
 
     // Toggle the "show" class for each element
     notificationPopout.classList.toggle('show');

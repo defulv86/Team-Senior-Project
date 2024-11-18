@@ -675,6 +675,12 @@ textarea:focus {
     justify-content: center;
 }
 
+.test-status-filter{
+    display: flex;
+    max-width:500px;
+    padding-top: 25px;
+}
+
 #test-content {
     margin-top: 20px;
 }

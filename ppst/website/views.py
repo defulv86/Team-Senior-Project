@@ -386,9 +386,17 @@ def start_test(request, link):
 
 
 @login_required
-def get_test_results(request):
-    tests = Test.objects.filter(user=request.user)
-    
+def get_test_results(request, test_status):
+    tests = []
+    if test_status == "All":
+        tests = Test.objects.filter(user=request.user)
+    elif test_status == "Pending":
+        tests = Test.objects.filter(user=request.user, status='pending')
+    elif test_status == "Completed":
+        tests = Test.objects.filter(user=request.user, status='completed')
+    elif test_status == "Invalid":
+        tests = Test.objects.filter(user=request.user, status='invalid')
+
     # Update the status for each test based on conditions
     test_data = []
     for test in tests:
