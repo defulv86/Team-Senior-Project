@@ -10,11 +10,10 @@ Installation along with instructions to make sure it works properly.
 
 4. Activate the virtual environment: source venv/scripts/activate
 
-5. Install the django into the directory: pip install django
-   
-6. Install the dateutil into the directory: pip install python-dateutil
+5. Install the Django and Python-Dateutil with this command:
+    pip install -r requirements.txt
 
-7. Open Task Scheduler on Windows:
+6. Open Task Scheduler on Windows:
     - Click on the "Create Task" button.
     - Give the Task a name (Check Test Status)
     - Go to the 'Triggers' tab and click 'New'.
@@ -30,12 +29,18 @@ Installation along with instructions to make sure it works properly.
     - OPTIONAL. In the Settings tab, you can choose whether you want to stop the task if it runs longer than an hour but that's up to you.
     - Click ok
 
-8. in the Team-Senior-Project/ppst directory, run this command:
+7. in the Team-Senior-Project/ppst directory, run this command:
     - Windows: py migrationsfix.py
 
     - macOS/Linux will need to run these:
         python manage.py makemigrations
         python manage.py migrate
         python manage.py shell < fixture.py
+
+8. Once you install the requirements needed.. You need to make one edit to a file in your virtual environment.
+    - Go to your venv/Lib/django/contrib/admin/templates/admin/base.html
+    - At line 48, replace the line with: 
+        - <a href="{% url 'admin_dashboard' %}" class="headerlink">Back to Admin Dashboard</a>
+    - Save the file.
 
 9. Run the project: py manage.py runserver

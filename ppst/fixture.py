@@ -84,13 +84,13 @@ invalid_test_1 = Test.objects.create(
 )
 
 
-
 # Create a Ticket instance submitted by DoctorWho
 Ticket.objects.create(
     user=doctor_who,
     category='general',
     description="This is a sample issue reported by DoctorWho.",
-    created_at=timezone.now()
+    created_at=timezone.now(),
+    status='open'  # Set the default or desired status
 )
 
 Notification.objects.create(

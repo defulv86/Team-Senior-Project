@@ -1,8 +1,9 @@
 from django.urls import path
 from . import views
-
+from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('', views.home, name='home'),
+    path('admin/logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -12,6 +13,9 @@ urlpatterns = [
     path('get-stimuli/', views.get_stimuli, name='get_stimuli'),
     path('submit_ticket/', views.submit_ticket, name='submit_ticket'),
     path('get_user_tickets/', views.get_user_tickets, name='get_user_tickets'),
+    path('admin_tickets/', views.admin_view_tickets, name='admin_tickets'),
+    path('update_ticket_status/<int:ticket_id>/', views.update_ticket_status, name='update_ticket_status'),
+    path('complete_ticket/<int:ticket_id>/', views.complete_ticket, name='complete_ticket'),
     path('create_test/', views.create_test, name='create_test'),  # Create test endpoint
     path('testpage/<str:link>/', views.test_page_view, name='testpage'),  # New URL for taking the test
     path('get_test_results/<str:test_status>/', views.get_test_results, name='get_test_results'),  # Get user's tests results
