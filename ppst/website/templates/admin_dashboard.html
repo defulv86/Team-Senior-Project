@@ -63,13 +63,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#adminpanel" onclick="loadContent('adminpanel')" title="Admin Panel">
+                    <a href="{% url 'admin:index' %}" title="Admin Panel">
                         <img class="icon" src="{% static 'images/AdminPanel.png' %}" alt="AdminPanel Icon">
                         <span class="icon-text">Admin Panel</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#support" onclick="loadContent('Support')" title="Support">
+                    <a href="#support" onclick="loadContent('support')" title="Support">
                         <img class="icon" src="{% static 'images/support.png' %}" alt="Support Icon">
                         <span class="icon-text">Support</span>
                     </a>

@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.utils import timezone
 from datetime import timedelta, datetime
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification, Registration
@@ -37,7 +38,6 @@ def login_view(request):
             error_message = "Invalid username or password."  # Set the error message
     
     return render(request, 'login.html', {'error_message': error_message})
-
 
 def register_view(request):
     error_message = None
@@ -876,9 +876,68 @@ def submit_ticket(request):
 @login_required
 def get_user_tickets(request):
     if request.method == 'GET':
-        tickets = Ticket.objects.filter(user=request.user).values('category', 'description', 'created_at')
+        tickets = Ticket.objects.filter(user=request.user).select_related('user').values(
+            'id', 'category', 'description', 'created_at', 'user__username'
+        )
         return JsonResponse(list(tickets), safe=False)
     return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+# Ticket View for Administrators in their Dashboard
+def admin_view_tickets(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    sort_by = request.GET.get('sort_by', 'created_at')
+    status_filter = request.GET.get('status', None)  # Optional status filter
+    tickets = Ticket.objects.all()
+
+    if status_filter:
+        tickets = tickets.filter(status=status_filter)
+
+    tickets = tickets.order_by(sort_by)
+    ticket_data = tickets.values(
+        'id', 'category', 'description', 'created_at', 'status', 'user__username'
+    )
+    
+    return JsonResponse(list(ticket_data), safe=False)
+
+# Administrator begins working on a ticket.
+@csrf_exempt
+@login_required
+def update_ticket_status(request, ticket_id):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        ticket = Ticket.objects.get(id=ticket_id)
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        if new_status not in dict(Ticket.STATUS_CHOICES):
+            return JsonResponse({'error': 'Invalid status'}, status=400)
+
+        ticket.status = new_status
+        ticket.save()
+        return JsonResponse({'success': True, 'status': ticket.status})
+    except Ticket.DoesNotExist:
+        return JsonResponse({'error': 'Ticket not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+# Administrator marks a ticket as completed.
+@csrf_exempt
+@login_required
+def complete_ticket(request, ticket_id):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        ticket = Ticket.objects.get(id=ticket_id)
+        ticket.completed = True
+        ticket.save()
+        return JsonResponse({'success': True})
+    except Ticket.DoesNotExist:
+        return JsonResponse({'error': 'Ticket not found'}, status=404)
 
 @login_required
 def update_account(request):
