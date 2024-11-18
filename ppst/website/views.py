@@ -949,6 +949,20 @@ def update_ticket_status(request, ticket_id):
 
         if new_status not in dict(Ticket.STATUS_CHOICES):
             return JsonResponse({'error': 'Invalid status'}, status=400)
+        
+
+        if new_status == "closed":
+            notifs = Notification.objects.filter(info=ticket.id)
+            for notif in notifs:
+                notif.delete()
+            
+            # create a notification to notify the user that their ticket was closed
+            Notification.objects.create(
+            user = ticket.user,
+            info = f"{ticket.id}",
+            header = "Issue closed",
+            message = f"Your {ticket.category} issue has been marked as closed"
+        )
 
         ticket.status = new_status
         ticket.save()
@@ -969,6 +983,7 @@ def complete_ticket(request, ticket_id):
         ticket = Ticket.objects.get(id=ticket_id)
         ticket.completed = True
         ticket.save()
+
         return JsonResponse({'success': True})
     except Ticket.DoesNotExist:
         return JsonResponse({'error': 'Ticket not found'}, status=404)
