@@ -62,6 +62,7 @@ function loadContent(section) {
                 <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
                 <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
             </div>
+
             <div class="test-status-filter">
                 <label for="test_status_menu">test status:</label>
                 <select id="test_status_menu" name="test_status_menu">
@@ -71,48 +72,50 @@ function loadContent(section) {
                     <option value="invalid">Invalid</option>
                 </select>
             </div>
+            <button onclick="retrieveTestResults()" class="apply-filter-button">Apply Filter</button>
             <div id="test-content">
                 <!-- Dynamic content for tests will be loaded here -->
             </div>
         `;
+        toggleTestStatusFilter(false);
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
-<section id="support-section">
-    <h2>Support</h2>
+            <section id="support-section">
+                <h2>Support</h2>
 
-    <!-- Create a Support Ticket Section -->
-    <div id="create-ticket">
-        <h3>Create a Support Ticket</h3>
-        <form id="ticketForm">
-            <div class="input-group">
-                <label for="category">Category:</label>
-                <select id="category" name="category" required>
-                    <option value="general">General Issue</option>
-                    <option value="technical">Technical Issue</option>
-                    <option value="account">Account Management</option>
-                    <option value="bug/error">Bug/Error Report</option>
-                </select>
-            </div>
+                <!-- Create a Support Ticket Section -->
+                <div id="create-ticket">
+                    <h3>Create a Support Ticket</h3>
+                    <form id="ticketForm">
+                        <div class="input-group">
+                        <label for="category">Category:</label>
+                        <select id="category" name="category" required>
+                            <option value="general">General Issue</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="account">Account Management</option>
+                            <option value="bug/error">Bug/Error Report</option>
+                        </select>
+                        </div>
 
-            <div class="input-group">
-                <label for="description">Issue Description:</label>
-                <textarea id="description" name="description" rows="4" required placeholder="Describe the issue you are facing..."></textarea>
-            </div>
+                        <div class="input-group">
+                            <label for="description">Issue Description:</label>
+                            <textarea id="description" name="description" rows="4" required placeholder="Describe the issue you are facing..."></textarea>
+                        </div>
 
-            <div class="form-actions">
-                <button type="button" onclick="submitTicket()">Submit Ticket</button>
-                <div id="ticket-message" class="message success" style="display: none;"></div>
-                <div id="ticket-error-message" class="message error" style="display: none;"></div>
-            </div>
-        </form>
-    </div>
+                        <div class="form-actions">
+                            <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                            <div id="ticket-message" class="message success" style="display: none;"></div>
+                            <div id="ticket-error-message" class="message error" style="display: none;"></div>
+                        </div>
+                    </form>
+                </div>
 
-    <!-- List of Submitted Tickets -->
-    <div id="ticket-list">
-        <h3>Your Tickets</h3>
-        <ul id="ticket-items"></ul>
-    </div>
-</section>
+                <!-- List of Submitted Tickets -->
+                <div id="ticket-list">
+                    <h3>Your Tickets</h3>
+                    <ul id="ticket-items"></ul>
+                </div>
+            </section>
         `;
         loadUserTickets();
     }
@@ -204,6 +207,8 @@ function getCookie(name) {
 
 // Function that creates a new test with a given age of 18 or older and stores it into the backend as a link.
 function createTest() {
+    // Hide the test-status filter
+    toggleTestStatusFilter(false);
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
         <h2>Create a New Test</h2>
@@ -244,20 +249,43 @@ function generateTestLink() {
 }
 
 function retrieveTestResults() {
+    // Show the test-status filter
+    toggleTestStatusFilter(true);
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `<h2>Patient Test Results</h2>`;
 
     const test_status = document.getElementById('test_status_menu');
     const test_status_selection = test_status.options[test_status.selectedIndex].text;
 
-    // load legend if all test statuses are loaded in
-    if (test_status_selection == 'All') {
-        testContent.innerHTML = `<h2>Patient Test Results</h2>
-        <h3>Blue - Complete</h3>
-        <h3>Red - Invalid</h3>
-        <h3>Grey - Pending</h3><br>`;
+    if (test_status_selection === 'All') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-green">Complete</h3>
+                <h3 class="legend-gray">Pending</h3>
+                <h3 class="legend-red">Invalid</h3>
+                
+            </div>`;
     }
-    // Fetch the test results
+    if (test_status_selection === 'Completed') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-green">Complete</h3>
+            </div>`;
+    }
+    if (test_status_selection === 'Invalid') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-red">Invalid</h3>
+            </div>`;
+    }
+    if (test_status_selection === 'Pending') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-gray">Pending</h3>
+            </div>`;
+    }
+
+
     fetch(`/get_test_results/${test_status_selection}`)
         .then(response => response.json())
         .then(data => {
@@ -275,8 +303,7 @@ function retrieveTestResults() {
                 testContent.innerHTML += `
                     <button class="${colorClass}" ${onclickAttr}>
                         Test ID ${test.id} | Link: ${test.link}
-                    </button><br>
-                `;
+                    </button><br>`;
             });
         })
         .catch(error => console.error('Error:', error));
@@ -396,7 +423,7 @@ function renderTestResultsTable(data, testId) {
             </tbody>
         </table>
     </div>
-    <button onclick="retrieveTestResults()">Back to Test Results</button>
+    <button onclick="backToTestResults()">Back to Test Results</button>
     <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
     `;
     // Check if the View as Graph button is already present
@@ -577,21 +604,45 @@ function loadAccuracyChart(testId) {
 }
 
 
+
 function backToTestResults() {
-    isViewingTest = false; // Reset when going back
-    toggleTestButtons(); // Show the test buttons again
-    retrieveTestResults(); // Reload the test results list
+    console.log('Navigating back to test results...');
+    isViewingTest = false; // Reset view state
+    toggleTestButtons();   // Make buttons visible again
+    retrieveTestResults(); // Load test results
 }
 
-// Function to toggle visibility of test buttons
 function toggleTestButtons() {
     const testButtons = document.querySelector('.test-buttons');
-    const testStatusFilter = document.querySelector('.test-status-filter')
+    const testStatusFilter = document.querySelector('.test-status-filter');
+    const applyFilterButton = document.querySelector('.apply-filter-button');
+    console.log('isViewingTest:', isViewingTest);
     if (testButtons) {
         testButtons.style.display = isViewingTest ? 'none' : 'block';
+        console.log('Test buttons visibility:', testButtons.style.display);
+    }
+    if (testStatusFilter) {
         testStatusFilter.style.display = isViewingTest ? 'none' : 'block';
+        console.log('Test filter visibility:', testStatusFilter.style.display);
+    }
+        if (applyFilterButton) {
+        applyFilterButton.style.display = isViewingTest ? 'none' : 'block';
     }
 }
+
+
+
+function toggleTestStatusFilter(show) {
+    const testStatusFilter = document.querySelector('.test-status-filter');
+    const applyFilterButton = document.querySelector('.apply-filter-button');
+    if (testStatusFilter) {
+        testStatusFilter.style.display = show ? 'block' : 'none';
+    }
+    if (applyFilterButton) {
+        applyFilterButton.style.display = show ? 'block' : 'none';
+    }
+}
+
 
 function exportToSpreadsheet(testId) {
     fetch(`/test_results/${testId}/`)
