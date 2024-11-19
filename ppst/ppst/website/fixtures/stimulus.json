@@ -1,0 +1,162 @@
+[
+{
+  "model": "website.stimulus",
+  "pk": 1,
+  "fields": {
+    "stimulus_content": "Sp SW",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 2,
+  "fields": {
+    "stimulus_content": "qd sI",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 3,
+  "fields": {
+    "stimulus_content": "WC fO",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 4,
+  "fields": {
+    "stimulus_content": "pJ KD",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 5,
+  "fields": {
+    "stimulus_content": "CX vj",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 6,
+  "fields": {
+    "stimulus_content": "rf oh",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 7,
+  "fields": {
+    "stimulus_content": "xv Pz",
+    "stimulus_type": 2
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 8,
+  "fields": {
+    "stimulus_content": "hy FL",
+    "stimulus_type": 2
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 9,
+  "fields": {
+    "stimulus_content": "ZQ Ug",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 10,
+  "fields": {
+    "stimulus_content": "IX yS",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 11,
+  "fields": {
+    "stimulus_content": "dt xm",
+    "stimulus_type": 1
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 12,
+  "fields": {
+    "stimulus_content": "BU TP",
+    "stimulus_type": 2
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 13,
+  "fields": {
+    "stimulus_content": "Aw kM",
+    "stimulus_type": 2
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 14,
+  "fields": {
+    "stimulus_content": "nA ao",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 15,
+  "fields": {
+    "stimulus_content": "po yn",
+    "stimulus_type": 2
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 16,
+  "fields": {
+    "stimulus_content": "HR tw",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 17,
+  "fields": {
+    "stimulus_content": "km Nt",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 18,
+  "fields": {
+    "stimulus_content": "TX iB",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 19,
+  "fields": {
+    "stimulus_content": "Ic JW",
+    "stimulus_type": 3
+  }
+},
+{
+  "model": "website.stimulus",
+  "pk": 20,
+  "fields": {
+    "stimulus_content": "jD lD",
+    "stimulus_type": 1
+  }
+}
+]

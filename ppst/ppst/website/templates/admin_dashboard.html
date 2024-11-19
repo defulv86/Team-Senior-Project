@@ -1,0 +1,122 @@
+<head>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=M+PLUS+Rounded+1c&family=Maven+Pro:wght@400..900&family=Schibsted+Grotesk:ital,wght@0,400..900;1,400..900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-center">
+            <!-- Logo -->
+            <img class="logo" src="{% static 'images/ppst-logo.png' %}" alt="Logo">
+        </div>
+
+        <div class="header-left">
+            <!-- Title and Welcome Message -->
+            <div class="header-title-container">
+                <span class="header-title">Administrator Dashboard</span>
+                <p class="welcome-message">
+                    {% if user.is_authenticated %}
+                    Welcome, {{ user.username }}
+                    {% else %}
+                    Welcome, Guest
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <a href="#" onclick="toggleNotifications(event)" class="top-right-item">
+                <img class="icon" src="{% static 'images/notifications.png' %}" alt="Notifications Icon">
+                <span class="icon-text">Notifications</span>
+            </a>
+            <a href="{% url 'logout' %}" class="top-right-item">
+                <img class="icon" src="{% static 'images/logout.png' %}" alt="Sign Out Icon">
+                <span class="icon-text">Sign Out</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="menu">
+                <li>
+                    <a href="#registrationreview" onclick="loadContent('registrationreview')" title="Review Registrations">
+                        <img class="icon" src="{% static 'images/Registration.png' %}" alt="Registration Icon">
+                        <span class="icon-text">Registrations</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#dashboard" onclick="loadContent('dashboard')" title="Dashboard">
+                        <img class="icon" src="{% static 'images/dashboard.png' %}" alt="Dashboard Icon">
+                        <span class="icon-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin:index' %}" title="Admin Panel">
+                        <img class="icon" src="{% static 'images/AdminPanel.png' %}" alt="AdminPanel Icon">
+                        <span class="icon-text">Admin Panel</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#support" onclick="loadContent('support')" title="Support">
+                        <img class="icon" src="{% static 'images/support.png' %}" alt="Support Icon">
+                        <span class="icon-text">Support</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Dynamic Content Area -->
+            <div id="dynamic-content">
+                <!-- Content for My Account, Dashboard, Tests, etc. will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popout -->
+    <div id="notification-popout" class="notification-popout">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button onclick="closeNotifications()" class="close-btn">&times;</button>
+        </div>
+        <div class="notif-tab-header">
+            <button data-action="unread" onclick="update_notifications(event)" id="unread-tab"
+                class="notif-tab active">Unread</button>
+            <button data-action="read" onclick="update_notifications(event)" id="read-tab"
+                class="notif-tab">Read</button>
+        </div>
+        <div class="notification-body" id="notification-body">
+            <ul id="notification-list">
+                <!-- Notifications will be dynamically loaded here -->
+                </ul>
+                </ul>
+            </div>
+            <div class="notification-footer">
+                <!-- <button onclick="markAllRead()">Read All</button>
+                <button onclick="clearNotifications()">Clear</button> -->
+            </div>
+            </ul>
+            </div>
+            <div class="notification-footer">
+                <!-- <button onclick="markAllRead()">Read All</button>
+                <button onclick="clearNotifications()">Clear</button> -->
+            </div>
+        </div>
+    </div>
+</body>
+<script src="{% static 'js/admin_dashboard.js' %}" defer></script>
+
+</html>

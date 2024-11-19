@@ -1,0 +1,295 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+#pause-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+    /* Ensure it’s on top */
+}
+
+#pause-message{
+    font-size: 1.5em;
+    font-weight: bold;
+    font-family: 'Montserrat', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease 0s;
+    letter-spacing: 2px;
+}
+
+h1,
+h2 {
+    text-align: center;
+    /* Center align headings */
+    word-wrap: break-word;
+    /* Allow words to break to the next line */
+    margin: 0 20px;
+    /* Add horizontal margin for better spacing */
+}
+
+#introduction h1 {
+    color: #0077b3;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    font-size: 1.7em;
+    margin-bottom: 30px;
+}
+
+#introduction h2 {
+    color: #000000;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#introduction h3 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 15px;
+    margin-left: 30px;
+    margin-bottom: 20px; 
+    margin-top: 10px;
+    font-weight: bolder;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#logo h3{
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 15px;
+    margin-left: 30px;
+    margin-bottom: 20px; 
+    margin-top: 10px;
+    font-weight: bolder;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#response-section h2 {
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: bold;
+    font-size: 1.7em;
+    margin-bottom: 50px;
+    transition: all 0.4s ease 0s;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.icon-blue {
+    color: #0077b3;
+    float: left;
+    margin-right: 5px;
+}
+
+form#changeFont {
+    color: #000000;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 15px;
+    margin-right: 30px;
+    margin-bottom: 20px; 
+    margin-top: 10px;
+    font-weight: bolder;
+    font-family: 'Montserrat', sans-serif;
+}
+
+form#changeFont input[type="submit"]{
+    z-index: 20;
+    color: white;
+    background-color: #0077B3;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    height: 30px;
+    width: 80px;
+    border-radius: 80px;
+    cursor: pointer;
+}
+
+form#changeFont input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+
+p {
+    text-align: center;
+    /* Center text for paragraphs */
+}
+
+#introduction {
+    max-height: 500px;
+    max-width: 1000px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+#stimulus {
+    font-size: 9rem;
+    font-weight: 500px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 100%;
+    position: relative;
+}
+
+#response-section {
+    display: none;
+    text-align: center;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+#alphanumeric-keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+#digit-keyboard,
+#alphanumeric-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+    /* Center keyboard buttons */
+}
+
+.key {
+    width: 100px;
+    height: 100px;
+    margin: 20px;
+    font-size: 3rem;
+    align-items: center;
+    justify-content: center;
+    background-color: #007bff;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s;
+    font-family: 'Montserrat', sans-serif;
+    touch-action: manipulation;
+    background-image: linear-gradient(#007bff 0, rgba(255, 255, 255, 0) 100%);
+    /* buttons in test */
+}
+
+.key:hover {
+    background-color: #0056b3;
+    box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
+    transform: scale(1.05);
+}
+
+#submit-response {
+    width: 200px;
+    height: 50px;
+    margin: 20px;
+    font-size: 1.7rem;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    background-color: #007bff;
+    color: white;
+    border-radius: 40px;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s;
+    touch-action: manipulation;
+    background-image: linear-gradient(#007bff 0, rgba(255, 255, 255, 0) 100%);
+}
+
+#submit-response:hover{
+  background-color: #0056b3;
+  box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
+  transform: scale(1.05);
+}
+
+#continue-button {
+/* Base styles */
+    width: 200px;
+    height: 50px;
+    margin: 20px;
+    font-size: 1.7rem;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    background-color: #007bff;
+    color: white;
+    border-radius: 40px;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s;
+    touch-action: manipulation;
+    background-image: linear-gradient(#007bff 0, rgba(255, 255, 255, 0) 100%);
+
+/* Hover effect */
+&:hover {
+    background-color: #0056b3;
+    box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
+    transform: scale(1.05);
+}
+}
+
+button {
+    z-index: 20;
+    color: white;
+    background-color: #0077B3;
+    border: none;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: bold;
+    height: 50px;
+    width: 100px;
+    border-radius: 30px;
+    cursor: pointer;
+      /* buttons under video */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+
+.video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 50px;
+}
+
+#speak-button {
+    margin-top: 0px;
+    /* Adjust spacing */
+    color: #0077B3;
+    /* Change color as needed */
+}
+
+#speak-button:hover {
+    color: #0056b3;
+    /* Change color on hover */
+}
+

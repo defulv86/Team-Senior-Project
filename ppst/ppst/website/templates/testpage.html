@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <title>PPST Test</title>
+</head>
+
+<body>
+    <div id="introduction">
+        <h3><i class="fa-solid fa-laptop-medical icon-blue"></i>Online Philadelphia Pointing Span Test</h3>
+        <form id="changeFont" name="changeFont">
+            Change Font Size: <select name="fontSize" id="fontSize"> 
+                <option value="16px">16px</option>
+                <option value="24px">24px</option>
+                <option value="32px">32px</option>
+            </select>
+            Voices: <select id="voice-select">
+                
+            </select> <!--Choose a voice -->
+            <input type="submit" value="Submit">
+        </form>
+        <h1>Welcome to the Philadelphia Pointing Span Test</h1>
+        <h2 id="intro">This is a demonstration video for taking the <b>Philadelphia Pointing Span Test</b>. Do <b>NOT</b> exit out of your browser during the test. 
+            Exiting out of your browser while taking the test will invalidate the results, and you will be unable to continue. Once you are prepared to
+            proceed, click the button below to begin taking the test. <i class="fas fa-volume-up" id="speak-button"
+                style="font-size: 30px; cursor: pointer;"></i> </h2>
+
+        <div id="text-to-speak" style="display:none;"> 
+            Welcome to the Philadelphia Pointing Span Test. 
+            This is a demonstration video for taking the Philadelphia Pointing Span Test. 
+            Do NOT exit out of your browser during the test. 
+            Exiting out of your browser while taking the test will invalidate the results, and you will be unable to continue.
+            Once you are prepared to proceed, click the button below to begin taking the test.
+        </div>
+
+        <div class="video-container">
+            <video width="640" height="360" controls>
+                <source src="{% static 'images\PPSTTestIntoVid.mp4' %}" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <button id="subtitles-button">Show Subtitles</button>
+            <div id="show-subtitles" style="display: none; justify-content: center;">
+                <br><br><br>
+                Welcome to your <b>Online Philadelphia Pointing Span Test.</b> 
+                When you click the <b>"Start Test" </b> button, you'll be presented with <b>two practice stimuli</b>.
+                Don't worry, your results from this section <b>will not be recorded</b>.
+                It's just to get you comfortable with the <b>format of the test</b>.
+                Each practice question is an <b>exact replication </b> of what a <b> real question</b> will look like.
+                Each question will begin with the <b>stimuli</b>, in this case, the <b>numbers being flashed on screen</b>.
+                Once the <b>last stimulus</b> is presented, the <b>main test screen</b> will appear.
+                On this screen, you will be presented with <b>tiles containing the stimuli</b> that were presented to you, 
+                along with other <b>miscellaneous stimuli</b>.
+                You must <b>memorize the stimuli</b> that were presented and click on each 
+                <b>corresponding tile</b> with the goal of ending up with the tiles in <b>sequential order</b>.
+                Once you're finished with the practice questions, the <b>real test</b> will begin.
+                <br><br>
+            </div>
+        </div>
+        <br>
+        <div class="d-flex justify-content-center">
+            <button id="start-test">Start Test</button>
+        </div>
+
+    </div>
+
+    <div id="pause-screen"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); color: white; justify-content: center; align-items: center; flex-direction: column;">
+        <div id="pause-message" style="margin-bottom: 20px; text-align: center;"></div>
+        <button id="continue-button" class="btn btn-primary">Continue</button>
+    </div>
+
+    <div id="logo" style="display: none;">
+        <h3><i class="fa-solid fa-laptop-medical icon-blue"></i>Online Philadelphia Pointing Span Test</h3>
+    </div>
+
+
+    <input type="hidden" id="test-link" value="{{ test.link }}">
+    <div id="stimulus"></div>
+    <div id="response-section">
+        <h2>Enter Your Response Using the Keyboard Below.</h2>
+        <div id="digit-keyboard">
+            <button class="key" data-value="6">6</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="3">3</button>
+        </div>
+
+        <div id="alphanumeric-keyboard" style="display: none;">
+            <div class="alphanumeric-row">
+                <button class="key" data-value="R">R</button>
+                <button class="key" data-value="K">K</button>
+                <button class="key" data-value="F">F</button>
+                <button class="key" data-value="P">P</button>
+                <button class="key" data-value="Y">Y</button>
+                <button class="key" data-value="L">L</button>
+              </div>
+              <div class="alphanumeric-row">
+                <button class="key" data-value="6">6</button>
+                <button class="key" data-value="2">2</button>
+                <button class="key" data-value="4">4</button>
+                <button class="key" data-value="1">1</button>
+                <button class="key" data-value="5">5</button>
+                <button class="key" data-value="3">3</button>
+              </div>
+        </div>
+        <button id="submit-response" class="btn btn-primary mt-3">Submit</button>
+    </div>
+
+    <script src="{% static 'js/testpage.js' %}"></script>
+</body>
+
+</html>

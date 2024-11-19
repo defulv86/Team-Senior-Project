@@ -1,0 +1,9 @@
+ppst/virtual
+ppst/ppst/__pycache__
+ppst/website/migrations/__pycache__
+ppst/website/__pycache__
+**/migrations/*
+!**/migrations/__init__.py
+ppst/db.sqlite3
+venv
+ppst/check_tests.sh
