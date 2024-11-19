@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Personnel Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <script src="{% static 'js/dashboard.js' %}" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <ul class="menu">
+                <li>
+                    <img class="logo" img src="{% static 'images/ppst-logo.png' %}" alt="Logo">
+                    <a href="#myaccount" onclick="loadContent('account')" title="My Account">
+                        <img class="icon" src="{% static 'images/myaccount.png' %}" alt="Account Icon">
+                        <span class="icon-text">My Account</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#dashboard" onclick="loadContent('dashboard')" title="Dashboard">
+                        <img class="icon" src="{% static 'images/dashboard.png' %}" alt="Dashboard Icon">
+                        <span class="icon-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#tests" onclick="loadContent('tests')" title="Tests">
+                        <img class="icon" src="{% static 'images/test.png' %}" alt="Tests Icon">
+                        <span class="icon-text">Tests</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#support" onclick="loadContent('support')" title="Support">
+                        <img class="icon" src="{% static 'images/support.png' %}" alt="Support Icon">
+                        <span class="icon-text">Support</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="title">Medical Personnel Dashboard</div>
+                <div class="top-right">
+                    <!-- Notifications Link -->
+                    <a href="#" onclick="toggleNotifications(event)" class="top-right-item">
+                        <img class="icon" src="{% static 'images/notifications.png' %}" alt="Notifications Icon">
+                        <span class="icon-text">Notifications</span>
+                    </a>
+                    <!-- Sign Out Link -->
+                    <a href="{% url 'logout' %}" class="top-right-item">
+                        <img class="icon" src="{% static 'images/logout.png' %}" alt="Sign Out Icon">
+                        <span class="icon-text">Sign Out</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Welcome Message -->
+            <div class="welcome-message">
+                {% if user.is_authenticated %}
+                <h1>Welcome back, {{ user.username }}!</h1>
+                {% else %}
+                <h1>Welcome back, Guest!</h1>
+                {% endif %}
+            </div>
+
+            <!-- Content Area -->
+            <div id="dynamic-content">
+                <!-- Content for My Account, Dashboard, Tests, etc. will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Notification Popout -->
+        <div id="notification-popout" class="notification-popout">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button onclick="closeNotifications()" class="close-btn">&times;</button>
+            </div>
+            <div class="notification-body" id="notification-body">
+                <ul id="notification-list">
+                    <!-- Notifications will be dynamically loaded here -->
+
+                </ul>
+            </div>
+            <div class="notification-footer"><!-- Notification options-->
+                <button onclick="markAllRead()">Read All</button>
+                <button onclick="clearNotifications()">Clear</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

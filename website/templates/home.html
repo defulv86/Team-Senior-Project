@@ -1,0 +1,141 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Meta Tags for Character Set and Viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philadelphia Pointing Span Test</title>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap"
+        rel="stylesheet">
+    <!-- CSS file -->
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <!-- JavaScript file -->
+    <script src="{% static 'js/home.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-links">
+            <ul>
+                <li><a href="#section1">Home</a></li>
+                <li><a href="#section2">About</a></li>
+                <li><a href="#section3">Services</a></li>
+                <li><a href="#section4">Benefits</a></li>
+            </ul>
+        </div>
+        <a href="/login" class="login-button">Log In</a>
+    </nav>
+
+    <!-- Section 1: Introduction -->
+    <section id="section1">
+        <h1 class="fade-in">Revolutionizing Medical Testing: Fast, Reliable, and At Home.</h1>
+        <h2 class="fade-in">Where convenience meets cutting-edge healthcare technology.</h2>
+        <p> 
+            Our at-home <b>Philadelphia Pointing Span</b> assessment empowers medical professionals to deliver essential
+            evaluations without hospital visits. Designed for accuracy and ease, these tests allow patients to independently
+            take comprehensive assessments in the comfort of their own homes. With our user-friendly platform, healthcare
+            providers can effortlessly access and analyze patient results, ensuring timely and effective care <b>when it
+            matters most.</b>
+        </p>
+    </section>
+
+    <!-- Section 2: About the PPST -->
+    <section id="section2" class="about-section">
+        <div class="content">
+            <h1>About The Philadelphia Pointing Span Test</h1>
+            <p>
+                The <b>Philadelphia Pointing Span Test</b> (PPST) is a neuropsychological test that uses stimuli,
+                whether presented in sequences of digits or sequences of digits and letters, to <b>evaluate cognitive
+                functionality</b>, such as memory and executive function, by <b>measuring patient recall latencies</b>.
+                Patients are asked to reorder the elements given for each question, listing first the digits presented
+                in ascending numerical order followed by any letters presented in alphabetical order. The PPST features
+                a total of twelve stimuli, divided into two groups: six digit stimuli and six mixed stimuli. The six digit
+                and mixed stimuli both comprise three 4-span stimuli followed by three 5-span stimuli. The test measures
+                patient accuracies and latencies to assess patient performance and aid in <b>early detection of neurodegenerative
+                conditions</b>.
+            </p>
+        </div>
+        <div class="image-container">
+            <img src="{% static 'images/about-img.jpg' %}"
+                alt="Description of image" class="about-image">
+        </div>
+    </section>
+
+
+    <!-- Section 3: About the Available Testing Services -->
+    <section id="section3" class="services-section">
+        <div class="services-content">
+            <h1>Testing Services</h1>
+            <p>
+                Our platform enables healthcare providers to create and administer tests that patients can
+                complete to evaluate their risk of neurodegenerative illnesses. The application <b>aggregates
+                testing data</b> into structured spreadsheets, accessible through a comprehensive dashboard. This
+                functionality facilitates in-depth <b>data analysis</b> and enables comparisons across various age groups,
+                supporting informed clinical decisions. By leveraging our tool, medical personnel can enhance patient
+                assessment processes and contribute to more effective detection of neurodegenerative health risks.
+                Experience a new standard in patient care with our innovative solution tailored for healthcare excellence.
+            </p>
+
+            <a href="/login" class="sign-up-button">Sign Up Today to Access These Features</a>
+        </div>
+        <div class="services-image-container">
+            <img src="{% static 'images/spreadsheet-img.jpg' %}"
+                alt="Description of image" class="services-image">
+        </div>
+    </section>
+
+    <!-- Section 4: Benefits of Online Testing -->
+    <section id="section4">
+        <h1>Benefits of Online Testing</h1>
+        <h2>Discover the key advantages of online testing.</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <img src="{% static 'images/ear-icon.png' %}" alt="Benefit 1" class="benefit-image">
+                <h3>Accessibility and Convenience.</h3>
+                <p>
+                    Online testing can significantly enhance access to healthcare for patients who rely on
+                    auditory and visual aids or those with disabilities, by providing a <b>convenient</b> and
+                    <b>accommodating</b> alternative to <b>traditional in-person visits</b>. Online platforms can
+                    offer unique interfaces that cater to individual needs, such as screen readers, enlarged text,
+                    and captioned video instructions.
+                </p>
+            </div>
+            <div class="benefit">
+                <img src="{% static 'images/graph-icon.png' %}" alt="Benefit 2" class="benefit-image">
+                <h3>Powerful Insight and Analytics.</h3>
+                <p>
+                    Healthcare providers can gather substantial, comprehensive data that captures patient
+                    responses and their latencies and accuracies, allowing for definitive assessments of patient
+                    health and behaviors. Automated data entry reduces the risk of human error and streamlines the
+                    analysis process, making it easier to <b>identify trends</b> and gather insights that might
+                    otherwise go undetected.
+                </p>
+            </div>
+            <div class="benefit">
+                <img src="{% static 'images/defense-icon.png' %}" alt="Benefit 3" class="benefit-image">
+                <h3>Research Capabilities</h3>
+                <p>
+                    Significant enhancements in research efforts and deep understanding of various health issues has
+                    been facilitated by online testing and the collection of <b>large-scale, diverse data sets</b> with ease.
+                    The real-time data aggregation and analysis capabilities of online platforms enables researchers to
+                    identify trends and correlations, allowing timely insights into <b>emerging health concerns</b>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Philadelphia Pointing Span Test.</p>
+    </footer>
+
+    <script src="{% static 'js/home.js' %}"></script>
+</body>
+
+</html>

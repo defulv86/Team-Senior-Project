@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <script src="{% static 'js/login.js' %}" defer></script>
+</head>  
+<body>
+    <div class="container">
+      <div class="left-column">
+        <div class="image-container">
+          <img src="{% static 'images/login.jpg' %}" alt="Description of image" class="login-image">
+        </div>
+        <div class="title">
+          <h1>Online Philadelphia Pointing Span Test (PPST)</h1>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="login-form">
+          <h2>Get Started Now</h2>
+          <form method="post">
+            {% csrf_token %}
+            <div class="txt_field">
+              <input type="text" id="username" name="username" placeholder="" required>
+              <i class="fas fa-user"></i>
+              <span></span>
+              <label>Username</label>
+              <span class="caps-lock-warning"> <i class="fas fa-exclamation-triangle"></i><span class="caps-lock-text">Caps Lock is On</span></span>
+            </div>
+            <div class="new-line"></div>
+            <div class="txt_field">
+              <input type="password" id="passwd" name="passwd" placeholder="" required>
+              <i class="fas fa-lock"></i>
+              <span></span>
+              <label>Password</label>
+              <span class="caps-lock-warning"> <i class="fas fa-exclamation-triangle"></i><span class="caps-lock-text">Caps Lock is On</span></span>
+            </div>
+            <div class="new-line"></div>
+             <!-- Display error message if it exists -->
+            {% if error_message %}
+                <div class="error-message">{{ error_message }}</div>
+                <div class="new-line"></div>
+            {% endif %}
+            <button type="submit">Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>

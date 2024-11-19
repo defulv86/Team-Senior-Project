@@ -1,0 +1,23 @@
+[
+{
+  "model": "website.stimulus_type",
+  "pk": 1,
+  "fields": {
+    "stimulus_type": "digit"
+  }
+},
+{
+  "model": "website.stimulus_type",
+  "pk": 2,
+  "fields": {
+    "stimulus_type": "letter"
+  }
+},
+{
+  "model": "website.stimulus_type",
+  "pk": 3,
+  "fields": {
+    "stimulus_type": "mixed"
+  }
+}
+]

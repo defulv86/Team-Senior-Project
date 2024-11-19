@@ -1,0 +1,110 @@
+[
+{
+  "model": "website.aggregate",
+  "pk": 1,
+  "fields": {
+    "min_age": 20,
+    "max_age": 29,
+    "average_latencies": {
+      "fourdigit_0": 183,
+      "fourdigit_1": 212,
+      "fourdigit_2": 256
+    },
+    "average_accuracies": {
+      "fourdigit_0": 0.88,
+      "fourdigit_1": 0.58,
+      "fourdigit_2": 0.63
+    }
+  }
+},
+{
+  "model": "website.aggregate",
+  "pk": 2,
+  "fields": {
+    "min_age": 30,
+    "max_age": 39,
+    "average_latencies": {
+      "fourdigit_0": 176,
+      "fourdigit_1": 198,
+      "fourdigit_2": 103
+    },
+    "average_accuracies": {
+      "fourdigit_0": 0.8,
+      "fourdigit_1": 0.62,
+      "fourdigit_2": 0.68
+    }
+  }
+},
+{
+  "model": "website.aggregate",
+  "pk": 3,
+  "fields": {
+    "min_age": 40,
+    "max_age": 49,
+    "average_latencies": {
+      "fourdigit_0": 180,
+      "fourdigit_1": 130,
+      "fourdigit_2": 210
+    },
+    "average_accuracies": {
+      "fourdigit_0": 0.88,
+      "fourdigit_1": 0.51,
+      "fourdigit_2": 0.74
+    }
+  }
+},
+{
+  "model": "website.aggregate",
+  "pk": 4,
+  "fields": {
+    "min_age": 20,
+    "max_age": 29,
+    "average_latencies": {
+      "fourdigit_0": 242,
+      "fourdigit_1": 281,
+      "fourdigit_2": 289
+    },
+    "average_accuracies": {
+      "fourdigit_0": 0.89,
+      "fourdigit_1": 0.81,
+      "fourdigit_2": 0.82
+    }
+  }
+},
+{
+  "model": "website.aggregate",
+  "pk": 5,
+  "fields": {
+    "min_age": 30,
+    "max_age": 39,
+    "average_latencies": {
+      "fourdigit_0": 110,
+      "fourdigit_1": 193,
+      "fourdigit_2": 177
+    },
+    "average_accuracies": {
+      "fourdigit_0": 0.58,
+      "fourdigit_1": 0.66,
+      "fourdigit_2": 0.51
+    }
+  }
+},
+{
+  "model": "website.aggregate",
+  "pk": 6,
+  "fields": {
+    "min_age": 40,
+    "max_age": 49,
+    "average_latencies": {
+      "fourdigit_0": 150,
+      "fourdigit_1": 168,
+      "fourdigit_2": 226
+    },
+    "average_accuracies": {
+      "fourdigit_0": 0.56,
+      "fourdigit_1": 0.69,
+      "fourdigit_2": 0.85
+    }
+  }
+}
+]
