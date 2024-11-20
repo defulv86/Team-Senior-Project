@@ -695,7 +695,7 @@ textarea:focus {
 
 .completed {
     margin-bottom: 20px;
-    background-color: #0099ff;
+    background-color: #00d039;
     /* Blue for completed */
     color: white;
 }
@@ -703,7 +703,7 @@ textarea:focus {
 .incomplete {
     margin-bottom: 20px;
     pointer-events: none;
-    background-color: #d3d3d3;
+    background-color: #a9a9a9;
     /* Gray for incomplete */
     color: black;
 }
@@ -787,4 +787,36 @@ textarea:focus {
 .chart-toggle-buttons button:hover,
 .view-toggle-buttons button:hover {
     background-color: #0056b3;
+}
+
+.apply-filter-button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #0099ff; /* Adjust color as needed */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.apply-filter-button:hover {
+    background-color: #0077cc; /* Darken on hover */
+}
+
+.legend-green {
+    margin-bottom: 15px;
+    color: #00d039;
+    font-weight: bold; /* Optional to make it stand out */
+}
+
+.legend-red {
+    margin-bottom: 15px;
+    color: #ff4c4c;
+    font-weight: bold;
+}
+
+.legend-gray {
+    margin-bottom: 15px;
+    color: #a9a9a9;
+    font-weight: bold;
 }

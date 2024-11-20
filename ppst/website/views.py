@@ -12,13 +12,26 @@ from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notific
 from dateutil import parser
 from statistics import mean
 import json
+
 def home(request):
+    """
+    Displays the home page, which lists all registered users.
+
+    :param request: The request object
+    :return: The rendered home page
+    """
     all_users = User.objects.all()  # Call the method to get all users
     return render(request, 'home.html', {
         'all': all_users
     })
 
 def login_view(request):
+    """
+    Handles the login view by authenticating the user and redirecting them to the appropriate dashboard.
+
+    :param request: The request object
+    :return: The rendered login page with an error message if the credentials are invalid
+    """
     error_message = None
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -36,10 +49,22 @@ def login_view(request):
                 return redirect('dashboard')
         else:
             error_message = "Invalid username or password."  # Set the error message
+
+    if request.user.is_authenticated and not request.user.is_staff:
+        return redirect('dashboard')
+
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('admin_dashboard')
     
     return render(request, 'login.html', {'error_message': error_message})
 
 def register_view(request):
+    """
+    Handles the registration view by allowing users to request an account and sends a notification to all staff members.
+
+    :param request: The request object
+    :return: The rendered registration page with an error message if the registration request was invalid
+    """
     error_message = None
     success_message = None
 
@@ -81,26 +106,54 @@ def register_view(request):
 
 
 def logout_view(request):
+    """
+    Logs out the user and redirects to the login page.
+
+    :param request: The request object
+    :return: Redirect to the login page
+    """
     auth_logout(request)  # Logs out the user
     return redirect('login')  # Redirects to the login page after logout
 
 
 def dashboard(request):
-    if request.user.is_authenticated:
+    """
+    Renders the dashboard page. If the user is not authenticated, redirects to the login page.
+
+    :param request: The request object
+    :return: The rendered dashboard page
+    """
+    if request.user.is_authenticated and not request.user.is_staff:
         # Your logic for rendering the dashboard goes here
         return render(request, 'dashboard.html', {'user': request.user})
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('admin_dashboard')
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
 
 def admin_dashboard(request):
-    if request.user.is_authenticated:
+    """
+    Renders the administrator dashboard page. If the user is not authenticated, redirects to the login page.
+
+    :param request: The request object
+    :return: The rendered administrator dashboard page
+    """
+    if request.user.is_authenticated and request.user.is_staff:
         # Your logic for rendering the dashboard goes here
         return render(request, 'admin_dashboard.html', {'user': request.user})
+    if request.user.is_authenticated and not request.user.is_staff:
+        return redirect('dashboard')
     else:
         return redirect('login')  # Redirect to the login page if not authenticated
 
 def get_registration_requests(request):
-    # Ensure the user is staff
+    """
+    Returns a JSON response containing a list of unapproved registration requests.
+
+    :param request: The request object
+    :return: A JsonResponse containing a list of unapproved registration requests
+    """
+
     if request.user.is_staff:
         registrations = Registration.objects.filter(approved=False)
         registration_data = [
@@ -116,12 +169,25 @@ def get_registration_requests(request):
 
 #archive all unarchived notifications associated with a registration request
 def remove_reg_notifs(registration):
-            registration_notifications = Notification.objects.filter(info=f"registration:{registration.username}", is_archived=False)
-            for notification in registration_notifications:
-                notification.delete()
+    """
+    Deletes all unarchived notifications associated with a registration request.
+
+    :param registration: The registration object for which notifications should be removed.
+    """
+    registration_notifications = Notification.objects.filter(info=f"registration:{registration.username}", is_archived=False)
+    for notification in registration_notifications:
+        notification.delete()
 
 @csrf_exempt
 def approve_registration(request, registration_id):
+    """
+    Approves a registration request and creates a new user account with a hashed password.
+    
+    :param request: The request object
+    :param registration_id: The ID of the registration request to approve
+    :return: A JsonResponse indicating the success of the operation
+    """
+    
     if request.user.is_staff and request.method == 'POST':
         try:
 
@@ -142,6 +208,13 @@ def approve_registration(request, registration_id):
     return JsonResponse({"error": "Unauthorized"}, status=403)
 @csrf_exempt
 def deny_registration(request, registration_id):
+    """
+    Deletes a registration request and its associated notifications.
+
+    :param request: The request object
+    :param registration_id: The ID of the registration request to deny
+    :return: A JsonResponse indicating the success of the operation
+    """
     if request.user.is_staff and request.method == 'POST':
         try:
             registration = Registration.objects.get(id=registration_id)
@@ -155,6 +228,12 @@ def deny_registration(request, registration_id):
 @csrf_exempt
 @login_required
 def create_test(request):
+    """
+    Creates a new test for the logged-in user with the provided age.
+    
+    :param request: The request object
+    :return: A JsonResponse containing the test link
+    """
     if request.method == 'POST':
         data = json.loads(request.body)
         age = data.get('age')
@@ -178,6 +257,14 @@ def create_test(request):
 
 
 def test_page_view(request, link):
+    """
+    Handles test page requests and renders the appropriate template based on the test status
+    (completed, invalid, or pending). If the test is not found, a 404 page is rendered.
+
+    :param request: The request object
+    :param link: The link of the test to be rendered
+    :return: A rendered HttpResponse object
+    """
     try:
         test = Test.objects.get(link=link)
         # Call different view functions based on test status
@@ -193,10 +280,32 @@ def test_page_view(request, link):
     except Test.DoesNotExist:
         return render(request, '404.html')
 
-
-
 @csrf_exempt
 def submit_response(request):
+        
+    """
+    Handles the submission of a response for a specific test and stimulus. It processes the
+    response data, calculates character latencies and accuracies, and updates the corresponding
+    test results.
+
+    :param request: The HTTP request object containing the response data.
+    :return: A JsonResponse indicating the success of the operation or an error message if
+             any issues occurred during processing.
+    
+    The request must be a POST request with a JSON body containing the following fields:
+        - link: The link of the test.
+        - stimulus_id: The ID of the stimulus.
+        - response_text: The text response submitted by the user.
+        - response_position: The position of the response.
+        - timestamps: A list of timestamps for character inputs.
+        - expected_stimulus: The expected stimulus for accuracy comparison.
+
+    Errors:
+        - Returns a 400 error if timestamps are not a list or if a field is missing.
+        - Returns a 404 error if the test is not found.
+        - Returns a 500 error for any other exceptions.
+        - Returns a 400 error if the request is not a POST request.
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -295,6 +404,19 @@ def submit_response(request):
     return JsonResponse({'error': 'Invalid request.'}, status=400)
 
 def check_test_status(request, link):
+    """
+    Retrieve the status of a test by its link.
+
+    Args:
+        request: The Django request object.
+        link: The link to the test.
+
+    Returns:
+        A JSON response containing the status of the test.
+
+    Raises:
+        405: Method Not Allowed if the request method is not GET.
+    """
     if request.method == 'GET':  # Ensure the request is a GET request
         test = get_object_or_404(Test, link=link)  # Fetch the test by link
         test.check_status()  # Call any status update logic
@@ -304,6 +426,19 @@ def check_test_status(request, link):
         return JsonResponse({'error': 'Invalid request method. Only GET is allowed.'}, status=405)
 
 def mark_test_complete(request, link):
+    """
+    Mark a test as completed and set the finish time.
+
+    Args:
+        request: The Django request object.
+        link: The link to the test.
+
+    Returns:
+        A JSON response indicating success or failure.
+
+    Raises:
+        405: Method Not Allowed if the request method is not POST.
+    """
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
         test.finished_at = timezone.now()  # Set the finish time
@@ -325,6 +460,19 @@ def mark_test_complete(request, link):
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     
 def invalidate_test(request, link):
+    """
+    Invalidate a test by marking it as exited prematurely and notify the user that a patient exited the test without completion.
+
+    Args:
+        request: The Django request object.
+        link: The link to the test.
+
+    Returns:
+        A JSON response indicating success or failure.
+
+    Raises:
+        405: Method Not Allowed if the request method is not POST.
+    """
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
         test.premature_exit = True  # Mark as exited prematurely
@@ -368,7 +516,21 @@ def check_and_notify_test_status():
                     header="Test Expired",
                     message=f"Test link {test.link} has expired because it was not completed in one week.",
                 )
+
 def start_test(request, link):
+    """
+    Record the start time of the test and update the test status to 'Pending' once the patient has officially started the test.
+
+    Args:
+        request: The Django request object.
+        link: The link to the test.
+
+    Returns:
+        A JSON response indicating success or failure.
+
+    Raises:
+        405: Method Not Allowed if the request method is not POST.
+    """
     if request.method == 'POST':
         test = get_object_or_404(Test, link=link)
         test.status = 'Pending'
@@ -387,6 +549,23 @@ def start_test(request, link):
 
 @login_required
 def get_test_results(request, test_status):
+    """
+    Retrieve a list of tests for the current user, filtered by test status.
+
+    Args:
+        request: The Django request object.
+        test_status: The status of the test to filter by. Options are 'All', 'Pending', 'Completed', 'Invalid'.
+    
+    Returns:
+        A JSON response containing a list of dictionaries representing the tests. Each dictionary contains the following keys:
+            id: The ID of the test.
+            link: The link to the test.
+            age: The age of the patient taking the test.
+            created_at: The date and time the test was created.
+            started_at: The date and time the test was started.
+            finished_at: The date and time the test was finished.
+            status: The current status of the test.
+    """
     tests = []
     if test_status == "All":
         tests = Test.objects.filter(user=request.user)
@@ -414,6 +593,16 @@ def get_test_results(request, test_status):
     return JsonResponse({'tests': test_data})
 
 def get_stimuli(request):
+    """
+    Retrieves and organizes stimuli from the database, categorizing them based on their stimulus type.
+
+    Args:
+        request: The Django request object.
+
+    Returns:
+        JsonResponse: A JSON response containing a list of dictionaries, where each dictionary represents a stimulus
+        with its id, content, and type. Stimuli are ordered by their type in the response.
+    """
     stimuli = Stimulus.objects.select_related('stimulus_type').all()
     
     # Organizing question presentation by type
@@ -466,6 +655,23 @@ def get_stimuli(request):
 
 # Helper function to format timestamps with seconds case.
 def format_timestamp(timestamp):
+    """
+    Format a timestamp as a string, either from a datetime object or an ISO-formatted string.
+    
+    If the timestamp is a string, it is first converted to a datetime object using
+    datetime.fromisoformat(). If the conversion fails, the original string is returned.
+    
+    If the timestamp is a datetime object, it is first converted to the local timezone
+    (EST) using timezone.localtime(). The formatted time is then generated as a string
+    in the format "YYYY-MM-DD | HH:MM:SS AM/PM", where the seconds are only included if
+    they are not zero.
+    
+    Args:
+        timestamp (str or datetime): The timestamp to be formatted.
+    
+    Returns:
+        str: The formatted timestamp string.
+    """
     if isinstance(timestamp, str):
         try:
             timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
@@ -484,6 +690,19 @@ def format_timestamp(timestamp):
 
 # Helper function to format durations
 def format_duration(duration):
+    """
+    Format a duration as a string, showing hours, minutes, and seconds separately.
+    
+    If the duration is zero, the function returns "0 seconds". If the duration is less
+    than one hour, only minutes and seconds are shown. If the duration is less than one
+    minute, only seconds are shown.
+    
+    Args:
+        duration (timedelta): The duration to be formatted.
+    
+    Returns:
+        str: The formatted duration string.
+    """
     hours = duration.total_seconds() // 3600
     minutes = (duration.total_seconds() % 3600) // 60
     seconds = duration.total_seconds() % 60
@@ -508,6 +727,29 @@ def format_duration(duration):
 @login_required
 def test_results(request, test_id):
     # Retrieve test and result data
+    """
+    View to display the results of a completed test.
+
+    Retrieves a test and its associated result, and age group aggregate data.
+    Calculates the completion time, and formats the timestamps for completed,
+    pending, and invalid tests.
+    Retrieves stimuli and associated responses for the export.
+    Retrieves completed tests and calculates completion times.
+    Retrieves pending tests and formats the timestamps with expiration and time remaining.
+    Retrieves invalid tests and formats the timestamps with time since invalidation.
+    Calculates accuracy and latency averages for each metric, excluding practice positions.
+    Compares these averages to the aggregate data for the age group.
+    Calculates the amount correct for non-practice questions.
+    Returns a JSON response containing the test and result data, age group aggregate data,
+    and the formatted test results, including accuracy and latency averages, and the amount correct.
+
+    Parameters:
+    test_id (int): The ID of the test to retrieve the results for.
+
+    Returns:
+    JsonResponse: A JSON response containing the test and result data, age group aggregate data,
+    and the formatted test results, including accuracy and latency averages, and the amount correct.
+    """
     test = get_object_or_404(Test, id=test_id)
     result = Result.objects.filter(test=test).first()
     
@@ -619,8 +861,6 @@ def test_results(request, test_id):
         "id", "link", "age", "user__username", "created_at", "premature_exit"
     )
 
-
-
     # Format invalid tests with time since invalidation
     formatted_invalid_tests = []
     for test in invalid_tests:
@@ -646,9 +886,6 @@ def test_results(request, test_id):
             "invalidated_at": format_timestamp(invalidated_at),
             "time_since_invalid": formatted_time_since_invalid
         })
-
-    
-
 
     metrics = [
         'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
@@ -728,8 +965,6 @@ def test_results(request, test_id):
         if pos not in excluded_positions and all(a == 1 for a in accuracy)
     )
 
-
-
     return JsonResponse({
         "test_id": test_id,
         "test_link": test_link,
@@ -747,6 +982,24 @@ def test_results(request, test_id):
     })
 
 def get_test_comparison_data(request, test_id):
+    """
+    Retrieve and compare test results for a given test ID against aggregate data.
+
+    This function fetches the test and result objects associated with a given test ID.
+    It then determines the age of the test subject and retrieves the corresponding 
+    aggregate data for the age group. The function calculates average latencies and 
+    accuracies for both the patient and the aggregate data, excluding specified practice 
+    question positions. The function returns the data in JSON format, containing a 
+    comparison of the patient's performance against the aggregate data.
+
+    Args:
+        request: The HTTP request object.
+        test_id (int): The ID of the test for which to retrieve comparison data.
+
+    Returns:
+        JsonResponse: A JSON response containing patient's test data, aggregate data, 
+                      and a potential error message if no matching aggregate data is found.
+    """
     test = Test.objects.get(id=test_id)
     result = Result.objects.get(test=test)
     age = test.age
@@ -882,6 +1135,17 @@ def update_or_create_aggregate(test):
 # Handle ticket submission (for non-staff users)
 @login_required
 def submit_ticket(request):
+    """
+    Handles ticket submission for non-staff users.
+
+    If the request method is POST, validates that the category and description
+    fields are not empty. If valid, saves the ticket to the database and creates
+    a notification for all admin users. Returns a success JSON response with a
+    message.
+
+    If the request method is not POST, or if the category or description fields
+    are empty, returns a JSON error response with a status code of 400.
+    """
     if request.method == 'POST':
         category = request.POST.get('category')
         description = request.POST.get('description')
@@ -909,6 +1173,12 @@ def submit_ticket(request):
 # Fetch user's tickets
 @login_required
 def get_user_tickets(request):
+    """
+    Handles GET requests to /get_user_tickets/
+    Returns a JSON response containing the user's tickets with their
+    id, category, description, created_at time, and the user's username.
+    If the request method is not GET, returns a JSON error response with a status code of 400.
+    """    
     if request.method == 'GET':
         tickets = Ticket.objects.filter(user=request.user).select_related('user').values(
             'id', 'category', 'description', 'created_at', 'user__username'
@@ -918,6 +1188,17 @@ def get_user_tickets(request):
 
 # Ticket View for Administrators in their Dashboard
 def admin_view_tickets(request):
+    """
+    Retrieves and returns a JSON response containing all tickets for administrators.
+
+    Only accessible to staff users. Administrators can optionally filter tickets by status 
+    and sort them by a specified field. The default sorting is by the creation date.
+
+    :param request: The request object containing optional query parameters 'sort_by' and 'status'.
+    :return: A JsonResponse containing a list of tickets with their id, category, description, 
+             created_at timestamp, status, and the username of the user who submitted the ticket.
+             Returns a 403 error if the user is not a staff member.
+    """
     if not request.user.is_staff:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
@@ -939,6 +1220,21 @@ def admin_view_tickets(request):
 @csrf_exempt
 @login_required
 def update_ticket_status(request, ticket_id):
+    """
+    Handles a PATCH request to update the status of a specific ticket.
+
+    Only accessible to staff users. The request body must contain the new status
+    of the ticket in JSON format. The new status must be one of the valid choices
+    for a Ticket object.
+
+    :param request: The request object containing the new status of the ticket
+    :param ticket_id: The id of the ticket to be updated
+    :return: A JsonResponse containing a success message and the new status of the
+             ticket if the update is successful. Returns a 403 error if the user
+             is not a staff member, a 404 error if the ticket does not exist, a
+             400 error if the request body is invalid JSON, and a 400 error if the
+             new status is not one of the valid choices.
+    """
     if not request.user.is_staff:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
@@ -963,10 +1259,23 @@ def update_ticket_status(request, ticket_id):
             header = "Issue closed",
             message = f"Your {ticket.category} issue has been marked as closed"
         )
+        if new_status == "in_progress":
+            notifs = Notification.objects.filter(info=ticket.id)
+            for notif in notifs:
+                notif.delete()
+            
+            # create a notification to notify the user that their ticket was in progress
+            Notification.objects.create(
+            user = ticket.user,
+            info = f"{ticket.id}",
+            header = f"Your ticket {ticket.id} in progress",
+            message = f"Your {ticket.category} issue has been marked as in progress"
+        )
 
         ticket.status = new_status
         ticket.save()
         return JsonResponse({'success': True, 'status': ticket.status})
+
     except Ticket.DoesNotExist:
         return JsonResponse({'error': 'Ticket not found'}, status=404)
     except json.JSONDecodeError:
@@ -976,6 +1285,18 @@ def update_ticket_status(request, ticket_id):
 @csrf_exempt
 @login_required
 def complete_ticket(request, ticket_id):
+    """
+    Handles a PATCH request to mark a specific ticket as completed.
+
+    Only accessible to staff users. If the ticket does not exist, returns a 404 error.
+
+    :param request: The request object
+    :param ticket_id: The id of the ticket to be marked as completed
+    :return: A JsonResponse containing a success message if the update is successful.
+             Returns a 403 error if the user is not a staff member and a 404 error
+             if the ticket does not exist.
+    """
+
     if not request.user.is_staff:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
@@ -990,6 +1311,21 @@ def complete_ticket(request, ticket_id):
 
 @login_required
 def update_account(request):
+    """
+    Handles a POST request to update the user's account details.
+
+    Only accessible to logged in users. If the request method is not POST, returns a 400 error.
+
+    The request must contain the following fields in the JSON body:
+        - first_name: The new first name.
+        - last_name: The new last name.
+        - email: The new email address.
+        - current_password: The current password to verify.
+        - new_password (optional): The new password to set.
+
+    Returns a JsonResponse containing a success message if the update is successful.
+    Returns a 400 error if the request is not a POST request or if the current password is incorrect.
+    """
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
@@ -1021,6 +1357,11 @@ def update_account(request):
 # Additional view to get user information for pre-filling the form
 @login_required
 def get_user_info(request):
+    """
+    Returns a JsonResponse containing user information for pre-filling the update account form.
+
+    Returns a 400 error if the request is not a GET request.
+    """
     if request.method == 'GET':
         user = request.user
         user_info = {
@@ -1035,6 +1376,23 @@ def get_user_info(request):
 @login_required
 def get_user_notifications(request, load_type):
     
+    """
+    Returns a JsonResponse containing the user's notifications, either read or unread depending on the load_type parameter.
+
+    The request must be a GET request. If the request is not a GET request or if load_type is not 'read' or 'unread', returns a 400 error.
+
+    The JsonResponse contains a list of notifications, each notification being a dictionary with the following fields:
+        - id: The notification's id.
+        - header: The notification's header.
+        - message: The notification's message.
+        - time_created: The notification's time of creation.
+        - is_archived: Whether the notification is archived or not.
+        - is_read: Whether the notification is read or not.
+
+    :param request: The request object
+    :param load_type: The type of notifications to load. Must be 'read' or 'unread'.
+    :return: A JsonResponse containing the user's notifications
+    """
     if request.method == 'GET':
         if load_type != 'read' and load_type != 'unread':
             return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -1051,6 +1409,17 @@ def get_user_notifications(request, load_type):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def dismiss_notification(request, id):
+    """
+    Handles a PATCH request to dismiss a notification.
+
+    The request must contain the id of the notification in the URL parameters.
+    If the request is not a PATCH request or if the notification does not exist, returns a 400 error.
+
+    :param request: The request object
+    :param id: The id of the notification to be dismissed
+    :return: A JsonResponse containing a success message if the update is successful.
+             Returns a 400 error if the request is not a PATCH request or if the notification does not exist.
+    """
     if request.method == 'PATCH':
         try:
             notif = Notification.objects.get(id=id)
@@ -1063,6 +1432,17 @@ def dismiss_notification(request, id):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def mark_as_read(request, id):
+    """
+    Handles a PATCH request to mark a notification as read.
+
+    The request must contain the id of the notification in the URL parameters.
+    If the request is not a PATCH request or if the notification does not exist, returns a 400 error.
+
+    :param request: The request object
+    :param id: The id of the notification to be marked as read
+    :return: A JsonResponse containing a success message if the update is successful.
+             Returns a 400 error if the request is not a PATCH request or if the notification does not exist.
+    """
     if request.method == 'PATCH':
         try:
             notif = Notification.objects.get(id=id)
@@ -1074,9 +1454,19 @@ def mark_as_read(request, id):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def errorpage(request):
+    """
+    Renders the error page when a test is invalidated or an error occurs.
+
+    :param request: The HTTP request object
+    :return: A rendered HttpResponse object for the error page
+    """
     return render(request, 'errorpage.html')
 
 def completionpage(request):
+    """
+    Renders the completion page when a test is completed.
+
+    :param request: The HTTP request object
+    :return: A rendered HttpResponse object for the completion page
+    """
     return render(request, 'completionpage.html')
-
-
