@@ -1,12 +1,12 @@
 html {
-    background-color: #f0f4f8;
+    background-color: white;
     height: 100%;
 }
 
 @media screen and (max-width: 500px) {
     .title {
         position: absolute;
-        top: 0;
+        top: 65px;
         left: 0;
         right: 0;
         text-align: center;
@@ -30,19 +30,20 @@ html {
     .image-container img {
         object-fit: none;
         height: 15%;
-        width: 100%
+        width: 100%;
     }
 
     .left-column {
         display: block;
         position: absolute;
+        height: 70%;
     }
 
     .right-column {
         display: block;
         position: absolute;
         width: 100%;
-        top: 30%;
+        top: 35%;
     }
 
     .login-form {
