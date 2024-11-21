@@ -23,10 +23,11 @@ class TestAdmin(admin.ModelAdmin):
     administered_by.short_description = "Administered by"
     
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('test', 'fourdigit_accuracy_1', 'fourdigit_latency_1', 'fivedigit_accuracy_1', 'fivedigit_latency_1')
+    list_display = ('id', 'test', 'amount_correct')
     readonly_fields = ('test',)
 
 class TestResponse(admin.ModelAdmin):
+    list_display = ('id', 'test', 'stimulus', 'response', 'time_submitted')
     readonly_fields = ('time_submitted',)
 
 class NotificationAdmin(admin.ModelAdmin):
@@ -71,7 +72,7 @@ class RegistrationAdmin(admin.ModelAdmin):
 
 admin.site.register(Stimulus)
 admin.site.register(Test, TestAdmin)
-admin.site.register(Result)
+admin.site.register(Result, ResultAdmin)
 admin.site.register(Response, TestResponse)
 admin.site.register(Aggregate)
 admin.site.register(Stimulus_Type)
