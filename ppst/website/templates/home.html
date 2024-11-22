@@ -31,7 +31,17 @@
                 <li><a href="#section4">Benefits</a></li>
             </ul>
         </div>
-        <a href="/login" class="login-button">Log In</a>
+        <a href="{% if user.is_authenticated %}{% if user.is_staff %}/admin_dashboard{% else %}/dashboard{% endif %}{% else %}/login{% endif %}" class="login-button">
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    Access Admin Dashboard
+                {% else %}
+                    Access Medical Dashboard
+                {% endif %}
+            {% else %}
+                Log In
+            {% endif %}
+        </a>
     </nav>
 
     <!-- Section 1: Introduction -->

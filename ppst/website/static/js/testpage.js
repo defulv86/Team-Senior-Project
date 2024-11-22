@@ -63,12 +63,14 @@ function markTestComplete(testLink) {
 
 function flashStimulus(stimulus) {
     const stimulusDiv = document.getElementById('stimulus');
+    const logoDiv = document.getElementById('logo');
     const digitKeyboard = document.getElementById('digit-keyboard');
     const alphanumericKeyboard = document.getElementById('alphanumeric-keyboard');
     const responseSection = document.getElementById('response-section');
 
     // Hide both keyboards and the response section initially
     digitKeyboard.style.display = 'none';
+    logoDiv.style.display = 'block';
     alphanumericKeyboard.style.display = 'none';
     responseSection.style.display = 'none'; // Hide the response section
 
@@ -193,6 +195,11 @@ function nextStimulus() {
 
     } else {
         document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
+        document.getElementById('stimulus').style.fontSize = '2.5em';
+        document.getElementById('stimulus').style.fontWeight = 'bold';
+        document.getElementById('stimulus').style.fontFamily = 'Montserrat';
+        document.getElementById('stimulus').style.color = '#0077b3';
+        document.getElementById('stimulus').style.marginTop = '100px';
         document.getElementById('response-section').style.display = 'none';
 
 

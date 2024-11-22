@@ -101,7 +101,7 @@ class Aggregate(models.Model):
         return {"accuracy": accuracy, "latency": latency}
 
 
-# Ticket model.
+# Ticket model
 class Ticket(models.Model):
     CATEGORY_CHOICES = [
         ('general', 'General Issue'),
@@ -110,17 +110,29 @@ class Ticket(models.Model):
         ('bug/error', 'Bug/Error Report'),
     ]
 
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('closed', 'Closed'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='open',
+        help_text="The current status of this ticket."
+    )
 
     def __str__(self):
-        return f"Ticket {self.id} - {self.category} by {self.user.username}"
+        return f"Ticket {self.id} - {self.category} ({self.status}) by {self.user.username}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    test = models.ForeignKey(Test, on_delete=models.CASCADE, default=1)
+    info = models.CharField(max_length=50,default='')
     header = models.CharField(max_length=50)
     message = models.CharField(max_length=100)
     time_created = models.DateTimeField(auto_now_add=True)
@@ -128,4 +140,12 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     def  __str__(self):
-        return   str(self.id) + " Header: " + self.header + " | Test: " + self.test.link + " | " + str(self.time_created)
+        return   str(self.id) + " Header: " + self.header  + " | " + str(self.time_created)
+
+class Registration(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    password = models.CharField(max_length=128)  # Ideally hashed or a placeholder
+    approved = models.BooleanField(default=False)  # Add this line for approval tracking
+
+    def __str__(self):
+        return self.username

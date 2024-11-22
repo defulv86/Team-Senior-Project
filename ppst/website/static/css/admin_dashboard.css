@@ -22,7 +22,7 @@ body {
 
 /* Header */
 .header {
-    background-color: #0c4884;
+    background-color: #840c0c;
     color: white;
     display: flex;
     justify-content: space-between;
@@ -161,7 +161,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    background-color: #1f5a94;
+    background-color: #941f1f;
     color: #ecf0f1;
     width: 60px;
     padding-top: 90px;
@@ -253,7 +253,7 @@ body {
 }
 
 .sidebar .menu li a:hover {
-    background-color: #286aab;
+    background-color: #ad4f4f;
 }
 
 .sidebar .menu a {
@@ -453,19 +453,22 @@ textarea:focus {
     margin-top: 15px;
 }
 
-button {
-    padding: 10px 15px;
-    background-color: #0099ff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+/* Green Button for Approve in Registration */
+.btn-green {
+    background-color: #28a745; /* Green */
 }
 
-button:hover {
-    background-color: #0077cc;
+.btn-green:hover {
+    background-color: #218838; /* Darker Green */
+}
+
+/* Red Button for Deny in Registration */
+.btn-red {
+    background-color: #dc3545; /* Red */
+}
+
+.btn-red:hover {
+    background-color: #c82333; /* Darker Red */
 }
 
 /* Success and Error Message Styles */
@@ -565,7 +568,7 @@ textarea:focus {
 
 .notification-header {
     padding: 12px 15px;
-    background-color: #1f619f;
+    background-color: #9f1f1f;
     color: white;
     font-size: 18px;
     font-weight: bold;
@@ -675,12 +678,6 @@ textarea:focus {
     justify-content: center;
 }
 
-.test-status-filter{
-    display: flex;
-    max-width:500px;
-    padding-top: 25px;
-}
-
 #test-content {
     margin-top: 20px;
 }
@@ -695,7 +692,7 @@ textarea:focus {
 
 .completed {
     margin-bottom: 20px;
-    background-color: #00d039;
+    background-color: #0099ff;
     /* Blue for completed */
     color: white;
 }
@@ -703,7 +700,7 @@ textarea:focus {
 .incomplete {
     margin-bottom: 20px;
     pointer-events: none;
-    background-color: #a9a9a9;
+    background-color: #d3d3d3;
     /* Gray for incomplete */
     color: black;
 }
@@ -787,36 +784,4 @@ textarea:focus {
 .chart-toggle-buttons button:hover,
 .view-toggle-buttons button:hover {
     background-color: #0056b3;
-}
-
-.apply-filter-button {
-    margin-top: 10px;
-    padding: 10px 15px;
-    background-color: #0099ff; /* Adjust color as needed */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.apply-filter-button:hover {
-    background-color: #0077cc; /* Darken on hover */
-}
-
-.legend-green {
-    margin-bottom: 15px;
-    color: #00d039;
-    font-weight: bold; /* Optional to make it stand out */
-}
-
-.legend-red {
-    margin-bottom: 15px;
-    color: #ff4c4c;
-    font-weight: bold;
-}
-
-.legend-gray {
-    margin-bottom: 15px;
-    color: #a9a9a9;
-    font-weight: bold;
 }

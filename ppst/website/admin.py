@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Test, Result, Response, Stimulus, Aggregate, Stimulus_Type, Notification, Ticket
+from .models import Test, Result, Response, Stimulus, Aggregate, Stimulus_Type, Notification, Ticket, Registration
+from django.contrib.auth.models import User
 
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('last_login',)
@@ -22,14 +23,15 @@ class TestAdmin(admin.ModelAdmin):
     administered_by.short_description = "Administered by"
     
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('test', 'fourdigit_accuracy_1', 'fourdigit_latency_1', 'fivedigit_accuracy_1', 'fivedigit_latency_1')
+    list_display = ('id', 'test', 'amount_correct')
     readonly_fields = ('test',)
 
 class TestResponse(admin.ModelAdmin):
+    list_display = ('id', 'test', 'stimulus', 'response', 'time_submitted')
     readonly_fields = ('time_submitted',)
 
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'test', 'header', 'message', 'time_created', 'is_archived', 'is_read')
+    list_display = ('id','user', 'info', 'header', 'message', 'time_created', 'is_archived', 'is_read')
 
     def mark_as_unread(modeladmin, request, queryset):
         queryset.update(is_read=False)
@@ -41,11 +43,39 @@ class NotificationAdmin(admin.ModelAdmin):
 
     actions = [mark_as_unread, mark_as_unarchived]
 
+    
+# Define actions for approving or denying registrations
+def approve_registration(modeladmin, request, queryset):
+    for registration in queryset:
+        # Check if the user already exists
+        if not User.objects.filter(username=registration.username).exists():
+            # Create a new user based on the registration request
+            User.objects.create_user(
+                username=registration.username,
+                password=registration.password  # Ensure password is securely hashed
+            )
+            registration.approved = True
+            registration.save()
+        else:
+            modeladmin.message_user(request, f"User {registration.username} already exists.", level='warning')
+
+approve_registration.short_description = "Approve selected registrations"
+
+def deny_registration(modeladmin, request, queryset):
+    # Mark registration requests as denied
+    queryset.update(approved=False)
+deny_registration.short_description = "Deny selected registrations"
+
+class RegistrationAdmin(admin.ModelAdmin):
+    list_display = ('username', 'approved')
+    actions = [approve_registration]
+
 admin.site.register(Stimulus)
 admin.site.register(Test, TestAdmin)
-admin.site.register(Result)
+admin.site.register(Result, ResultAdmin)
 admin.site.register(Response, TestResponse)
 admin.site.register(Aggregate)
 admin.site.register(Stimulus_Type)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(Ticket)
+admin.site.register(Registration, RegistrationAdmin)

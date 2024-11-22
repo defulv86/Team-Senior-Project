@@ -4,27 +4,47 @@ function loadContent(section) {
 
     if (section === 'account') {
         dynamicContent.innerHTML = `
-            <h2>My Account</h2>
-            <form id="account-form">
-                <label for="first-name">First Name:</label>
-                <input type="text" id="first-name" name="first_name" required>
-                <br>
-                <label for="last-name">Last Name:</label>
-                <input type="text" id="last-name" name="last_name" required>
-                <br>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <br>
-                <label for="current-password">Current Password:</label>
-                <input type="password" id="current-password" name="current_password" required>
-                <br>
-                <label for="new-password">New Password:</label>
-                <input type="password" id="new-password" name="new_password">
-                <br>
-                <button type="button" onclick="saveAccountChanges()">Save Changes</button>
-            </form>
-            <div id="account-message" style="color: green;"></div>
-            <div id="account-error-message" style="color: red; display: none;"></div>
+<form id="account-form">
+<h2>My Account</h2>
+    <fieldset>
+        <legend>Update Your Information</legend>
+
+        <!-- Form fields (First Name, Last Name, etc.) -->
+        <div class="input-group">
+            <label for="first-name">First Name:</label>
+            <input type="text" id="first-name" name="first_name" placeholder="Enter your first name" required>
+        </div>
+
+        <div class="input-group">
+            <label for="last-name">Last Name:</label>
+            <input type="text" id="last-name" name="last_name" placeholder="Enter your last name" required>
+        </div>
+
+        <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="input-group">
+            <label for="current-password">Current Password:</label>
+            <input type="password" id="current-password" name="current_password" placeholder="Enter your current password" required>
+        </div>
+
+        <div class="input-group">
+            <label for="new-password">New Password:</label>
+            <input type="password" id="new-password" name="new_password" placeholder="Enter a new password">
+        </div>
+
+        <!-- Submit Button and Messages Container -->
+        <div class="form-actions">
+            <button type="button" onclick="saveAccountChanges()">Save Changes</button>
+
+            <!-- Success and Error messages (initially hidden) -->
+            <div id="account-message" class="message success" style="display: none;"></div>
+            <div id="account-error-message" class="message error" style="display: none;"></div>
+        </div>
+    </fieldset>
+</form>
         `;
 
         // calling getUserInfo() to populate the form with user info, such as first name, last name, and email.
@@ -37,46 +57,69 @@ function loadContent(section) {
     } else if (section === 'tests') {
         dynamicContent.innerHTML = `
             <h2>Tests</h2>
+            
             <div class="test-buttons">
                 <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
                 <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
             </div>
+
+            <div class="test-status-filter">
+                <label for="test_status_menu">test status:</label>
+                <select id="test_status_menu" name="test_status_menu">
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="invalid">Invalid</option>
+                </select>
+            </div>
+            <button onclick="retrieveTestResults()" class="apply-filter-button">Apply Filter</button>
             <div id="test-content">
                 <!-- Dynamic content for tests will be loaded here -->
             </div>
         `;
+        toggleTestStatusFilter(false);
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
-            <h2>Support</h2>
-            <div id="support-section">
+            <section id="support-section">
+                <h2>Support</h2>
+
+                <!-- Create a Support Ticket Section -->
                 <div id="create-ticket">
                     <h3>Create a Support Ticket</h3>
-                    <br>
                     <form id="ticketForm">
+                        <div class="input-group">
                         <label for="category">Category:</label>
-                        <select id="category" required>
+                        <select id="category" name="category" required>
                             <option value="general">General Issue</option>
                             <option value="technical">Technical Issue</option>
                             <option value="account">Account Management</option>
                             <option value="bug/error">Bug/Error Report</option>
                         </select>
-                        <br><br>
-                        <label for="description">Issue Description:</label>
-                        <br>
-                        <textarea id="description" rows="4" required></textarea>
-                        <br><br>
-                        <button style="background-color: #0099ff; color: white;" type="button" onclick="submitTicket()">Submit Ticket</button>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="description">Issue Description:</label>
+                            <textarea id="description" name="description" rows="4" required placeholder="Describe the issue you are facing..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" onclick="submitTicket()">Submit Ticket</button>
+                            <div id="ticket-message" class="message success" style="display: none;"></div>
+                            <div id="ticket-error-message" class="message error" style="display: none;"></div>
+                        </div>
                     </form>
-                    <div id="error-message" style="color: red; display: none;"></div>
                 </div>
+
+                <!-- List of Submitted Tickets -->
                 <div id="ticket-list">
                     <h3>Your Tickets</h3>
                     <ul id="ticket-items"></ul>
                 </div>
-            </div>
+            </section>
         `;
         loadUserTickets();
     }
+    closeNotifications();
 }
 
 // Function to submit a ticket
@@ -85,10 +128,14 @@ function submitTicket() {
     const description = document.getElementById('description').value;
     const errorMessage = document.getElementById('error-message');
 
+    document.getElementById("ticket-message").style.display = "none";
+    document.getElementById("ticket-error-message").style.display = "none";
+
     // Ensure the form is not empty or the description doesn't contain only spaces.
-    if (!category || !description || description.trim() === "") {
-        errorMessage.textContent = 'Please fill in all required fields.';
-        errorMessage.style.display = 'block';
+    if (!category || !description) {
+        // Show error message if validation fails
+        document.getElementById("ticket-error-message").textContent = "All fields are required!";
+        document.getElementById("ticket-error-message").style.display = "block";
         return;
     }
 
@@ -108,10 +155,11 @@ function submitTicket() {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                errorMessage.textContent = data.error;
-                errorMessage.style.display = 'block';
+                document.getElementById("ticket-error-message").textContent = "All fields are required!";
+                document.getElementById("ticket-error-message").style.display = "block";
             } else {
-                errorMessage.style.display = 'none';
+                document.getElementById("ticket-message").textContent = "Your support ticket has been submitted!";
+                document.getElementById("ticket-message").style.display = "block"; // Show success message
                 loadUserTickets(); // Reload tickets
                 document.getElementById('ticketForm').reset(); // Clear the form
             }
@@ -133,7 +181,7 @@ function loadUserTickets() {
             } else {
                 data.forEach(ticket => {
                     const ticketItem = document.createElement('li');
-                    ticketItem.textContent = `Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
+                    ticketItem.textContent = `Created by: ${ticket.user__username}, Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
                     ticketList.appendChild(ticketItem);
                 });
             }
@@ -159,6 +207,8 @@ function getCookie(name) {
 
 // Function that creates a new test with a given age of 18 or older and stores it into the backend as a link.
 function createTest() {
+    // Hide the test-status filter
+    toggleTestStatusFilter(false);
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
         <h2>Create a New Test</h2>
@@ -199,11 +249,44 @@ function generateTestLink() {
 }
 
 function retrieveTestResults() {
+    // Show the test-status filter
+    toggleTestStatusFilter(true);
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `<h2>Retrieve Patient Test Results</h2>`;
+    testContent.innerHTML = `<h2>Patient Test Results</h2>`;
 
-    // Fetch the test results
-    fetch('/get_test_results/')
+    const test_status = document.getElementById('test_status_menu');
+    const test_status_selection = test_status.options[test_status.selectedIndex].text;
+
+    if (test_status_selection === 'All') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-green">Complete</h3>
+                <h3 class="legend-gray">Pending</h3>
+                <h3 class="legend-red">Invalid</h3>
+                
+            </div>`;
+    }
+    if (test_status_selection === 'Completed') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-green">Complete</h3>
+            </div>`;
+    }
+    if (test_status_selection === 'Invalid') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-red">Invalid</h3>
+            </div>`;
+    }
+    if (test_status_selection === 'Pending') {
+        testContent.innerHTML += `
+            <div class="legend">
+                <h3 class="legend-gray">Pending</h3>
+            </div>`;
+    }
+
+
+    fetch(`/get_test_results/${test_status_selection}`)
         .then(response => response.json())
         .then(data => {
             data.tests.forEach(test => {
@@ -220,8 +303,7 @@ function retrieveTestResults() {
                 testContent.innerHTML += `
                     <button class="${colorClass}" ${onclickAttr}>
                         Test ID ${test.id} | Link: ${test.link}
-                    </button><br>
-                `;
+                    </button><br>`;
             });
         })
         .catch(error => console.error('Error:', error));
@@ -265,7 +347,8 @@ function renderTestResultsTable(data, testId) {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
     <div class="table-container">
-        <h2>Test Results for ID ${testId}</h2>
+        <h2>Test Results for Link: ${data.test_link}</h2>
+        <p><strong>Patient's Age:</strong> ${data.patient_age}</p>
         <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
         <table class="results-table">
             <thead>
@@ -279,35 +362,35 @@ function renderTestResultsTable(data, testId) {
             </thead>
             <tbody>
                 ${data.test_results.map(result => {
-                    let comparisonText = result.comparison || "N/A";
-                    let colorStyle = '';  // Inline styles for color coding
+        let comparisonText = result.comparison || "N/A";
+        let colorStyle = '';  // Inline styles for color coding
 
-                    // Determine if the metric is for latency or accuracy
-                    const isLatency = result.metric.toLowerCase().includes("latency");
-                    const isAccuracy = result.metric.toLowerCase().includes("accuracy");
+        // Determine if the metric is for latency or accuracy
+        const isLatency = result.metric.toLowerCase().includes("latency");
+        const isAccuracy = result.metric.toLowerCase().includes("accuracy");
 
-                    // Apply color rules based on metric type and comparison value
-                    if (isLatency) {
-                        // Latency: Above average = red, Below average = green
-                        if (comparisonText === 'Above average') {
-                            colorStyle = 'color: red; font-weight: bold;';
-                        } else if (comparisonText === 'Below average') {
-                            colorStyle = 'color: green; font-weight: bold;';
-                        } else if (comparisonText === 'Average') {
-                            colorStyle = 'color: black; font-weight: bold;';
-                        }
-                    } else if (isAccuracy) {
-                        // Accuracy: Above average = green, Below average = red
-                        if (comparisonText === 'Above average') {
-                            colorStyle = 'color: green; font-weight: bold;';
-                        } else if (comparisonText === 'Below average') {
-                            colorStyle = 'color: red; font-weight: bold;';
-                        } else if (comparisonText === 'Average') {
-                            colorStyle = 'color: black; font-weight: bold;';
-                        }
-                    }
+        // Apply color rules based on metric type and comparison value
+        if (isLatency) {
+            // Latency: Above average = red, Below average = green
+            if (comparisonText === 'Above average') {
+                colorStyle = 'color: red; font-weight: bold;';
+            } else if (comparisonText === 'Below average') {
+                colorStyle = 'color: green; font-weight: bold;';
+            } else if (comparisonText === 'Average') {
+                colorStyle = 'color: black; font-weight: bold;';
+            }
+        } else if (isAccuracy) {
+            // Accuracy: Above average = green, Below average = red
+            if (comparisonText === 'Above average') {
+                colorStyle = 'color: green; font-weight: bold;';
+            } else if (comparisonText === 'Below average') {
+                colorStyle = 'color: red; font-weight: bold;';
+            } else if (comparisonText === 'Average') {
+                colorStyle = 'color: black; font-weight: bold;';
+            }
+        }
 
-                    return `
+        return `
                     <tr>
                         <td>${result.metric.replace(/_/g, ' ')}</td>
                         <td>${result.values.join(", ")}</td>  <!-- Display all values -->
@@ -317,7 +400,7 @@ function renderTestResultsTable(data, testId) {
                             ${comparisonText}
                         </td>
                     </tr>`;
-                }).join('')}
+    }).join('')}
             </tbody>
         </table>
     </div>
@@ -340,7 +423,7 @@ function renderTestResultsTable(data, testId) {
             </tbody>
         </table>
     </div>
-    <button onclick="retrieveTestResults()">Back to Test Results</button>
+    <button onclick="backToTestResults()">Back to Test Results</button>
     <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
     `;
     // Check if the View as Graph button is already present
@@ -395,7 +478,7 @@ function loadLatencyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.latencies).map(pos => `Position ${pos}`);
+            const labels = Object.keys(data.patient.latencies).map(pos => `Question: ${pos}`);
             const patientLatencies = Object.values(data.patient.latencies);
             const aggregateLatencies = Object.values(data.aggregate.latencies);
 
@@ -464,7 +547,7 @@ function loadAccuracyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.accuracies).map(pos => `Position ${pos}`);
+            const labels = Object.keys(data.patient.accuracies).map(pos => `Question: ${pos}`);
             const patientAccuracies = Object.values(data.patient.accuracies);
             const aggregateAccuracies = Object.values(data.aggregate.accuracies);
 
@@ -521,61 +604,156 @@ function loadAccuracyChart(testId) {
 }
 
 
+
 function backToTestResults() {
-    isViewingTest = false; // Reset when going back
-    toggleTestButtons(); // Show the test buttons again
-    retrieveTestResults(); // Reload the test results list
+    console.log('Navigating back to test results...');
+    isViewingTest = false; // Reset view state
+    toggleTestButtons();   // Make buttons visible again
+    retrieveTestResults(); // Load test results
 }
 
-// Function to toggle visibility of test buttons
 function toggleTestButtons() {
     const testButtons = document.querySelector('.test-buttons');
+    const testStatusFilter = document.querySelector('.test-status-filter');
+    const applyFilterButton = document.querySelector('.apply-filter-button');
+    console.log('isViewingTest:', isViewingTest);
     if (testButtons) {
         testButtons.style.display = isViewingTest ? 'none' : 'block';
+        console.log('Test buttons visibility:', testButtons.style.display);
+    }
+    if (testStatusFilter) {
+        testStatusFilter.style.display = isViewingTest ? 'none' : 'block';
+        console.log('Test filter visibility:', testStatusFilter.style.display);
+    }
+        if (applyFilterButton) {
+        applyFilterButton.style.display = isViewingTest ? 'none' : 'block';
     }
 }
+
+
+
+function toggleTestStatusFilter(show) {
+    const testStatusFilter = document.querySelector('.test-status-filter');
+    const applyFilterButton = document.querySelector('.apply-filter-button');
+    if (testStatusFilter) {
+        testStatusFilter.style.display = show ? 'block' : 'none';
+    }
+    if (applyFilterButton) {
+        applyFilterButton.style.display = show ? 'block' : 'none';
+    }
+}
+
 
 function exportToSpreadsheet(testId) {
     fetch(`/test_results/${testId}/`)
         .then(response => response.json())
         .then(data => {
-            // Initialize workbook and worksheet
+            // Initialize workbook
             const workbook = XLSX.utils.book_new();
 
-            // Prepare Patient Test Results Sheet
+            // Patient Test Results Sheet
             const patientResults = [
                 ['Metric', 'Value', 'Average', 'Comparison']
             ];
             data.test_results.forEach(result => {
                 patientResults.push([
                     result.metric.replace(/_/g, ' '),
-                    result.value,
+                    result.values.join(', '),
                     result.average || "N/A",
                     result.comparison
                 ]);
             });
-
-            // Add patient results to the workbook
             const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
             XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
 
-            // Prepare Aggregate Results Sheet
+            // Aggregate Results Sheet
             const aggregateResults = [
                 ['Metric', 'Average']
             ];
             data.aggregate_results.forEach(result => {
                 aggregateResults.push([
-                    result.metric.replace("avg_", "").replace(/_/g, ' '),
+                    result.metric.replace(/_/g, ' '),
                     result.average
                 ]);
             });
-
-            // Add aggregate results to the workbook
             const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
-            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results`);
+            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results ${data.min_age}-${data.max_age}`);
 
-            // Export the workbook to a file
-            XLSX.writeFile(workbook, `TestResults_${testId}.xlsx`);
+            // Stimuli and Responses Sheet
+            const stimuliResponses = [
+                ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Response Position', 'Time Submitted']
+            ];
+            data.stimuli_responses.forEach(item => {
+                stimuliResponses.push([
+                    item.stimulus_id,
+                    item.stimulus_type,
+                    item.stimulus_content,
+                    item.correct_answer,  // New column for correct answer
+                    item.response,
+                    item.response_position,
+                    item.time_submitted || "N/A"
+                ]);
+            });
+            const stimuliSheet = XLSX.utils.aoa_to_sheet(stimuliResponses);
+            XLSX.utils.book_append_sheet(workbook, stimuliSheet, `Stimuli and Responses`);
+
+            // Completed Patient Tests Sheet
+            const completedTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Started At', 'Finished At', 'Completion Time']
+            ];
+            data.completed_tests.forEach(test => {
+                completedTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.started_at,
+                    test.finished_at,
+                    test.completion_time || "N/A"  // Add completion time here
+                ]);
+            });
+            const completedTestsSheet = XLSX.utils.aoa_to_sheet(completedTests);
+            XLSX.utils.book_append_sheet(workbook, completedTestsSheet, `Completed Patient Tests`);
+
+            // Pending Patient Tests Sheet
+            const pendingTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Expiration Date', 'Time Remaining']
+            ];
+            data.pending_tests.forEach(test => {
+                pendingTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.expiration_date,
+                    test.time_remaining
+                ]);
+            });
+            const pendingTestsSheet = XLSX.utils.aoa_to_sheet(pendingTests);
+            XLSX.utils.book_append_sheet(workbook, pendingTestsSheet, "Pending Patient Tests");
+
+            // Invalid Patient Tests Sheet
+            const invalidTests = [
+                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Invalidated At', 'Time Since Invalid']
+            ];
+            data.invalid_tests.forEach(test => {
+                invalidTests.push([
+                    test.id,
+                    test.link,
+                    test.age,
+                    test.user__username,
+                    test.created_at,
+                    test.invalidated_at,
+                    test.time_since_invalid
+                ]);
+            });
+            const invalidTestsSheet = XLSX.utils.aoa_to_sheet(invalidTests);
+            XLSX.utils.book_append_sheet(workbook, invalidTestsSheet, "Invalid Patient Tests");
+
+            // Export workbook
+            XLSX.writeFile(workbook, `TestResults_${data.test_link}.xlsx`);
         })
         .catch(error => console.error('Error:', error));
 }
@@ -644,14 +822,14 @@ function getUserInfo() {
         });
 }
 
-
-
 // Enable dragging for the notification popout
 let isDragging = false;
 let offsetX, offsetY;
 
 const notificationPopout = document.getElementById('notification-popout');
 const notificationHeader = document.querySelector('.notification-header');
+const notificationBody = document.getElementById('notification-body');
+const notificationList = document.getElementById('notification-list');
 
 notificationHeader.addEventListener('mousedown', (e) => {
     isDragging = true;
@@ -672,13 +850,17 @@ document.addEventListener('mouseup', () => {
     notificationPopout.style.cursor = 'default';
 });
 
+var isNotificationsOpen = false;
+var lastNotifLoadType = 'read'
+
 // Close notifications with the close button
 function closeNotifications() {
-    notificationPopout.classList.toggle('show');
-    notificationBody.classList.toggle('show');
-    notificationList.classList.toggle('show');
+    notificationPopout.classList.remove('show');
+    notificationBody.classList.remove('show');
+    notificationList.classList.remove('show');
+    isNotificationsOpen = notificationPopout.classList.contains('show');
 }
-lastNotifLoadType = 'read'
+
 // Show or hide the notification popout
 function toggleNotifications(event) {
     // Prevent the default action of the anchor tag
@@ -689,87 +871,82 @@ function toggleNotifications(event) {
         loadNotifications("unread");
     }
 
-    // Toggle the display of the notification popout
-    const notificationPopout = document.getElementById('notification-popout');
-    const notificationBody = document.getElementById('notification-body');
-    const notificationList = document.getElementById('notification-list');
-  
     // Toggle the "show" class for each element
     notificationPopout.classList.toggle('show');
     notificationBody.classList.toggle('show');
     notificationList.classList.toggle('show');
-    
+
     // Update the isNotificationsOpen variable based on the visibility of the popout
     isNotificationsOpen = notificationPopout.classList.contains('show');
     console.log("Popout visibility:", notificationPopout.classList.contains('show'));
-    
 
-    
+
+
 }
 
-isNotificationsOpen = false;
+
 
 function update_notifications(event) {
     const action = event.target.getAttribute('data-action');
     //whether we want to load show just unread notifications or read notifications
     loadNotifications(action);
-    if(action == 'unread'){
+    if (action == 'unread') {
         document.getElementById('unread-tab').classList.add('active');
         document.getElementById('read-tab').classList.remove('active');
     }
-    else if(action == 'read'){
+    else if (action == 'read') {
         document.getElementById('unread-tab').classList.remove('active');
         document.getElementById('read-tab').classList.add('active');
     }
 }
 // function that loads in notifications based on the current logged in user
-function loadNotifications(loadType){
+function loadNotifications(loadType) {
     const notificationList = document.getElementById('notification-list');
-    if (!(lastNotifLoadType == loadType)){
-    notificationList.innerHTML = '';
+    if (!(lastNotifLoadType == loadType)) {
+        notificationList.innerHTML = '';
     }
 
     fetch(`/get_user_notifications/${loadType}`)
-    .then(response => response.json())
-    .then(data => {
-        const notifications = data.notifications;
-        if (notifications.length === 0) {
-            if (loadType == 'unread') {
-                notificationList.innerHTML = '<li> No new Notifications </li>';
-            }
-            else{
-                notificationList.innerHTML = '<li> No Notifications </li>';
-            }
-        } else if (!(lastNotifLoadType == loadType)){
-            notifications.forEach(notif => {
-                    
+        .then(response => response.json())
+        .then(data => {
+            const notifications = data.notifications;
+            if (notifications.length === 0) {
+                if (loadType == 'unread') {
+                    notificationList.innerHTML = '<li> No new Notifications </li>';
+                }
+                else {
+                    notificationList.innerHTML = '<li> No Notifications </li>';
+                }
+            } else if (!(lastNotifLoadType == loadType)) {
+                notifications.forEach(notif => {
+
                     const notifItem = document.createElement('li');
 
                     const separator = document.createElement('li');
                     notifItem.className = 'separator';
                     notificationList.appendChild(separator);
-    
+
                     const notificationTime = new Date(notif.time_created);
                     const now = new Date();
 
                     const current_date = now.getDate() + now.getMonth() + now.getFullYear()
                     const notif_date = notificationTime.getDate() + notificationTime.getMonth() + notificationTime.getFullYear()
-                    
+
                     const dateSpan = document.createElement('span');
                     if (current_date == notif_date) {
                         dateSpan.textContent = `Today at ${new Date(notif.time_created).toLocaleString([], { hour: 'numeric', minute: '2-digit' })}`;
                     }
-                    else{
-                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString([], {year:'2-digit', month:'2-digit', day:'2-digit', hour:'numeric', minute: '2-digit'})}`;
+                    else {
+                        dateSpan.textContent = `${new Date(notif.time_created).toLocaleString([], { year: '2-digit', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit' })}`;
                     }
 
                     const headerSpan = document.createElement('span');
                     headerSpan.textContent = `${notif.header}`;
                     headerSpan.style.fontWeight = 'bold';
-    
+
                     const messageSpan = document.createElement('span');
                     messageSpan.textContent = `${notif.message}`;
-                    
+
                     notifItem.appendChild(dateSpan);
                     notifItem.appendChild(document.createElement('br'));
                     notifItem.appendChild(headerSpan);
@@ -782,7 +959,7 @@ function loadNotifications(loadType){
                         archiveButton.onclick = () => dismissNotification(notif.id, notifItem);
                         notifItem.appendChild(archiveButton);
                     }
-                    else{
+                    else {
                         const archiveButton = document.createElement(`button`);
                         archiveButton.textContent = 'Archive';
                         archiveButton.style.marginRight = '5px';
@@ -793,18 +970,18 @@ function loadNotifications(loadType){
                         readButton.onclick = () => markAsRead(notif.id, notifItem);
                         notifItem.appendChild(readButton);
                     }
-                    
-                    notificationList.appendChild(notifItem);
-            });
-        }
 
-        if (lastNotifLoadType == 'read' && loadType != 'read') {
-            lastNotifLoadType = 'unread';
-        } else if(lastNotifLoadType == 'unread' && loadType != 'unread'){
-            lastNotifLoadType = 'read';
-        }
-    })
-    .catch(error => console.error('Error:', error));    
+                    notificationList.appendChild(notifItem);
+                });
+            }
+
+            if (lastNotifLoadType == 'read' && loadType != 'read') {
+                lastNotifLoadType = 'unread';
+            } else if (lastNotifLoadType == 'unread' && loadType != 'unread') {
+                lastNotifLoadType = 'read';
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // removes the notification based on the notifItem corrisponding to the button that was pressed
@@ -828,11 +1005,11 @@ function dismissNotification(id, notifItem) {
         .catch(error => console.error('Error updating notification', error))
 }
 // marks the notification as read based on the notifItem corrisponding to the button that was pressed
-function markAsRead(id ,notifItem){
+function markAsRead(id, notifItem) {
     const notificationList = document.getElementById('notification-list');
     notificationList.removeChild(notifItem);
 
-    fetch(`/mark_as_read/${id}/`,{
+    fetch(`/mark_as_read/${id}/`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -840,16 +1017,15 @@ function markAsRead(id ,notifItem){
         },
         body: JSON.stringify({ is_read: true })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('failed to mark the notification as read')
-        }
-    })
-    .catch(error => console.error('Error updating notification', error))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('failed to mark the notification as read')
+            }
+        })
+        .catch(error => console.error('Error updating notification', error))
 }
 
 // Automatically load the "Dashboard" tab when the page is first loaded
 window.addEventListener('load', () => {
     loadContent('dashboard');
 });
-
