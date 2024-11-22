@@ -1073,7 +1073,7 @@ for min_age, max_age in age_groups:
 	avg_accuracies = {str(i): [] for i in range(1, 17)}
 	for test_num in range(3):
 		age = randint(min_age, max_age)
-		created_at = timezone.now() - timedelta(days=randint(1, 30))
+		created_at = timezone.now() - timedelta(days=randint(1, 6))
 		started_at = created_at + timedelta(minutes=randint(1, 60))
 		finished_at = started_at + timedelta(minutes=randint(5, 15))
 		test_instance = Test.objects.create(
@@ -1104,28 +1104,20 @@ for min_age, max_age in age_groups:
 			avg_accuracies[str(i)].extend(accuracy)
 			time_submitted = test_start_time + timedelta(seconds=randint(30, 90))
 			test_start_time = time_submitted
-			response_data = {
-				"response": response,
-				"test": test_instance,
-				"response_position": i,
-				"stimulus": Stimulus.objects.get(stimulus_content=stimulus_content),
-				"time_submitted": time_submitted
-			}
-			responses_data.append(response_data)
-		result = {
-			"test": test_instance,
-			"character_latencies": character_latencies,
-			"character_accuracies": character_accuracies,
-			"amount_correct": amount_correct
-		}
-		results_data.append(result)
-	# Add aggregate data for the age group
-	aggregate_data.append({
-		"min_age": min_age,
-		"max_age": max_age,
-		"average_latencies": {key: sum(values) / len(values) for key, values in avg_latencies.items()},
-		"average_accuracies": {key: sum(values) / len(values) for key, values in avg_accuracies.items()}
-	})
+			response_data = Response.objects.create(
+				response=response,
+				test=test_instance,
+				response_position=i,
+				stimulus=Stimulus.objects.get(stimulus_content=stimulus_content),
+				time_submitted=time_submitted
+			)
+		result = Result.objects.create(
+			test=test_instance,
+			character_latencies=character_latencies,
+			character_accuracies=character_accuracies,
+			amount_correct=amount_correct
+		)
+		update_or_create_aggregate(test_instance)
 
 # Output generated data
 for test in tests_data:
@@ -1141,4 +1133,3 @@ for aggregate in aggregate_data:
 	Aggregate.objects.create(**aggregate)
 
 
-# Enter more test responses below...
