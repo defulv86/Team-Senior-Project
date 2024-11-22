@@ -47,8 +47,9 @@ h2 {
     color: #0077b3;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
-    font-size: 1.7em;
-    margin-bottom: 30px;
+    font-size: 2.0em;
+    margin-top: 20px;
+    margin-bottom: 25px;
 }
 
 #introduction h2 {
@@ -64,6 +65,9 @@ h2 {
     margin-left: 30px;
     margin-bottom: 20px; 
     margin-top: 10px;
+    width: 361.24px;
+    height: 30px;
+    line-height: 30px;
     font-weight: bolder;
     font-family: 'Montserrat', sans-serif;
 }
@@ -76,6 +80,9 @@ h2 {
     margin-left: 30px;
     margin-bottom: 20px; 
     margin-top: 10px;
+    width: 361.24px;
+    height: 30px;
+    line-height: 30px;
     font-weight: bolder;
     font-family: 'Montserrat', sans-serif;
 }
@@ -90,10 +97,14 @@ h2 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.icon-blue {
+.icon {
     color: #0077b3;
     float: left;
     margin-right: 5px;
+    width: 30px;
+    height: 30px;
+    transform: scale(1.1); /* Slight zoom on hover */
+    transition: transform 0.3s ease-in-out;
 }
 
 form#changeFont {
@@ -105,25 +116,37 @@ form#changeFont {
     margin-right: 30px;
     margin-bottom: 20px; 
     margin-top: 10px;
+    width: 361.24px;
+    height: 30px;
+    line-height: 30px;
     font-weight: bolder;
     font-family: 'Montserrat', sans-serif;
 }
 
+form#changeFont select {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+  
+
 form#changeFont input[type="submit"]{
     z-index: 20;
     color: white;
-    background-color: #0077B3;
+    background-color: #0099ff;
     border: none;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     height: 30px;
     width: 80px;
-    border-radius: 80px;
     cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
 form#changeFont input[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #0077cc;
+    transform: scale(1.05);
 }
 
 
@@ -199,7 +222,8 @@ p {
 .key:hover {
     background-color: #0056b3;
     box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
-    transform: scale(1.05);
+    transform: scale(1.2);
+    transition: transform 0.2s ease-in-out
 }
 
 #submit-response {
@@ -254,22 +278,26 @@ p {
 }
 }
 
-button {
+button#start-test, button#subtitles-button {
     z-index: 20;
     color: white;
-    background-color: #0077B3;
+    background-color: #0099ff;
     border: none;
     font-family: 'Open Sans', sans-serif;
     font-weight: bold;
     height: 50px;
     width: 100px;
-    border-radius: 30px;
     cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
       /* buttons under video */
 }
 
-button:hover {
-    background-color: #0056b3;
+button#start-test:hover, 
+button#subtitles-button:hover {
+    background-color: #0056b3; /* Darker shade for hover */
+    transform: scale(1.05);
 }
 
 
@@ -290,6 +318,7 @@ button:hover {
 
 #speak-button:hover {
     color: #0056b3;
+    transform: scale(1.05);
     /* Change color on hover */
 }
 
