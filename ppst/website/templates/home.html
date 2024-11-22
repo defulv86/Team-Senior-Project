@@ -34,9 +34,9 @@
         <a href="{% if user.is_authenticated %}{% if user.is_staff %}/admin_dashboard{% else %}/dashboard{% endif %}{% else %}/login{% endif %}" class="login-button">
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
-                    Access Admin Dashboard
+                    Dashboard
                 {% else %}
-                    Access Medical Dashboard
+                    Dashboard
                 {% endif %}
             {% else %}
                 Log In
