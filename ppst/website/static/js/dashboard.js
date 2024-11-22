@@ -54,27 +54,52 @@ function loadContent(section) {
             <h2>Dashboard</h2>
             <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
         `;
-    } else if (section === 'tests') {
+    } else if (section === 'tests') { 
         dynamicContent.innerHTML = `
-            <h2>Tests</h2>
-            
-            <div class="test-buttons">
-                <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
-                <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
-            </div>
+            <div class="dynamic-content">
+                <h2>Tests</h2>
 
-            <div class="test-status-filter">
-                <label for="test_status_menu">test status:</label>
-                <select id="test_status_menu" name="test_status_menu">
-                    <option value="all">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="invalid">Invalid</option>
-                </select>
-            </div>
-            <button onclick="retrieveTestResults()" class="apply-filter-button">Apply Filter</button>
-            <div id="test-content">
-                <!-- Dynamic content for tests will be loaded here -->
+                <div class="test-buttons">
+                    <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
+                    <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
+                </div>
+
+                <div class="filter-content-wrapper" id="filter-content-wrapper">
+                    <!-- Test Status Filter Section -->
+                    <div class="test-status-filter" id="test-status-filter">
+                        <!-- Legend Section Above the Filter -->
+                            <div class="legend" id="legend">
+                                <div class="legend-item">
+                                    <span class="legend-circle legend-green"></span>
+                                    <span class="legend-text">Complete</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-circle legend-gray"></span>
+                                    <span class="legend-text">Pending</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-circle legend-red"></span>
+                                    <span class="legend-text">Invalid</span>
+                                </div>
+                            </div>
+
+                            <label for="test_status_menu">Test Status:</label>
+                            <select id="test_status_menu" name="test_status_menu">
+                                <option value="all">All</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                                <option value="invalid">Invalid</option>
+                            </select>
+
+                            <!-- Button to Apply Filter -->
+                            <button onclick="retrieveTestResults()" class="apply-filter-button">Apply Filter</button>
+                        </div>
+
+                        <!-- Test Results Section -->
+                        <div id="test-content">
+                            <!-- Dynamic content for tests will be loaded here -->
+                        </div>
+                </div>
             </div>
         `;
         toggleTestStatusFilter(false);
@@ -213,10 +238,11 @@ function createTest() {
     testContent.innerHTML = `
         <h2>Create a New Test</h2>
         <label for="patient-age">Please provide the patient's age:</label>
-        <input type="number" id="patient-age" name="patient-age" required><br><br>
+        <input type="number" id="patient-age" name="patient-age" required class="small-input"><br><br>
         <button onclick="generateTestLink()">Generate Test Link</button>
         <div id="generated-link"></div>
     `;
+    testContent.classList.add('loaded');
 }
 // Function that serves as a helper to generate a test link in the createTest function.
 function generateTestLink() {
@@ -257,38 +283,10 @@ function retrieveTestResults() {
     const test_status = document.getElementById('test_status_menu');
     const test_status_selection = test_status.options[test_status.selectedIndex].text;
 
-    if (test_status_selection === 'All') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-green">Complete</h3>
-                <h3 class="legend-gray">Pending</h3>
-                <h3 class="legend-red">Invalid</h3>
-                
-            </div>`;
-    }
-    if (test_status_selection === 'Completed') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-green">Complete</h3>
-            </div>`;
-    }
-    if (test_status_selection === 'Invalid') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-red">Invalid</h3>
-            </div>`;
-    }
-    if (test_status_selection === 'Pending') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-gray">Pending</h3>
-            </div>`;
-    }
-
-
     fetch(`/get_test_results/${test_status_selection}`)
         .then(response => response.json())
         .then(data => {
+        if (data.tests && data.tests.length > 0) {
             data.tests.forEach(test => {
                 let colorClass = 'incomplete';
                 let onclickAttr = '';
@@ -305,8 +303,16 @@ function retrieveTestResults() {
                         Test ID ${test.id} | Link: ${test.link}
                     </button><br>`;
             });
+            testContent.classList.add('loaded');
+        } else {
+            testContent.innerHTML = "<p>No test results available.</p>";
+            testContent.classList.add('loaded');
+        }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            testContent.classList.add('loaded');
+        });
 }
 
 // Track if we're in test viewing mode
