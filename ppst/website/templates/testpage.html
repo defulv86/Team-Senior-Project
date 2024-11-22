@@ -72,13 +72,13 @@
 
     <div id="pause-screen"
         style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); color: white; justify-content: center; align-items: center; flex-direction: column;">
-        <div id="intro-vid" class="video-container">
+        <div id="intro-video-div" class="video-container">
             <video id="intro-vid" width="640" height="360" controls>
                 <source src="{% static 'images\PPSTTestIntoVid.mp4' %}" type="video/mp4">
             </video>
         </div>
         <div id="pause-message" style="margin-bottom: 20px; text-align: center;"></div>
-        <div id="mixed-stim-vid" class="video-container" style="display: none;">
+        <div id="mixed-video-div" class="video-container" style="display: none;">
             <video id="mixed-vid" width="640" height="360" controls>
                 <source src="{% static 'images\MixedStimuliInstructions.mp4' %}" type="video/mp4">
             </video>

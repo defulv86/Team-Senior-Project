@@ -138,26 +138,28 @@ function showPauseScreen(type ,message, callback) {
     const pauseScreen = document.getElementById('pause-screen');
     const messageDiv = document.getElementById('pause-message');
     const continueButton = document.getElementById('continue-button');
-    const mixedInstructVideo =  document.getElementById('mixed-stim-vid');
+    const introVideoDiv =  document.getElementById('intro-video-div');
+    const mixedVideoDiv =  document.getElementById('mixed-video-div');
     const introVideo = document.getElementById('intro-vid');
+    const mixedVideo = document.getElementById('mixed-vid')
 
     messageDiv.textContent = message;
     pauseScreen.style.display = 'flex';
 
     if (type == "4_Span_Mixed_Pr") {
-        mixedInstructVideo.style.display = 'block';
+        mixedVideoDiv.style.display = 'block';
     } 
     else if (type == "4_Span_Digit_Pr") {
-        introVideo.style.display = 'block';
+        introVideoDiv.style.display = 'block';
     }
 
     continueButton.onclick = function (event) {
         event.stopPropagation();
         pauseScreen.style.display = 'none';
-        mixedInstructVideo.style.display = 'none';
-        introVideo.style.display = 'none';
-        // introVideo.pause();
-        // mixedInstructVideo.pause();
+        mixedVideoDiv.style.display = 'none';
+        introVideoDiv.style.display = 'none';
+        introVideo.pause();
+        mixedVideo.pause();
         if (callback) callback();
     };
 }
