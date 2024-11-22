@@ -24,7 +24,7 @@ body {
     /* Ensure it’s on top */
 }
 
-#pause-message{
+#pause-message {
     font-size: 1.5em;
     font-weight: bold;
     font-family: 'Montserrat', sans-serif;
@@ -63,7 +63,7 @@ h2 {
     left: 0;
     font-size: 15px;
     margin-left: 30px;
-    margin-bottom: 20px; 
+    margin-bottom: 20px;
     margin-top: 10px;
     width: 361.24px;
     height: 30px;
@@ -72,13 +72,13 @@ h2 {
     font-family: 'Montserrat', sans-serif;
 }
 
-#logo h3{
+#logo h3 {
     position: absolute;
     top: 0;
     left: 0;
     font-size: 15px;
     margin-left: 30px;
-    margin-bottom: 20px; 
+    margin-bottom: 20px;
     margin-top: 10px;
     width: 361.24px;
     height: 30px;
@@ -88,7 +88,7 @@ h2 {
 }
 
 #response-section h2 {
-    font-family: 'Montserrat', sans-serif; 
+    font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     font-size: 1.7em;
     margin-bottom: 50px;
@@ -103,7 +103,8 @@ h2 {
     margin-right: 5px;
     width: 30px;
     height: 30px;
-    transform: scale(1.1); /* Slight zoom on hover */
+    transform: scale(1.1);
+    /* Slight zoom on hover */
     transition: transform 0.3s ease-in-out;
 }
 
@@ -114,7 +115,7 @@ form#changeFont {
     right: 0;
     font-size: 15px;
     margin-right: 30px;
-    margin-bottom: 20px; 
+    margin-bottom: 20px;
     margin-top: 10px;
     width: 361.24px;
     height: 30px;
@@ -126,10 +127,10 @@ form#changeFont {
 form#changeFont select {
     border: 1px solid #ccc;
     border-radius: 3px;
-  }
-  
+}
 
-form#changeFont input[type="submit"]{
+
+form#changeFont input[type="submit"] {
     z-index: 20;
     color: white;
     background-color: #0099ff;
@@ -245,14 +246,14 @@ p {
     background-image: linear-gradient(#007bff 0, rgba(255, 255, 255, 0) 100%);
 }
 
-#submit-response:hover{
-  background-color: #0056b3;
-  box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
-  transform: scale(1.05);
+#submit-response:hover {
+    background-color: #0056b3;
+    box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
+    transform: scale(1.05);
 }
 
 #continue-button {
-/* Base styles */
+    /* Base styles */
     width: 200px;
     height: 50px;
     margin: 20px;
@@ -270,15 +271,15 @@ p {
     touch-action: manipulation;
     background-image: linear-gradient(#007bff 0, rgba(255, 255, 255, 0) 100%);
 
-/* Hover effect */
-&:hover {
-    background-color: #0056b3;
-    box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
-    transform: scale(1.05);
-}
+    /* Hover effect */
+    &:hover {
+        background-color: #0056b3;
+        box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
+        transform: scale(1.05);
+    }
 }
 
-button#start-test, button#subtitles-button {
+button#start-test {
     z-index: 20;
     color: white;
     background-color: #0099ff;
@@ -291,12 +292,12 @@ button#start-test, button#subtitles-button {
     border-radius: 4px;
     font-size: 16px;
     transition: background-color 0.3s ease, transform 0.2s ease;
-      /* buttons under video */
+    /* buttons under video */
 }
 
-button#start-test:hover, 
-button#subtitles-button:hover {
-    background-color: #0056b3; /* Darker shade for hover */
+button#start-test:hover {
+    background-color: #0056b3;
+    /* Darker shade for hover */
     transform: scale(1.05);
 }
 
@@ -321,4 +322,3 @@ button#subtitles-button:hover {
     transform: scale(1.05);
     /* Change color on hover */
 }
-
