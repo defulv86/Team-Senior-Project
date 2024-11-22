@@ -1059,7 +1059,7 @@ def is_correct_order(response: str, stimulus: str) -> bool:
 
 
 # Define age groups
-age_groups = [(18, 29), (30, 39), (60, 69), (70, 79), (80, 89), (90, 99)]
+age_groups = [(18, 29), (30, 39), (50, 59), (60, 69), (70, 79), (80, 89), (90, 99)]
 
 # Store generated data
 tests_data = []
@@ -1071,7 +1071,7 @@ aggregate_data = []
 for min_age, max_age in age_groups:
 	avg_latencies = {str(i): [] for i in range(1, 17)}
 	avg_accuracies = {str(i): [] for i in range(1, 17)}
-	for test_num in range(3):
+	for test_num in range(5):
 		age = randint(min_age, max_age)
 		created_at = timezone.now() - timedelta(days=randint(1, 6))
 		started_at = created_at + timedelta(minutes=randint(1, 60))
