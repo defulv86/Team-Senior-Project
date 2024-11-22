@@ -134,17 +134,30 @@ document.querySelectorAll('.key').forEach(key => {
     });
 });
 
-function showPauseScreen(message, callback) {
+function showPauseScreen(type ,message, callback) {
     const pauseScreen = document.getElementById('pause-screen');
     const messageDiv = document.getElementById('pause-message');
     const continueButton = document.getElementById('continue-button');
+    const mixedInstructVideo =  document.getElementById('mixed-stim-vid');
+    const introVideo = document.getElementById('intro-vid');
 
     messageDiv.textContent = message;
     pauseScreen.style.display = 'flex';
 
+    if (type == "4_Span_Mixed_Pr") {
+        mixedInstructVideo.style.display = 'block';
+    } 
+    else if (type == "4_Span_Digit_Pr") {
+        introVideo.style.display = 'block';
+    }
+
     continueButton.onclick = function (event) {
         event.stopPropagation();
         pauseScreen.style.display = 'none';
+        mixedInstructVideo.style.display = 'none';
+        introVideo.style.display = 'none';
+        // introVideo.pause();
+        // mixedInstructVideo.pause();
         if (callback) callback();
     };
 }
@@ -158,13 +171,13 @@ function nextStimulus() {
         if (['4_Span_Digit_Pr', '4_Span_Digit', '4_Span_Mixed_Pr', '4_Span_Mixed'].includes(stimulusType) && !shownTypes.has(stimulusType)) {
             shownTypes.add(stimulusType);
             const messageMap = {
-                '4_Span_Digit_Pr': "You will now see two digit practice stimuli.",
+                '4_Span_Digit_Pr': "When you proceed, you will see two digit practice stimuli.",
                 '4_Span_Digit': "The actual test will now begin. You will now see six different digit stimuli. These results will be recorded.", // "six digit stimuli" by itself sounded a bit confusing and misleading in my opinion
-                '4_Span_Mixed_Pr': "You will now see two mixed practice stimuli.",
+                '4_Span_Mixed_Pr': "The next section includes mixed stimuli. Watch the video below for instructions on how to respond.",
                 '4_Span_Mixed': "The actual test will now begin. You will now see six different mixed stimuli. These results will be recorded." // "six mixed stimuli" sounds a little less confusing but I changed it anyway for consistency
             };
 
-            showPauseScreen(messageMap[stimulusType], () => {
+            showPauseScreen(stimulusType, messageMap[stimulusType], () => {
                 flashStimulus(currentStimulus);
                 currentStimulusIndex++;
             });

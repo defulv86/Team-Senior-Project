@@ -40,11 +40,9 @@
             Once you are prepared to proceed, click the button below to begin taking the test.
         </div>
 
-        <div class="video-container">
-            <video width="640" height="360" controls>
-                <source src="{% static 'images\PPSTTestIntoVid.mp4' %}" type="video/mp4">
-            </video>
-        </div>
+        
+
+
 
         <div class="d-flex justify-content-center">
             <button id="subtitles-button">Show Subtitles</button>
@@ -74,7 +72,18 @@
 
     <div id="pause-screen"
         style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); color: white; justify-content: center; align-items: center; flex-direction: column;">
+        <div id="intro-vid" class="video-container">
+            <video id="intro-vid" width="640" height="360" controls>
+                <source src="{% static 'images\PPSTTestIntoVid.mp4' %}" type="video/mp4">
+            </video>
+        </div>
         <div id="pause-message" style="margin-bottom: 20px; text-align: center;"></div>
+        <div id="mixed-stim-vid" class="video-container" style="display: none;">
+            <video id="mixed-vid" width="640" height="360" controls>
+                <source src="{% static 'images\MixedStimuliInstructions.mp4' %}" type="video/mp4">
+            </video>
+        </div>
+        
         <button id="continue-button" class="btn btn-primary">Continue</button>
     </div>
 
