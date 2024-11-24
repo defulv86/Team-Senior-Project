@@ -718,6 +718,23 @@ function exportToSpreadsheet(testId) {
             const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
             XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results ${data.min_age}-${data.max_age}`);
 
+            const comparisonResults = [
+                ['Metric', 'Patient Accuracy Average', 'Aggregate Accuracy Average', 'Accuracy Comparison', 'Patient Latency Average', 'Aggregate Latency Average', 'Latency Comparison']
+            ];
+            data.test_results.forEach(result => {
+                comparisonResults.push([
+                    result.metric.replace(/_/g, ' '),
+                    result.user_accuracy_average || "N/A",
+                    result.accuracy_average || "N/A",
+                    result.accuracy_comparison || "N/A",
+                    result.user_latency_average || "N/A",
+                    result.latency_average || "N/A",
+                    result.latency_comparison || "N/A"
+                ]);
+            });
+            const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonResults);
+            XLSX.utils.book_append_sheet(workbook, comparisonSheet, `Comparison Results`);
+
             // Stimuli and Responses Sheet
             const stimuliResponses = [
                 ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Response Position', 'Time Submitted']
