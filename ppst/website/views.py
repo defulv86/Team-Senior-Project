@@ -934,29 +934,21 @@ def test_results(request, test_id):
 
         # Append accuracy and latency results
         test_results.append({
-            "metric": f"{metric} Accuracy",
-            "values": user_accuracies,
-            "average": user_accuracy_avg,
-            "aggregate_average": avg_accuracy,
-            "comparison": accuracy_comparison
-        })
-        test_results.append({
-            "metric": f"{metric} Latency",
-            "values": user_latencies,
-            "average": user_latency_avg,
-            "aggregate_average": avg_latency,
-            "comparison": latency_comparison
-        })
-
-        aggregate_results.append({
-            "metric": f"{metric} Accuracy",
-            "average": avg_accuracy
+            "metric": f"{metric}",
+            "user_accuracy_values": user_accuracies,
+            "user_accuracy_average": user_accuracy_avg,
+            "accuracy_average": avg_accuracy,
+            "accuracy_comparison": accuracy_comparison,
+            "user_latency_values": user_latencies,
+            "user_latency_average": user_latency_avg,
+            "latency_average": avg_latency,
+            "latency_comparison": latency_comparison
         })
         aggregate_results.append({
-            "metric": f"{metric} Latency",
-            "average": avg_latency
+            "metric": f"{metric}",
+            "accuracy_average": avg_accuracy,
+            "latency_average": avg_latency
         })
-
         metric_position += 1
 
     # Calculate amount correct for non-practice questions
@@ -1042,6 +1034,10 @@ def get_test_comparison_data(request, test_id):
             "latencies": aggregate_latencies,
             "accuracies": aggregate_accuracies,
         },
+        "age_group": {
+        "min_age": aggregate.min_age,
+        "max_age": aggregate.max_age,
+        }
     }
     return JsonResponse(data)
 
