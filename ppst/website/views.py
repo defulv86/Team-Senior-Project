@@ -782,7 +782,6 @@ def test_results(request, test_id):
             "correct_answer": correct_answer,
             "stimulus_type": stimulus.stimulus_type.stimulus_type,
             "response": response.response,
-            "response_position": response.response_position,
             "time_submitted": format_timestamp(response.time_submitted)
         })
 
