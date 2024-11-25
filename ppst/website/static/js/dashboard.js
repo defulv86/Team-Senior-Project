@@ -733,6 +733,7 @@ function exportToSpreadsheet(testId) {
                 ]);
             });
             const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonResults);
+            
             XLSX.utils.book_append_sheet(workbook, comparisonSheet, `Comparison Results`);
 
             // Stimuli and Responses Sheet
@@ -746,7 +747,6 @@ function exportToSpreadsheet(testId) {
                     item.stimulus_content,
                     item.correct_answer,  // New column for correct answer
                     item.response,
-                    item.response_position,
                     item.time_submitted || "N/A"
                 ]);
             });
