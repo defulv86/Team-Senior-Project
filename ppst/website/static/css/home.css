@@ -7,6 +7,140 @@ body {
     color: #ffffff;
 }
 
+@media screen and (max-width: 925px) {
+    nav {
+        justify-content: center;
+        flex-direction: column;
+        position: static;
+    }
+
+    nav .nav-links {
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    nav ul {
+        flex-direction: column;
+    }
+
+    nav ul li {
+        margin: 0 auto;
+    }
+
+    nav ul li a {
+        display: block;
+    }
+
+    /* Login Button Styles */
+    .login-button {
+        display: block;
+        justify-content: center;
+    }
+
+    /* Styles for Section 1 */
+    #section1 h1 {
+        font-size: 0.5em;
+    }
+
+    #section1 h2 {
+        font-size: 0.5em;
+    }
+
+    #section1 p {
+        font-size: 12px;
+        max-width: 450px;
+    }
+
+    /* Styles for Section 2 */
+    #section2 h1 {
+        text-align: center;
+        margin-top: -100px;
+    }
+
+    #section2 p {
+        font-size: 20px;
+        max-width: 450px;
+    }
+
+    .about-section {
+        flex-direction: row;
+        align-items: center;
+        text-align: center;
+        height: auto;
+    }
+
+    .content {
+        font-size: 16px;
+    }
+
+    .image-container {
+        display: none;
+    }
+
+    /* Styles for Section 3 */
+    #section3 h1 {
+        text-align: center;
+        align-items: center;
+        margin-top: -100px;
+        margin-right: 0;
+        padding-left: 190px;
+    }
+
+    #section3 p {
+        font-size: 20px;
+        max-width: 450px;
+        margin-right: 0;
+        padding-left: 190px;
+    }
+
+    .services-section {
+        align-items: center;
+        flex-direction: row;
+        text-align: center;
+        height: auto;
+    }
+
+    .services-content {
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .services-image-container {
+        display: none;
+    }
+
+    .sign-up-button {
+        margin-left: 190px;
+    }
+
+    /* Styles for Section 4 */
+    #section4 h2 {
+        font-size: 1.3em;
+        color: rgba(255, 255, 255, 0.5);
+        margin: 0.02em 0;
+    }
+
+    #section4 h3 {
+        font-size: 1.2em;
+    }
+
+    #section4 p {
+        font-size: 1.2em;
+    }
+
+    .benefits {
+        display: flex;
+        margin-top: 20px;
+    }
+
+    .benefit {
+        width: 330px;
+        text-align: center;
+        padding: 15px;
+        margin: 20px;
+    }
+}
+
 /* Navigation Bar Styles */
 nav {
     position: fixed;
