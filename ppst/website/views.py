@@ -769,12 +769,20 @@ def test_results(request, test_id):
     # Retrieve stimuli and associated responses for the export
     responses = Response.objects.filter(test=test).select_related('stimulus')
     stimuli_responses = []
+    practice_correct = 0
+    actual_correct = 0
 
     for index, response in enumerate(responses, start=1):
         stimulus = response.stimulus
 
         # Sort alphanumerically for "Correct Answer for Stimuli"
         correct_answer = ''.join(sorted(stimulus.stimulus_content))
+        is_correct = response.response == correct_answer
+        # Check if the stimulus is practice or actual
+        if "Pr" in stimulus.stimulus_type.stimulus_type:
+            practice_correct += int(is_correct)
+        else:
+            actual_correct += int(is_correct)
 
         stimuli_responses.append({
             "stimulus_id": stimulus.id,
@@ -782,8 +790,12 @@ def test_results(request, test_id):
             "correct_answer": correct_answer,
             "stimulus_type": stimulus.stimulus_type.stimulus_type,
             "response": response.response,
+            "is_correct": is_correct,
             "time_submitted": format_timestamp(response.time_submitted)
         })
+
+    # Calculate total correct
+    total_correct = practice_correct + actual_correct
 
     # Retrieve completed tests and calculate completion times
     completed_tests = Test.objects.filter(status="completed").values(
@@ -967,6 +979,9 @@ def test_results(request, test_id):
         "patient_age": patient_age,
         # Below is only needed for spreadsheet exportation.
         "stimuli_responses": stimuli_responses,
+        "practice_correct": practice_correct,
+        "actual_correct": actual_correct,
+        "total_correct": total_correct,
         "completed_tests": formatted_completed_tests,
         "pending_tests": formatted_pending_tests,
         "invalid_tests": formatted_invalid_tests

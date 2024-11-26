@@ -744,7 +744,7 @@ function exportToSpreadsheet(testId) {
 
             // Stimuli and Responses Sheet
             const stimuliResponses = [
-                ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Response Position', 'Time Submitted']
+                ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Is Correct', 'Time Submitted']
             ];
             data.stimuli_responses.forEach(item => {
                 stimuliResponses.push([
@@ -753,9 +753,20 @@ function exportToSpreadsheet(testId) {
                     item.stimulus_content,
                     item.correct_answer,  // New column for correct answer
                     item.response,
+                    item.is_correct ? "Yes" : "No",
                     item.time_submitted || "N/A"
                 ]);
             });
+            // Add total row to the bottom of the sheet
+            stimuliResponses.push([
+                ''
+            ]);
+            stimuliResponses.push([
+                'Practice Correct', 'Actual Correct', 'Total Correct'
+            ]);
+            stimuliResponses.push([
+                data.practice_correct, data.actual_correct, data.total_correct
+            ]);
             const stimuliSheet = XLSX.utils.aoa_to_sheet(stimuliResponses);
             XLSX.utils.book_append_sheet(workbook, stimuliSheet, `Stimuli and Responses`);
 
