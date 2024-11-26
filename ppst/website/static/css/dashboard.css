@@ -535,6 +535,10 @@ textarea:focus {
     border-color: #0056b3;
 }
 
+.small-input {
+    width: 200px;
+}
+
 .notification-popout {
     position: absolute;
     right: 20px;
@@ -667,6 +671,88 @@ textarea:focus {
     outline: none;
 }
 
+#test-content {
+    width: 1000px;
+    background-color: white;
+    padding: 15px;
+    box-shadow: none;
+    border-radius: 8px;
+    display: none;
+}
+
+#test-content.loaded {
+    display: block;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-content-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 1350px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.test-status-filter {
+    background-color: white;
+    padding: 20px;
+    width: 250px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.legend-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.legend-green {
+    background-color: #00d039;
+}
+
+.legend-gray {
+    background-color: #a9a9a9;
+}
+
+.legend-red {
+    background-color: ff4c4c;
+}
+
+.legend-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 20px;
+}
+
+.test-status-filter label {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.test-status-filter select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
 
 .test-buttons {
     margin-top: 50px;
@@ -681,10 +767,6 @@ textarea:focus {
     padding-top: 25px;
 }
 
-#test-content {
-    margin-top: 20px;
-}
-
 .test-list li {
     margin-bottom: 10px;
     padding: 10px;
@@ -696,8 +778,12 @@ textarea:focus {
 .completed {
     margin-bottom: 20px;
     background-color: #00d039;
-    /* Blue for completed */
     color: white;
+    transition: background-color 0.3s ease;
+}
+
+.completed:hover {
+    background-color: #28a745;
 }
 
 .incomplete {
@@ -801,22 +887,4 @@ textarea:focus {
 
 .apply-filter-button:hover {
     background-color: #0077cc; /* Darken on hover */
-}
-
-.legend-green {
-    margin-bottom: 15px;
-    color: #00d039;
-    font-weight: bold; /* Optional to make it stand out */
-}
-
-.legend-red {
-    margin-bottom: 15px;
-    color: #ff4c4c;
-    font-weight: bold;
-}
-
-.legend-gray {
-    margin-bottom: 15px;
-    color: #a9a9a9;
-    font-weight: bold;
 }

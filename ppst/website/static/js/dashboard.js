@@ -54,27 +54,52 @@ function loadContent(section) {
             <h2>Dashboard</h2>
             <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
         `;
-    } else if (section === 'tests') {
+    } else if (section === 'tests') { 
         dynamicContent.innerHTML = `
-            <h2>Tests</h2>
-            
-            <div class="test-buttons">
-                <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
-                <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
-            </div>
+            <div class="dynamic-content">
+                <h2>Tests</h2>
 
-            <div class="test-status-filter">
-                <label for="test_status_menu">test status:</label>
-                <select id="test_status_menu" name="test_status_menu">
-                    <option value="all">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="invalid">Invalid</option>
-                </select>
-            </div>
-            <button onclick="retrieveTestResults()" class="apply-filter-button">Apply Filter</button>
-            <div id="test-content">
-                <!-- Dynamic content for tests will be loaded here -->
+                <div class="test-buttons">
+                    <button class="btn-create-test" onclick="createTest()">Create a New Test</button>
+                    <button class="btn-retrieve-results" onclick="retrieveTestResults()">Retrieve Patient Test Results</button>
+                </div>
+
+                <div class="filter-content-wrapper" id="filter-content-wrapper">
+                    <!-- Test Status Filter Section -->
+                    <div class="test-status-filter" id="test-status-filter">
+                        <!-- Legend Section Above the Filter -->
+                            <div class="legend" id="legend">
+                                <div class="legend-item">
+                                    <span class="legend-circle legend-green"></span>
+                                    <span class="legend-text">Complete</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-circle legend-gray"></span>
+                                    <span class="legend-text">Pending</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-circle legend-red"></span>
+                                    <span class="legend-text">Invalid</span>
+                                </div>
+                            </div>
+
+                            <label for="test_status_menu">Test Status:</label>
+                            <select id="test_status_menu" name="test_status_menu">
+                                <option value="all">All</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                                <option value="invalid">Invalid</option>
+                            </select>
+
+                            <!-- Button to Apply Filter -->
+                            <button onclick="retrieveTestResults()" class="apply-filter-button">Apply Filter</button>
+                        </div>
+
+                        <!-- Test Results Section -->
+                        <div id="test-content">
+                            <!-- Dynamic content for tests will be loaded here -->
+                        </div>
+                </div>
             </div>
         `;
         toggleTestStatusFilter(false);
@@ -213,10 +238,11 @@ function createTest() {
     testContent.innerHTML = `
         <h2>Create a New Test</h2>
         <label for="patient-age">Please provide the patient's age:</label>
-        <input type="number" id="patient-age" name="patient-age" required><br><br>
+        <input type="number" id="patient-age" name="patient-age" required class="small-input"><br><br>
         <button onclick="generateTestLink()">Generate Test Link</button>
         <div id="generated-link"></div>
     `;
+    testContent.classList.add('loaded');
 }
 // Function that serves as a helper to generate a test link in the createTest function.
 function generateTestLink() {
@@ -257,38 +283,10 @@ function retrieveTestResults() {
     const test_status = document.getElementById('test_status_menu');
     const test_status_selection = test_status.options[test_status.selectedIndex].text;
 
-    if (test_status_selection === 'All') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-green">Complete</h3>
-                <h3 class="legend-gray">Pending</h3>
-                <h3 class="legend-red">Invalid</h3>
-                
-            </div>`;
-    }
-    if (test_status_selection === 'Completed') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-green">Complete</h3>
-            </div>`;
-    }
-    if (test_status_selection === 'Invalid') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-red">Invalid</h3>
-            </div>`;
-    }
-    if (test_status_selection === 'Pending') {
-        testContent.innerHTML += `
-            <div class="legend">
-                <h3 class="legend-gray">Pending</h3>
-            </div>`;
-    }
-
-
     fetch(`/get_test_results/${test_status_selection}`)
         .then(response => response.json())
         .then(data => {
+        if (data.tests && data.tests.length > 0) {
             data.tests.forEach(test => {
                 let colorClass = 'incomplete';
                 let onclickAttr = '';
@@ -305,8 +303,16 @@ function retrieveTestResults() {
                         Test ID ${test.id} | Link: ${test.link}
                     </button><br>`;
             });
+            testContent.classList.add('loaded');
+        } else {
+            testContent.innerHTML = "<p>No test results available.</p>";
+            testContent.classList.add('loaded');
+        }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            testContent.classList.add('loaded');
+        });
 }
 
 // Track if we're in test viewing mode
@@ -354,50 +360,55 @@ function renderTestResultsTable(data, testId) {
             <thead>
                 <tr>
                     <th>Metric</th>
-                    <th>Result Values</th>
-                    <th>Result Value Avg</th>
-                    <th>Aggregate Avg</th>
-                    <th>Comparison</th>
+                    <th>Accuracy Values</th>
+                    <th>Accuracy Value Avg</th>
+                    <th>Aggregate Accuracy Value Avg</th>
+                    <th>Accuracy Comparison</th>
+                    <th>Latency Values</th>
+                    <th>Latency Value Avg</th>
+                    <th>Aggregate Latency Value Avg</th>
+                    <th>Latency Comparison</th>
                 </tr>
             </thead>
             <tbody>
                 ${data.test_results.map(result => {
-        let comparisonText = result.comparison || "N/A";
-        let colorStyle = '';  // Inline styles for color coding
+        let accuracyComparisonText = result.accuracy_comparison || "N/A";
+        let latencyComparisonText = result.latency_comparison || "N/A";
+        let accuracyColorStyle = '';  // Inline styles for color coding accuracy
+        let latencyColorStyle = '';  // Inline styles for color coding latency
 
-        // Determine if the metric is for latency or accuracy
-        const isLatency = result.metric.toLowerCase().includes("latency");
-        const isAccuracy = result.metric.toLowerCase().includes("accuracy");
+        // Apply color rules for accuracy comparison
+        if (accuracyComparisonText === 'Above average') {
+            accuracyColorStyle = 'color: green; font-weight: bold;';
+        } else if (accuracyComparisonText === 'Below average') {
+            accuracyColorStyle = 'color: red; font-weight: bold;';
+        } else if (accuracyComparisonText === 'Average') {
+            accuracyColorStyle = 'color: black; font-weight: bold;';
+        }
 
-        // Apply color rules based on metric type and comparison value
-        if (isLatency) {
-            // Latency: Above average = red, Below average = green
-            if (comparisonText === 'Above average') {
-                colorStyle = 'color: red; font-weight: bold;';
-            } else if (comparisonText === 'Below average') {
-                colorStyle = 'color: green; font-weight: bold;';
-            } else if (comparisonText === 'Average') {
-                colorStyle = 'color: black; font-weight: bold;';
-            }
-        } else if (isAccuracy) {
-            // Accuracy: Above average = green, Below average = red
-            if (comparisonText === 'Above average') {
-                colorStyle = 'color: green; font-weight: bold;';
-            } else if (comparisonText === 'Below average') {
-                colorStyle = 'color: red; font-weight: bold;';
-            } else if (comparisonText === 'Average') {
-                colorStyle = 'color: black; font-weight: bold;';
-            }
+        // Apply color rules for latency comparison
+        if (latencyComparisonText === 'Above average') {
+            latencyColorStyle = 'color: red; font-weight: bold;'; // Higher latency is worse
+        } else if (latencyComparisonText === 'Below average') {
+            latencyColorStyle = 'color: green; font-weight: bold;'; // Lower latency is better
+        } else if (latencyComparisonText === 'Average') {
+            latencyColorStyle = 'color: black; font-weight: bold;';
         }
 
         return `
                     <tr>
                         <td>${result.metric.replace(/_/g, ' ')}</td>
-                        <td>${result.values.join(", ")}</td>  <!-- Display all values -->
-                        <td>${result.average}</td>   <!-- Display user average -->
-                        <td>${result.aggregate_average}</td>   <!-- Display aggregate average -->
-                        <td style="${colorStyle}">  <!-- Apply inline color style here -->
-                            ${comparisonText}
+                        <td>${result.user_accuracy_values.join(", ")}</td>  <!-- Display all values -->
+                        <td>${result.user_accuracy_average}</td>   <!-- Display user average -->
+                        <td>${result.accuracy_average}</td>   <!-- Display aggregate average -->
+                        <td style="${accuracyColorStyle}">  <!-- Apply inline color style for accuracy -->
+                            ${accuracyComparisonText}
+                        </td>
+                        <td>${result.user_latency_values.join(", ")}</td>  <!-- Display all latency values -->
+                        <td>${result.user_latency_average}</td>   <!-- Display user latency average -->
+                        <td>${result.latency_average}</td>   <!-- Display aggregate latency average -->
+                        <td style="${latencyColorStyle}">  <!-- Apply inline color style for latency -->
+                            ${latencyComparisonText}
                         </td>
                     </tr>`;
     }).join('')}
@@ -410,14 +421,16 @@ function renderTestResultsTable(data, testId) {
             <thead>
                 <tr>
                     <th>Metric</th>
-                    <th>Average</th>
+                    <th>Accuracy Average</th>
+                    <th>Latency Average</th>
                 </tr>
             </thead>
             <tbody>
                 ${data.aggregate_results.map(result => `
                     <tr>
                         <td>${result.metric.replace(/_/g, ' ')}</td>
-                        <td>${result.average}</td>
+                        <td>${result.accuracy_average}</td>
+                        <td>${result.latency_average}</td>
                     </tr>
                 `).join('')}
             </tbody>
@@ -426,6 +439,7 @@ function renderTestResultsTable(data, testId) {
     <button onclick="backToTestResults()">Back to Test Results</button>
     <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
     `;
+
     // Check if the View as Graph button is already present
     if (!document.getElementById('viewGraphButton')) {
         const toggleButton = document.createElement("button");
@@ -450,6 +464,7 @@ function toggleResultsView(testId, data) {
                 <button onclick="loadLatencyChart(${testId})">Latency Comparison</button>
                 <button onclick="loadAccuracyChart(${testId})">Accuracy Comparison</button>
             </div>
+            <h2 id="chart-header"></h2>
             <canvas id="comparisonChart"></canvas>
             <div class="view-toggle-buttons">
                 <button onclick="retrieveTestResults()">Back to Patient's Results Tab</button>
@@ -467,6 +482,23 @@ function toggleResultsView(testId, data) {
     }
 }
 
+// Map positions to the corresponding metric names
+const metrics = [
+    'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+    'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+    'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+    'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
+];
+
+// Function to determine the metric based on position
+function getMetricForPosition(pos) {
+    const position = parseInt(pos); // Ensure pos is treated as a number
+    if (position >= 3 && position <= 5) return metrics[position - 3]; // fourdigit
+    if (position >= 6 && position <= 8) return metrics[position - 3]; // fivedigit
+    if (position >= 11 && position <= 13) return metrics[position - 5]; // fourmixed
+    if (position >= 14 && position <= 16) return metrics[position - 5]; // fivemixed
+    return `Metric ${pos}`; // Fallback for invalid positions
+}
 
 // Function to load latency comparison chart
 function loadLatencyChart(testId) {
@@ -478,7 +510,13 @@ function loadLatencyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.latencies).map(pos => `Question: ${pos}`);
+            // Set header for the chart
+            const { min_age, max_age } = data.age_group;
+            document.getElementById('chart-header').innerText = `Latency Comparison Graph for Age Group ${min_age} - ${max_age}`;
+
+            
+            const labels = Object.keys(data.patient.latencies || data.patient.accuracies)
+                .map(pos => getMetricForPosition(pos));
             const patientLatencies = Object.values(data.patient.latencies);
             const aggregateLatencies = Object.values(data.aggregate.latencies);
 
@@ -547,7 +585,12 @@ function loadAccuracyChart(testId) {
                 return;
             }
 
-            const labels = Object.keys(data.patient.accuracies).map(pos => `Question: ${pos}`);
+            // Set header for the chart
+            const { min_age, max_age } = data.age_group;
+            document.getElementById('chart-header').innerText = `Accuracy Comparison Graph for Age Group ${min_age} - ${max_age}`;
+
+            const labels = Object.keys(data.patient.latencies || data.patient.accuracies)
+                .map(pos => getMetricForPosition(pos));
             const patientAccuracies = Object.values(data.patient.accuracies);
             const aggregateAccuracies = Object.values(data.aggregate.accuracies);
 
@@ -653,14 +696,15 @@ function exportToSpreadsheet(testId) {
 
             // Patient Test Results Sheet
             const patientResults = [
-                ['Metric', 'Value', 'Average', 'Comparison']
+                ['Metric', 'Accuracy Values', 'Accuracy Value Average', 'Latency Values', 'Latency Value Average']
             ];
             data.test_results.forEach(result => {
                 patientResults.push([
                     result.metric.replace(/_/g, ' '),
-                    result.values.join(', '),
-                    result.average || "N/A",
-                    result.comparison
+                    result.user_accuracy_values.join(', '),
+                    result.user_accuracy_average || "N/A",
+                    result.user_latency_values.join(', '),
+                    result.user_latency_average || "N/A"
                 ]);
             });
             const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
@@ -668,16 +712,35 @@ function exportToSpreadsheet(testId) {
 
             // Aggregate Results Sheet
             const aggregateResults = [
-                ['Metric', 'Average']
+                ['Metric', 'Latency Average', 'Accuracy Average']
             ];
             data.aggregate_results.forEach(result => {
                 aggregateResults.push([
                     result.metric.replace(/_/g, ' '),
-                    result.average
+                    result.latency_average || "N/A",
+                    result.accuracy_average || "N/A"
                 ]);
             });
             const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
             XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results ${data.min_age}-${data.max_age}`);
+
+            const comparisonResults = [
+                ['Metric', 'Patient Accuracy Average', 'Aggregate Accuracy Average', 'Accuracy Comparison', 'Patient Latency Average', 'Aggregate Latency Average', 'Latency Comparison']
+            ];
+            data.test_results.forEach(result => {
+                comparisonResults.push([
+                    result.metric.replace(/_/g, ' '),
+                    result.user_accuracy_average || "N/A",
+                    result.accuracy_average || "N/A",
+                    result.accuracy_comparison || "N/A",
+                    result.user_latency_average || "N/A",
+                    result.latency_average || "N/A",
+                    result.latency_comparison || "N/A"
+                ]);
+            });
+            const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonResults);
+            
+            XLSX.utils.book_append_sheet(workbook, comparisonSheet, `Comparison Results`);
 
             // Stimuli and Responses Sheet
             const stimuliResponses = [
@@ -690,7 +753,6 @@ function exportToSpreadsheet(testId) {
                     item.stimulus_content,
                     item.correct_answer,  // New column for correct answer
                     item.response,
-                    item.response_position,
                     item.time_submitted || "N/A"
                 ]);
             });

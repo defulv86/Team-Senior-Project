@@ -12,7 +12,6 @@ form.addEventListener('submit', function (e) {
 
 function changeFontSize(size) {
     document.getElementById("intro").style.fontSize = size;
-    document.getElementById("show-subtitles").style.fontSize = size;
 }
 
 function getFontSize() {
@@ -134,17 +133,32 @@ document.querySelectorAll('.key').forEach(key => {
     });
 });
 
-function showPauseScreen(message, callback) {
+function showPauseScreen(type ,message, callback) {
     const pauseScreen = document.getElementById('pause-screen');
     const messageDiv = document.getElementById('pause-message');
     const continueButton = document.getElementById('continue-button');
+    const introVideoDiv =  document.getElementById('intro-video-div');
+    const mixedVideoDiv =  document.getElementById('mixed-video-div');
+    const introVideo = document.getElementById('intro-vid');
+    const mixedVideo = document.getElementById('mixed-vid')
 
     messageDiv.textContent = message;
     pauseScreen.style.display = 'flex';
 
+    if (type == "4_Span_Mixed_Pr") {
+        mixedVideoDiv.style.display = 'block';
+    } 
+    else if (type == "4_Span_Digit_Pr") {
+        introVideoDiv.style.display = 'block';
+    }
+
     continueButton.onclick = function (event) {
         event.stopPropagation();
         pauseScreen.style.display = 'none';
+        mixedVideoDiv.style.display = 'none';
+        introVideoDiv.style.display = 'none';
+        introVideo.pause();
+        mixedVideo.pause();
         if (callback) callback();
     };
 }
@@ -158,13 +172,13 @@ function nextStimulus() {
         if (['4_Span_Digit_Pr', '4_Span_Digit', '4_Span_Mixed_Pr', '4_Span_Mixed'].includes(stimulusType) && !shownTypes.has(stimulusType)) {
             shownTypes.add(stimulusType);
             const messageMap = {
-                '4_Span_Digit_Pr': "You will now see two digit practice stimuli.",
+                '4_Span_Digit_Pr': "When you proceed, you will see two digit practice stimuli.",
                 '4_Span_Digit': "The actual test will now begin. You will now see six different digit stimuli. These results will be recorded.", // "six digit stimuli" by itself sounded a bit confusing and misleading in my opinion
-                '4_Span_Mixed_Pr': "You will now see two mixed practice stimuli.",
+                '4_Span_Mixed_Pr': "The next section includes mixed stimuli. Watch the video below for instructions on how to respond.",
                 '4_Span_Mixed': "The actual test will now begin. You will now see six different mixed stimuli. These results will be recorded." // "six mixed stimuli" sounds a little less confusing but I changed it anyway for consistency
             };
 
-            showPauseScreen(messageMap[stimulusType], () => {
+            showPauseScreen(stimulusType, messageMap[stimulusType], () => {
                 flashStimulus(currentStimulus);
                 currentStimulusIndex++;
             });
@@ -269,7 +283,7 @@ function playDemo() { // shows demo video and speaks/shows instructions
     video.width = 420;
     video.height = 300;
     video.controls = true;
-    video.src = "/static/images/PPSTTestIntoVid.mp4"; // Static video path
+    video.src = "/static/images/IntroVideo.mp4"; // Static video path
     document.getElementById("demo_vid").appendChild(video); // shows video
     var titleText = document.getElementById("title").textContent;
     var welcomeText = document.getElementById("Welcome").textContent;
@@ -321,19 +335,7 @@ function startTest() {
         });
 }
 
-const subtitlesButton = document.getElementById("subtitles-button");
-subtitlesButton.addEventListener("click", function () {
-    const subtitles = document.getElementById("show-subtitles");
-    if (subtitles.style.display === 'none') {
-        subtitlesButton.innerText = 'Hide Subtitles';
-        subtitles.style.display = 'block';
-    } else {
-        subtitlesButton.innerText = 'Show Subtitles';
-        subtitles.style.display = 'none';
-    }
-    subtitles.style.fontSize = "24px"; // default value for when page is loaded
-    subtitles.style.fontSize = getFontSize();
-});
+
 
 document.getElementById('start-test').addEventListener('click', function () {
     document.getElementById('introduction').style.display = 'none';
