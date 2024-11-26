@@ -40,7 +40,8 @@ class Test(models.Model):
     def is_invalid(self):
         """Determine if a test should be invalid based on conditions."""
         expiration_date = self.created_at + timedelta(weeks=1)
-        return timezone.now() >= expiration_date or self.premature_exit
+        if self.status != 'completed':
+            return timezone.now() >= expiration_date or self.premature_exit
     
     def  __str__(self):
         return f"Test Link: {self.link}, Administerd By: {self.user}, Status: {self.status}"
