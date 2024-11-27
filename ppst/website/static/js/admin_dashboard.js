@@ -16,6 +16,13 @@ function loadContent(section) {
                     <option value="category">Category</option>
                     <option value="user__username">Submitted By</option>
                 </select>
+                <label for="status-select">Filter by Status:</label>
+                <select id="status-select" onchange="loadUserTickets('created_at', this.value)">
+                    <option value="">All</option>
+                    <option value="open">Open</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="closed">Closed</option>
+                </select>
                 <div id="ticket-list">
                     <ul id="ticket-items"></ul>
                 </div>

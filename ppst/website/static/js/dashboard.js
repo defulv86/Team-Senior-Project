@@ -204,11 +204,45 @@ function loadUserTickets() {
             if (data.length === 0) {
                 ticketList.innerHTML = '<li>No tickets found.</li>';
             } else {
+                // Group tickets by status
+                const ticketsByStatus = {
+                    open: [],
+                    inProgress: [],
+                    closed: []
+                };
+
                 data.forEach(ticket => {
-                    const ticketItem = document.createElement('li');
-                    ticketItem.textContent = `Created by: ${ticket.user__username}, Category: ${ticket.category}, Description: ${ticket.description}, Submitted: ${new Date(ticket.created_at).toLocaleString()}`;
-                    ticketList.appendChild(ticketItem);
+                    if (ticket.status === 'open') {
+                        ticketsByStatus.open.push(ticket);
+                    } else if (ticket.status === 'in progress') {
+                        ticketsByStatus.inProgress.push(ticket);
+                    } else if (ticket.status === 'closed') {
+                        ticketsByStatus.closed.push(ticket);
+                    }
                 });
+
+                // Helper function to create a ticket section
+                function createTicketSection(status, tickets) {
+                    if (tickets.length === 0) return `<li>No ${status} tickets.</li>`;
+                    return tickets
+                        .map(ticket => `
+                            <li>
+                                <strong>${ticket.category}</strong>: ${ticket.description}
+                                <br>Submitted: ${new Date(ticket.created_at).toLocaleString()}
+                            </li>
+                        `)
+                        .join('');
+                }
+
+                // Append sections for each status
+                ticketList.innerHTML = `
+                    <h4>Open Tickets</h4>
+                    <ul>${createTicketSection('Open', ticketsByStatus.open)}</ul>
+                    <h4>In Progress Tickets</h4>
+                    <ul>${createTicketSection('In Progress', ticketsByStatus.inProgress)}</ul>
+                    <h4>Closed Tickets</h4>
+                    <ul>${createTicketSection('Closed', ticketsByStatus.closed)}</ul>
+                `;
             }
         })
         .catch(error => console.error('Error:', error));

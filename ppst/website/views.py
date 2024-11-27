@@ -798,7 +798,9 @@ def test_results(request, test_id):
     total_correct = practice_correct + actual_correct
 
     # Retrieve completed tests and calculate completion times
-    completed_tests = Test.objects.filter(status="completed").values(
+    completed_tests = Test.objects.filter(
+        status="completed", user=request.user
+    ).values(
         "id", "link", "age", "user__username", "created_at", "started_at", "finished_at"
     )
 
@@ -827,7 +829,9 @@ def test_results(request, test_id):
 
 
     # Retrieve pending tests
-    pending_tests = Test.objects.filter(status="pending").values(
+    pending_tests = Test.objects.filter(
+        status="pending", user=request.user
+    ).values(
         "id", "link", "age", "user__username", "created_at"
     )
 
@@ -868,7 +872,9 @@ def test_results(request, test_id):
         })
 
     # Retrieve invalid tests
-    invalid_tests = Test.objects.filter(status="invalid").values(
+    invalid_tests = Test.objects.filter(
+        status="invalid", user=request.user
+    ).values(
         "id", "link", "age", "user__username", "created_at", "premature_exit"
     )
 
@@ -1184,14 +1190,11 @@ def submit_ticket(request):
 @login_required
 def get_user_tickets(request):
     """
-    Handles GET requests to /get_user_tickets/
-    Returns a JSON response containing the user's tickets with their
-    id, category, description, created_at time, and the user's username.
-    If the request method is not GET, returns a JSON error response with a status code of 400.
-    """    
+    Fetches the logged-in user's tickets along with their statuses.
+    """
     if request.method == 'GET':
         tickets = Ticket.objects.filter(user=request.user).select_related('user').values(
-            'id', 'category', 'description', 'created_at', 'user__username'
+            'id', 'category', 'description', 'created_at', 'status', 'user__username'
         )
         return JsonResponse(list(tickets), safe=False)
     return JsonResponse({'error': 'Invalid request.'}, status=400)
