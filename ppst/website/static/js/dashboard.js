@@ -278,6 +278,39 @@ function createTest() {
     `;
     testContent.classList.add('loaded');
 }
+
+function deleteTest(testId) {
+    if (!confirm("Are you sure you want to delete this invalid test?")) {
+        return; // Exit if the user cancels the confirmation
+    }
+
+    fetch(`/delete_test/${testId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken') // Include CSRF token for security
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error("Failed to delete test.");
+        }
+    })
+    .then(data => {
+        alert(data.message);
+        // Optionally remove the deleted test button from the UI
+        const testButton = document.getElementById(`test-${testId}`);
+        if (testButton) {
+            testButton.remove();
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while deleting the test.");
+    });
+}
+
 // Function that serves as a helper to generate a test link in the createTest function.
 function generateTestLink() {
     const age = document.getElementById('patient-age').value;
@@ -320,28 +353,39 @@ function retrieveTestResults() {
     fetch(`/get_test_results/${test_status_selection}`)
         .then(response => response.json())
         .then(data => {
-        if (data.tests && data.tests.length > 0) {
-            data.tests.forEach(test => {
-                let colorClass = 'incomplete';
-                let onclickAttr = '';
+            if (data.tests && data.tests.length > 0) {
+                data.tests.forEach(test => {
+                    let colorClass = 'incomplete';
+                    let onclickAttr = '';
+                    let deleteButtonHTML = ''; // For delete button
 
-                if (test.status === 'completed') {
-                    colorClass = 'completed';
-                    onclickAttr = `onclick="viewTestResults(${test.id})"`;
-                } else if (test.status === 'invalid') {
-                    colorClass = 'invalid';
-                }
+                    if (test.status === 'completed') {
+                        colorClass = 'completed';
+                        onclickAttr = `onclick="viewTestResults(${test.id})"`;
+                    } else if (test.status === 'invalid') {
+                        colorClass = 'invalid';
+                        deleteButtonHTML = `
+                            <button class="btn btn-danger" id="delete-test-${test.id}" onclick="deleteTest(${test.id})">
+                                Delete Test
+                            </button>
+                        `;
+                    }
 
-                testContent.innerHTML += `
-                    <button class="${colorClass}" ${onclickAttr}>
-                        Test ID ${test.id} | Link: ${test.link}
-                    </button><br>`;
-            });
-            testContent.classList.add('loaded');
-        } else {
-            testContent.innerHTML = "<p>No test results available.</p>";
-            testContent.classList.add('loaded');
-        }
+                    testContent.innerHTML += `
+                        <div class="test-entry">
+                            <button class="${colorClass}" ${onclickAttr}>
+                                Test ID ${test.id} | Link: ${test.link}
+                            </button>
+                            ${deleteButtonHTML} <!-- Add delete button if test is invalid -->
+                        </div>
+                        <br>
+                    `;
+                });
+                testContent.classList.add('loaded');
+            } else {
+                testContent.innerHTML = "<p>No test results available.</p>";
+                testContent.classList.add('loaded');
+            }
         })
         .catch(error => {
             console.error('Error:', error);

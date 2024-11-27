@@ -255,6 +255,25 @@ def create_test(request):
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
         return JsonResponse({'test_link': test_url})
 
+@login_required
+def delete_invalid_test(request, test_id):
+    """
+    Deletes a specific invalid test if it belongs to the logged-in user and is marked as invalid.
+
+    Args:
+        request: The HTTP request object.
+        test_id: The ID of the test to be deleted.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure.
+    """
+    test = get_object_or_404(Test, id=test_id, user=request.user)
+
+    if test.status != 'invalid':
+        return HttpResponseForbidden("You can only delete tests marked as 'invalid'.")
+
+    test.delete()
+    return JsonResponse({"message": "Test deleted successfully.", "test_id": test_id})
 
 def test_page_view(request, link):
     """
