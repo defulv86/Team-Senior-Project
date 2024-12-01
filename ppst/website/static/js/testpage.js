@@ -4,6 +4,113 @@ let response = ''; // Store the response from the keyboard
 const timestamps = [];
 const form = document.querySelector('form');
 
+let introAudio = new Audio('/static/audio/Voiceover_Male1_Intro.mp3');
+const stimulusAudioMap = {
+    male1: {
+        "intro": new Audio('/static/audio/Voiceover_Male1_Intro.mp3'),
+        "1": new Audio('/static/audio/Voiceover_Male1_1.mp3'),
+        "2": new Audio('/static/audio/Voiceover_Male1_2.mp3'),
+        "3": new Audio('/static/audio/Voiceover_Male1_3.mp3'),
+        "4": new Audio('/static/audio/Voiceover_Male1_4.mp3'),
+        "5": new Audio('/static/audio/Voiceover_Male1_5.mp3'),
+        "6": new Audio('/static/audio/Voiceover_Male1_6.mp3'),
+        "F": new Audio('/static/audio/Voiceover_Male1_F.mp3'),
+        "K": new Audio('/static/audio/Voiceover_Male1_K.mp3'),
+        "L": new Audio('/static/audio/Voiceover_Male1_L.mp3'),
+        "P": new Audio('/static/audio/Voiceover_Male1_P.mp3'),
+        "R": new Audio('/static/audio/Voiceover_Male1_R.mp3'),
+        "Y": new Audio('/static/audio/Voiceover_Male1_Y.mp3')
+    },
+    male2: {
+        "intro": new Audio('/static/audio/Voiceover_Male2_Intro.mp3'),
+        "1": new Audio('/static/audio/Voiceover_Male2_1.mp3'),
+        "2": new Audio('/static/audio/Voiceover_Male2_2.mp3'),
+        "3": new Audio('/static/audio/Voiceover_Male2_3.mp3'),
+        "4": new Audio('/static/audio/Voiceover_Male2_4.mp3'),
+        "5": new Audio('/static/audio/Voiceover_Male2_5.mp3'),
+        "6": new Audio('/static/audio/Voiceover_Male2_6.mp3'),
+        "F": new Audio('/static/audio/Voiceover_Male2_F.mp3'),
+        "K": new Audio('/static/audio/Voiceover_Male2_K.mp3'),
+        "L": new Audio('/static/audio/Voiceover_Male2_L.mp3'),
+        "P": new Audio('/static/audio/Voiceover_Male2_P.mp3'),
+        "R": new Audio('/static/audio/Voiceover_Male2_R.mp3'),
+        "Y": new Audio('/static/audio/Voiceover_Male2_Y.mp3')
+    },
+    female1: {
+        "intro": new Audio('/static/audio/Voiceover_Female1_Intro.mp3'),
+        "1": new Audio('/static/audio/Voiceover_Female1_1.mp3'),
+        "2": new Audio('/static/audio/Voiceover_Female1_2.mp3'),
+        "3": new Audio('/static/audio/Voiceover_Female1_3.mp3'),
+        "4": new Audio('/static/audio/Voiceover_Female1_4.mp3'),
+        "5": new Audio('/static/audio/Voiceover_Female1_5.mp3'),
+        "6": new Audio('/static/audio/Voiceover_Female1_6.mp3'),
+        "F": new Audio('/static/audio/Voiceover_Female1_F.mp3'),
+        "K": new Audio('/static/audio/Voiceover_Female1_K.mp3'),
+        "L": new Audio('/static/audio/Voiceover_Female1_L.mp3'),
+        "P": new Audio('/static/audio/Voiceover_Female1_P.mp3'),
+        "R": new Audio('/static/audio/Voiceover_Female1_R.mp3'),
+        "Y": new Audio('/static/audio/Voiceover_Female1_Y.mp3')
+    },
+    female2: {
+        "intro": new Audio('/static/audio/Voiceover_Female2_Intro.mp3'),
+        "1": new Audio('/static/audio/Voiceover_Female2_1.mp3'),
+        "2": new Audio('/static/audio/Voiceover_Female2_2.mp3'),
+        "3": new Audio('/static/audio/Voiceover_Female2_3.mp3'),
+        "4": new Audio('/static/audio/Voiceover_Female2_4.mp3'),
+        "5": new Audio('/static/audio/Voiceover_Female2_5.mp3'),
+        "6": new Audio('/static/audio/Voiceover_Female2_6.mp3'),
+        "F": new Audio('/static/audio/Voiceover_Female2_F.mp3'),
+        "K": new Audio('/static/audio/Voiceover_Female2_K.mp3'),
+        "L": new Audio('/static/audio/Voiceover_Female2_L.mp3'),
+        "P": new Audio('/static/audio/Voiceover_Female2_P.mp3'),
+        "R": new Audio('/static/audio/Voiceover_Female2_R.mp3'),
+        "Y": new Audio('/static/audio/Voiceover_Female2_Y.mp3')
+    }
+};
+
+// Current audio map by default: Male 1
+let currentAudioMap = stimulusAudioMap['male1'];
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Ensure the DOM is loaded before attaching event listeners
+    const voiceProfileDropdown = document.getElementById('voice-profile');
+    
+    if (voiceProfileDropdown) {
+        voiceProfileDropdown.addEventListener('change', function () {
+            const selectedProfile = this.value;
+            currentAudioMap = stimulusAudioMap[selectedProfile] || stimulusAudioMap['male1']; // Fallback to Male 1
+        });
+    } else {
+        console.error('Voice profile dropdown not found in the DOM.');
+    }
+});
+
+// Play Specific Stimulus Character Audio
+function playCharacterAudio(character) {
+    const characterAudio = currentAudioMap[character];
+    if (characterAudio && typeof characterAudio.play === 'function') {
+        characterAudio.pause();
+        characterAudio.currentTime = 0;
+        characterAudio.play();
+    }
+}
+
+
+// Toggle Intro Audio
+document.getElementById('speak-button').addEventListener('click', () => {
+    const introAudio = currentAudioMap["intro"]; // Access intro audio dynamically
+    if (introAudio && typeof introAudio.pause === 'function') {
+        if (!introAudio.paused) {
+            introAudio.pause();
+            introAudio.currentTime = 0; // Reset for the next play
+        } else {
+            introAudio.play();
+        }
+    } else {
+        console.error('Intro audio is not a valid Audio object.');
+    }
+});
+
 form.addEventListener('submit', function (e) {
     e.preventDefault();
     var selectedFontSize = document.getElementById("fontSize").value;
@@ -59,7 +166,17 @@ function markTestComplete(testLink) {
         });
 }
 
+// Play Specific Stimulus Character Audio
+function playCharacterAudio(character) {
+    const characterAudio = currentAudioMap[character];
+    if (characterAudio && typeof characterAudio.play === 'function') {
+        characterAudio.pause();
+        characterAudio.currentTime = 0;
+        characterAudio.play();
+    }
+}
 
+// Flash Stimulus
 function flashStimulus(stimulus) {
     const stimulusDiv = document.getElementById('stimulus');
     const logoDiv = document.getElementById('logo');
@@ -76,36 +193,11 @@ function flashStimulus(stimulus) {
     const stimulusContent = stimulus.stimulus_content;
     let currentCharIndex = 0;
 
-    // allow new voices to be selected: 77-94
-    let voices = [];
-    function populateVoices() {
-        voices = window.speechSynthesis.getVoices();
-        const voiceSelect = document.getElementById('voice-select');
-        voiceSelect.innerHTML = '';
-
-        // Populate the dropdown with available voices
-        voices.forEach((voice) => {
-            const option = document.createElement('option');
-            option.value = voice.name; 
-            option.textContent = `${voice.name} (${voice.lang})`; 
-            voiceSelect.appendChild(option);
-        });
-    }
-    window.speechSynthesis.onvoiceschanged = populateVoices;
-    populateVoices();
-    //////////////////////////////////////////////
-
-    // comment out & remove the following lines once above works
-    function speakCharacter(character) {
-        const utterance = new SpeechSynthesisUtterance(character);
-        window.speechSynthesis.speak(utterance);
-    }
-
-    // Function to show the next character
     const showNextChar = () => {
         if (currentCharIndex < stimulusContent.length) {
-            stimulusDiv.textContent = stimulusContent[currentCharIndex];
-            speakCharacter(stimulusContent[currentCharIndex]);
+            const currentChar = stimulusContent[currentCharIndex];
+            stimulusDiv.textContent = currentChar;
+            playCharacterAudio(currentChar); // Play audio for the current character
             currentCharIndex++;
             setTimeout(showNextChar, 1500); // Show next character after 1.5 seconds
         } else {
@@ -337,7 +429,14 @@ function startTest() {
 
 
 
-document.getElementById('start-test').addEventListener('click', function () {
+// Stop Intro Audio on Start Test
+document.getElementById('start-test').addEventListener('click', () => {
+    const introAudio = currentAudioMap["intro"]; // Access intro audio dynamically
+    if (introAudio && typeof introAudio.pause === 'function') {
+        introAudio.pause();
+        introAudio.currentTime = 0; // Stop and reset the intro audio
+    }
+
     document.getElementById('introduction').style.display = 'none';
     startTest();
 });
@@ -358,47 +457,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-let voices = [];
-function populateVoices() {
-    voices = window.speechSynthesis.getVoices();
-}
-
-window.speechSynthesis.onvoiceschanged = populateVoices;
-
-function speak(text) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const selectedVoice = voices.find(voice => voice.name === 'Google US English');
-
-    if (selectedVoice) {
-        utterance.voice = selectedVoice;
-    }
-
-    speechSynthesis.speak(utterance);
-}
-
-function speakText() {
-    const textElement = document.getElementById('text-to-speak');
-    const text = textElement.innerText;
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-
-        const speech = new SpeechSynthesisUtterance(text);
-        speech.voice = voices[0];
-        speech.lang = 'en-US';
-        speech.volume = 1;
-        speech.rate = 1;
-        speech.pitch = 1;
-
-        window.speechSynthesis.speak(speech);
-    } else {
-        alert('Sorry, your browser does not support text-to-speech.');
-    }
-}
-
-
-
-document.getElementById('speak-button').addEventListener('click', speakText);
-document.addEventListener('DOMContentLoaded', populateVoices);
 
 
 // Function to invalidate the test in the backend

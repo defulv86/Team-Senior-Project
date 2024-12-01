@@ -11,7 +11,13 @@ from datetime import timedelta, datetime
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification, Registration
 from dateutil import parser
 from statistics import mean
-import json
+from io import BytesIO
+import json, base64
+
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
 
 def home(request):
     """
@@ -255,6 +261,25 @@ def create_test(request):
         test_url = request.build_absolute_uri(f"/testpage/{test.link}")
         return JsonResponse({'test_link': test_url})
 
+@login_required
+def delete_invalid_test(request, test_id):
+    """
+    Deletes a specific invalid test if it belongs to the logged-in user and is marked as invalid.
+
+    Args:
+        request: The HTTP request object.
+        test_id: The ID of the test to be deleted.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure.
+    """
+    test = get_object_or_404(Test, id=test_id, user=request.user)
+
+    if test.status != 'invalid':
+        return HttpResponseForbidden("You can only delete tests marked as 'invalid'.")
+
+    test.delete()
+    return JsonResponse({"message": "Test deleted successfully.", "test_id": test_id})
 
 def test_page_view(request, link):
     """
@@ -769,12 +794,20 @@ def test_results(request, test_id):
     # Retrieve stimuli and associated responses for the export
     responses = Response.objects.filter(test=test).select_related('stimulus')
     stimuli_responses = []
+    practice_correct = 0
+    actual_correct = 0
 
     for index, response in enumerate(responses, start=1):
         stimulus = response.stimulus
 
         # Sort alphanumerically for "Correct Answer for Stimuli"
         correct_answer = ''.join(sorted(stimulus.stimulus_content))
+        is_correct = response.response == correct_answer
+        # Check if the stimulus is practice or actual
+        if "Pr" in stimulus.stimulus_type.stimulus_type:
+            practice_correct += int(is_correct)
+        else:
+            actual_correct += int(is_correct)
 
         stimuli_responses.append({
             "stimulus_id": stimulus.id,
@@ -782,11 +815,17 @@ def test_results(request, test_id):
             "correct_answer": correct_answer,
             "stimulus_type": stimulus.stimulus_type.stimulus_type,
             "response": response.response,
+            "is_correct": is_correct,
             "time_submitted": format_timestamp(response.time_submitted)
         })
 
+    # Calculate total correct
+    total_correct = practice_correct + actual_correct
+
     # Retrieve completed tests and calculate completion times
-    completed_tests = Test.objects.filter(status="completed").values(
+    completed_tests = Test.objects.filter(
+        status="completed", user=request.user
+    ).values(
         "id", "link", "age", "user__username", "created_at", "started_at", "finished_at"
     )
 
@@ -815,7 +854,9 @@ def test_results(request, test_id):
 
 
     # Retrieve pending tests
-    pending_tests = Test.objects.filter(status="pending").values(
+    pending_tests = Test.objects.filter(
+        status="pending", user=request.user
+    ).values(
         "id", "link", "age", "user__username", "created_at"
     )
 
@@ -856,7 +897,9 @@ def test_results(request, test_id):
         })
 
     # Retrieve invalid tests
-    invalid_tests = Test.objects.filter(status="invalid").values(
+    invalid_tests = Test.objects.filter(
+        status="invalid", user=request.user
+    ).values(
         "id", "link", "age", "user__username", "created_at", "premature_exit"
     )
 
@@ -967,6 +1010,9 @@ def test_results(request, test_id):
         "patient_age": patient_age,
         # Below is only needed for spreadsheet exportation.
         "stimuli_responses": stimuli_responses,
+        "practice_correct": practice_correct,
+        "actual_correct": actual_correct,
+        "total_correct": total_correct,
         "completed_tests": formatted_completed_tests,
         "pending_tests": formatted_pending_tests,
         "invalid_tests": formatted_invalid_tests
@@ -1169,14 +1215,11 @@ def submit_ticket(request):
 @login_required
 def get_user_tickets(request):
     """
-    Handles GET requests to /get_user_tickets/
-    Returns a JSON response containing the user's tickets with their
-    id, category, description, created_at time, and the user's username.
-    If the request method is not GET, returns a JSON error response with a status code of 400.
-    """    
+    Fetches the logged-in user's tickets along with their statuses.
+    """
     if request.method == 'GET':
         tickets = Ticket.objects.filter(user=request.user).select_related('user').values(
-            'id', 'category', 'description', 'created_at', 'user__username'
+            'id', 'category', 'description', 'created_at', 'status', 'user__username'
         )
         return JsonResponse(list(tickets), safe=False)
     return JsonResponse({'error': 'Invalid request.'}, status=400)
@@ -1465,3 +1508,102 @@ def completionpage(request):
     :return: A rendered HttpResponse object for the completion page
     """
     return render(request, 'completionpage.html')
+
+def create_result_charts(request, test_id):
+
+    # grab data for both charts
+
+    test = Test.objects.get(id=test_id)
+    result = Result.objects.get(test=test)
+    age = test.age
+
+    # Find the matching aggregate based on age
+    aggregate = Aggregate.objects.filter(min_age__lte=age, max_age__gte=age).first()
+
+    if not aggregate:
+        return JsonResponse({'error': 'No matching aggregate data found'}, status=404)
+
+    # Define positions to exclude (practice questions)
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Calculate averages for patient data excluding practice questions
+    patient_latencies = {
+        pos: mean(values) for pos, values in result.character_latencies.items()
+        if pos not in excluded_positions and values
+    }
+    patient_accuracies = {
+        pos: mean(values) for pos, values in result.character_accuracies.items()
+        if pos not in excluded_positions and values
+    }
+    
+    # Calculate averages for aggregate data in the same way
+    aggregate_latencies = {
+        pos: avg for pos, avg in aggregate.average_latencies.items() if pos not in excluded_positions
+    }
+    aggregate_accuracies = {
+        pos: avg for pos, avg in aggregate.average_accuracies.items() if pos not in excluded_positions
+    }
+
+    # create and save the accuracy chart first
+    
+    #create the labels
+    labels = [
+    'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+    'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+    'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+    'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
+    ]
+
+    # accuracies
+    patient_accuracies_values = [value for pos, value in patient_accuracies.items()]
+    aggregate_accuracies_values = [aggregate_accuracies.get(label, 0) for label in labels]
+
+    plt.plot(labels, patient_accuracies_values, label='Patient Accuracies', color='blue')
+    plt.plot(labels, aggregate_accuracies_values, label='Aggregate Accuracies', color='red')
+    
+    plt.xlabel('Question Type')
+    plt.ylabel('Accuracy (%)')
+    plt.title('Accuracies for Patient and ' + str(aggregate.min_age) + ' - ' + str(aggregate.max_age) + ' year olds')
+
+    # render x-axis labels diagonal so that they fit
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    plt.legend()
+
+    accuracy_buffer = BytesIO()
+    plt.savefig(accuracy_buffer, format='png')
+
+    plt.close()
+
+    # now create and save the latency chart
+
+    patient_latencies_values = [value for pos, value in patient_latencies.items()]
+    aggregate_latencies_values = [aggregate_latencies.get(label, 0) for label in labels]
+
+    plt.plot(labels, patient_latencies_values, label='Patient Latencies', color='blue')
+    plt.plot(labels, aggregate_latencies_values, label='Aggregate Latencies', color='red')
+    
+    plt.xlabel('Question Type')
+    plt.ylabel('Latency (ms)')
+    plt.title('Lantencies for Patient and ' + str(aggregate.min_age) + ' - ' + str(aggregate.max_age) + ' year olds')
+
+    # render x-axis labels diagonal so that they fit
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    plt.legend()
+
+    # store image in a buffer temporaily
+    latency_buffer = BytesIO()
+    plt.savefig(latency_buffer, format='png')
+
+    plt.close()
+
+    accuracy_chart_base64 = base64.b64encode(accuracy_buffer.getvalue()).decode('utf-8')
+    latency_chart_base64 = base64.b64encode(latency_buffer.getvalue()).decode('utf-8')
+
+    return JsonResponse({
+        'accuracy_chart': accuracy_chart_base64,
+        'latency_chart': latency_chart_base64
+    })

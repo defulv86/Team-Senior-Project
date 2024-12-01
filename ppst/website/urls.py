@@ -17,6 +17,7 @@ urlpatterns = [
     path('update_ticket_status/<int:ticket_id>/', views.update_ticket_status, name='update_ticket_status'),
     path('complete_ticket/<int:ticket_id>/', views.complete_ticket, name='complete_ticket'),
     path('create_test/', views.create_test, name='create_test'),  # Create test endpoint
+    path('delete_test/<int:test_id>/', views.delete_invalid_test, name='delete_invalid_test'),
     path('testpage/<str:link>/', views.test_page_view, name='testpage'),  # New URL for taking the test
     path('get_test_results/<str:test_status>/', views.get_test_results, name='get_test_results'),  # Get user's tests results
     path('test_results/<int:test_id>/', views.test_results, name='test_results'),  # Specific test results
@@ -36,5 +37,6 @@ urlpatterns = [
     path('get_registration_requests/', views.get_registration_requests, name='get_registration_requests'),
     path('approve_registration/<int:registration_id>/', views.approve_registration, name='approve_registration'),
     path('deny_registration/<int:registration_id>/', views.deny_registration, name='deny_registration'),
+    path('create_result_charts/<int:test_id>/', views.create_result_charts, name='create_result_charts'),
 
 ]

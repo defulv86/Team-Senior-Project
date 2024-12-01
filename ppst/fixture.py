@@ -663,6 +663,9 @@ test2_response_4 = [
 		"time_submitted": timezone.now() - timedelta(minutes=21)
 	}
 ]
+for test2_response_4 in test2_response_4:
+	Response.objects.create(**test2_response_4)
+
 
 test2_response_5 = [
 	{
