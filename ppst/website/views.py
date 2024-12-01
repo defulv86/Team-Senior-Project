@@ -11,7 +11,13 @@ from datetime import timedelta, datetime
 from .models import Ticket, Test, Result, Aggregate, Stimulus, Response, Notification, Registration
 from dateutil import parser
 from statistics import mean
-import json
+from io import BytesIO
+import json, base64
+
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
 
 def home(request):
     """
@@ -1502,3 +1508,102 @@ def completionpage(request):
     :return: A rendered HttpResponse object for the completion page
     """
     return render(request, 'completionpage.html')
+
+def create_result_charts(request, test_id):
+
+    # grab data for both charts
+
+    test = Test.objects.get(id=test_id)
+    result = Result.objects.get(test=test)
+    age = test.age
+
+    # Find the matching aggregate based on age
+    aggregate = Aggregate.objects.filter(min_age__lte=age, max_age__gte=age).first()
+
+    if not aggregate:
+        return JsonResponse({'error': 'No matching aggregate data found'}, status=404)
+
+    # Define positions to exclude (practice questions)
+    excluded_positions = {"1", "2", "9", "10"}
+    
+    # Calculate averages for patient data excluding practice questions
+    patient_latencies = {
+        pos: mean(values) for pos, values in result.character_latencies.items()
+        if pos not in excluded_positions and values
+    }
+    patient_accuracies = {
+        pos: mean(values) for pos, values in result.character_accuracies.items()
+        if pos not in excluded_positions and values
+    }
+    
+    # Calculate averages for aggregate data in the same way
+    aggregate_latencies = {
+        pos: avg for pos, avg in aggregate.average_latencies.items() if pos not in excluded_positions
+    }
+    aggregate_accuracies = {
+        pos: avg for pos, avg in aggregate.average_accuracies.items() if pos not in excluded_positions
+    }
+
+    # create and save the accuracy chart first
+    
+    #create the labels
+    labels = [
+    'fourdigit_1', 'fourdigit_2', 'fourdigit_3',
+    'fivedigit_1', 'fivedigit_2', 'fivedigit_3',
+    'fourmixed_1', 'fourmixed_2', 'fourmixed_3',
+    'fivemixed_1', 'fivemixed_2', 'fivemixed_3'
+    ]
+
+    # accuracies
+    patient_accuracies_values = [value for pos, value in patient_accuracies.items()]
+    aggregate_accuracies_values = [aggregate_accuracies.get(label, 0) for label in labels]
+
+    plt.plot(labels, patient_accuracies_values, label='Patient Accuracies', color='blue')
+    plt.plot(labels, aggregate_accuracies_values, label='Aggregate Accuracies', color='red')
+    
+    plt.xlabel('Question Type')
+    plt.ylabel('Accuracy (%)')
+    plt.title('Accuracies for Patient and ' + str(aggregate.min_age) + ' - ' + str(aggregate.max_age) + ' year olds')
+
+    # render x-axis labels diagonal so that they fit
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    plt.legend()
+
+    accuracy_buffer = BytesIO()
+    plt.savefig(accuracy_buffer, format='png')
+
+    plt.close()
+
+    # now create and save the latency chart
+
+    patient_latencies_values = [value for pos, value in patient_latencies.items()]
+    aggregate_latencies_values = [aggregate_latencies.get(label, 0) for label in labels]
+
+    plt.plot(labels, patient_latencies_values, label='Patient Latencies', color='blue')
+    plt.plot(labels, aggregate_latencies_values, label='Aggregate Latencies', color='red')
+    
+    plt.xlabel('Question Type')
+    plt.ylabel('Latency (ms)')
+    plt.title('Lantencies for Patient and ' + str(aggregate.min_age) + ' - ' + str(aggregate.max_age) + ' year olds')
+
+    # render x-axis labels diagonal so that they fit
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    plt.legend()
+
+    # store image in a buffer temporaily
+    latency_buffer = BytesIO()
+    plt.savefig(latency_buffer, format='png')
+
+    plt.close()
+
+    accuracy_chart_base64 = base64.b64encode(accuracy_buffer.getvalue()).decode('utf-8')
+    latency_chart_base64 = base64.b64encode(latency_buffer.getvalue()).decode('utf-8')
+
+    return JsonResponse({
+        'accuracy_chart': accuracy_chart_base64,
+        'latency_chart': latency_chart_base64
+    })

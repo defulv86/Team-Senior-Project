@@ -765,149 +765,174 @@ function toggleTestStatusFilter(show) {
 }
 
 
-function exportToSpreadsheet(testId) {
-    fetch(`/test_results/${testId}/`)
-        .then(response => response.json())
-        .then(data => {
-            // Initialize workbook
-            const workbook = XLSX.utils.book_new();
+async function exportToSpreadsheet(testId) {
+    try {
+        const response = await fetch(`/test_results/${testId}/`);
+        const data = await response.json();
 
-            // Patient Test Results Sheet
-            const patientResults = [
-                ['Metric', 'Accuracy Values', 'Accuracy Value Average', 'Latency Values', 'Latency Value Average']
-            ];
-            data.test_results.forEach(result => {
-                patientResults.push([
-                    result.metric.replace(/_/g, ' '),
-                    result.user_accuracy_values.join(', '),
-                    result.user_accuracy_average || "N/A",
-                    result.user_latency_values.join(', '),
-                    result.user_latency_average || "N/A"
-                ]);
-            });
-            const patientSheet = XLSX.utils.aoa_to_sheet(patientResults);
-            XLSX.utils.book_append_sheet(workbook, patientSheet, `Patient Results`);
+        const images = await getSpreadsheetImages(testId);
+        
+        if (!data) {
+            console.error('No data received');
+            return;
+        }
 
-            // Aggregate Results Sheet
-            const aggregateResults = [
-                ['Metric', 'Latency Average', 'Accuracy Average']
-            ];
-            data.aggregate_results.forEach(result => {
-                aggregateResults.push([
-                    result.metric.replace(/_/g, ' '),
-                    result.latency_average || "N/A",
-                    result.accuracy_average || "N/A"
-                ]);
-            });
-            const aggregateSheet = XLSX.utils.aoa_to_sheet(aggregateResults);
-            XLSX.utils.book_append_sheet(workbook, aggregateSheet, `Aggregate Results ${data.min_age}-${data.max_age}`);
+        // Initialize a new workbook
+        const workbook = new ExcelJS.Workbook();
 
-            const comparisonResults = [
-                ['Metric', 'Patient Accuracy Average', 'Aggregate Accuracy Average', 'Accuracy Comparison', 'Patient Latency Average', 'Aggregate Latency Average', 'Latency Comparison']
-            ];
-            data.test_results.forEach(result => {
-                comparisonResults.push([
-                    result.metric.replace(/_/g, ' '),
-                    result.user_accuracy_average || "N/A",
-                    result.accuracy_average || "N/A",
-                    result.accuracy_comparison || "N/A",
-                    result.user_latency_average || "N/A",
-                    result.latency_average || "N/A",
-                    result.latency_comparison || "N/A"
-                ]);
-            });
-            const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonResults);
-            
-            XLSX.utils.book_append_sheet(workbook, comparisonSheet, `Comparison Results`);
+        const addSheet = (workbook, sheetName, headers, rows) => {
+            const sheet = workbook.addWorksheet(sheetName);
+            sheet.addRow(headers);
+            rows.forEach(row => sheet.addRow(row));
+            return sheet;
+        };
 
-            // Stimuli and Responses Sheet
-            const stimuliResponses = [
-                ['Stimulus ID', 'Stimulus Type', 'Stimulus Content', 'Correct Answer for Stimuli', 'Patient Response', 'Is Correct', 'Time Submitted']
-            ];
-            data.stimuli_responses.forEach(item => {
-                stimuliResponses.push([
-                    item.stimulus_id,
-                    item.stimulus_type,
-                    item.stimulus_content,
-                    item.correct_answer,  // New column for correct answer
-                    item.response,
-                    item.is_correct ? "Yes" : "No",
-                    item.time_submitted || "N/A"
-                ]);
-            });
-            // Add total row to the bottom of the sheet
-            stimuliResponses.push([
-                ''
-            ]);
-            stimuliResponses.push([
-                'Practice Correct', 'Actual Correct', 'Total Correct'
-            ]);
-            stimuliResponses.push([
-                data.practice_correct, data.actual_correct, data.total_correct
-            ]);
-            const stimuliSheet = XLSX.utils.aoa_to_sheet(stimuliResponses);
-            XLSX.utils.book_append_sheet(workbook, stimuliSheet, `Stimuli and Responses`);
+        // Patient Test Results Sheet
+        const patientResultsHeaders = [
+            'Metric', 'Accuracy Values', 'Accuracy Value Average', 
+            'Latency Values', 'Latency Value Average'
+        ];
+        const patientResultsRows = data.test_results.map(result => [
+            result.metric.replace(/_/g, ' '),
+            result.user_accuracy_values.join(', '),
+            result.user_accuracy_average || "N/A",
+            result.user_latency_values.join(', '),
+            result.user_latency_average || "N/A"
+        ]);
+        addSheet(workbook, 'Patient Results', patientResultsHeaders, patientResultsRows);
 
-            // Completed Patient Tests Sheet
-            const completedTests = [
-                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Started At', 'Finished At', 'Completion Time']
-            ];
-            data.completed_tests.forEach(test => {
-                completedTests.push([
-                    test.id,
-                    test.link,
-                    test.age,
-                    test.user__username,
-                    test.created_at,
-                    test.started_at,
-                    test.finished_at,
-                    test.completion_time || "N/A"  // Add completion time here
-                ]);
-            });
-            const completedTestsSheet = XLSX.utils.aoa_to_sheet(completedTests);
-            XLSX.utils.book_append_sheet(workbook, completedTestsSheet, `Completed Patient Tests`);
+        // Aggregate Results Sheet
+        const aggregateResultsHeaders = ['Metric', 'Latency Average', 'Accuracy Average'];
+        const aggregateResultsRows = data.aggregate_results.map(result => [
+            result.metric.replace(/_/g, ' '),
+            result.latency_average || "N/A",
+            result.accuracy_average || "N/A"
+        ]);
+        addSheet(
+            workbook, 
+            `Aggregate Results ${data.min_age}-${data.max_age}`, 
+            aggregateResultsHeaders, 
+            aggregateResultsRows
+        );
 
-            // Pending Patient Tests Sheet
-            const pendingTests = [
-                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Expiration Date', 'Time Remaining']
-            ];
-            data.pending_tests.forEach(test => {
-                pendingTests.push([
-                    test.id,
-                    test.link,
-                    test.age,
-                    test.user__username,
-                    test.created_at,
-                    test.expiration_date,
-                    test.time_remaining
-                ]);
-            });
-            const pendingTestsSheet = XLSX.utils.aoa_to_sheet(pendingTests);
-            XLSX.utils.book_append_sheet(workbook, pendingTestsSheet, "Pending Patient Tests");
+        
+        // Comparison Results Sheet
+        const comparisonResultsHeaders = [
+            'Metric', 'Patient Accuracy Average', 'Aggregate Accuracy Average', 
+            'Accuracy Comparison', 'Patient Latency Average', 'Aggregate Latency Average', 
+            'Latency Comparison'
+        ];
+        const comparisonResultsRows = data.test_results.map(result => [
+            result.metric.replace(/_/g, ' '),
+            result.user_accuracy_average || "N/A",
+            result.accuracy_average || "N/A",
+            result.accuracy_comparison || "N/A",
+            result.user_latency_average || "N/A",
+            result.latency_average || "N/A",
+            result.latency_comparison || "N/A"
+        ]);
+        var comparisonSheet = addSheet(workbook, 'Comparison Results', comparisonResultsHeaders, comparisonResultsRows);
+        // Stimuli and Responses Sheet
+        const stimuliResponsesHeaders = [
+            'Stimulus ID', 'Stimulus Type', 'Stimulus Content', 
+            'Correct Answer for Stimuli', 'Patient Response', 'Is Correct', 'Time Submitted'
+        ];
+        const stimuliResponsesRows = data.stimuli_responses.map(item => [
+            item.stimulus_id,
+            item.stimulus_type,
+            item.stimulus_content,
+            item.correct_answer,
+            item.response,
+            item.is_correct ? "Yes" : "No",
+            item.time_submitted || "N/A"
+        ]);
+        stimuliResponsesRows.push([], ['Practice Correct', 'Actual Correct', 'Total Correct'], [
+            data.practice_correct, 
+            data.actual_correct, 
+            data.total_correct
+        ]);
+        const accuracyImageId = workbook.addImage({
+            base64: images[0], // Provide the base64 string of the image
+            extension: 'png',   // Specify the image type (png, jpeg, etc.)
+        });
+        const latencyImageId = workbook.addImage({
+            base64: images[1], // Provide the base64 string of the image
+            extension: 'png',   // Specify the image type (png, jpeg, etc.)
+        });
 
-            // Invalid Patient Tests Sheet
-            const invalidTests = [
-                ['Test ID', 'Test Link', 'Patient Age', 'Administered By', 'Created At', 'Invalidated At', 'Time Since Invalid']
-            ];
-            data.invalid_tests.forEach(test => {
-                invalidTests.push([
-                    test.id,
-                    test.link,
-                    test.age,
-                    test.user__username,
-                    test.created_at,
-                    test.invalidated_at,
-                    test.time_since_invalid
-                ]);
-            });
-            const invalidTestsSheet = XLSX.utils.aoa_to_sheet(invalidTests);
-            XLSX.utils.book_append_sheet(workbook, invalidTestsSheet, "Invalid Patient Tests");
+        comparisonSheet.addImage(accuracyImageId, {
+            tl: { col: 1, row: 15 }, // Top-left corner (column 1, row 1)
+            ext: { width: 640, height: 480 }, // Dimensions of the image
+        });
+        comparisonSheet.addImage(latencyImageId, {
+            tl: { col: 14, row: 15 }, // Top-left corner (column 1, row 1)
+            ext: { width: 640, height: 480 }, // Dimensions of the image
+        });
+        addSheet(workbook, 'Stimuli and Responses', stimuliResponsesHeaders, stimuliResponsesRows);
+        
+        // Completed Patient Tests Sheet
+        const completedTestsHeaders = [
+            'Test ID', 'Test Link', 'Patient Age', 'Administered By', 
+            'Created At', 'Started At', 'Finished At', 'Completion Time'
+        ];
+        const completedTestsRows = data.completed_tests.map(test => [
+            test.id,
+            test.link,
+            test.age,
+            test.user__username,
+            test.created_at,
+            test.started_at,
+            test.finished_at,
+            test.completion_time || "N/A"
+        ]);
+        addSheet(workbook, 'Completed Patient Tests', completedTestsHeaders, completedTestsRows);
 
-            // Export workbook
-            XLSX.writeFile(workbook, `TestResults_${data.test_link}.xlsx`);
-        })
-        .catch(error => console.error('Error:', error));
+        // Pending Patient Tests Sheet
+        const pendingTestsHeaders = [
+            'Test ID', 'Test Link', 'Patient Age', 'Administered By', 
+            'Created At', 'Expiration Date', 'Time Remaining'
+        ];
+        const pendingTestsRows = data.pending_tests.map(test => [
+            test.id,
+            test.link,
+            test.age,
+            test.user__username,
+            test.created_at,
+            test.expiration_date,
+            test.time_remaining
+        ]);
+        addSheet(workbook, 'Pending Patient Tests', pendingTestsHeaders, pendingTestsRows);
+
+        // Invalid Patient Tests Sheet
+        const invalidTestsHeaders = [
+            'Test ID', 'Test Link', 'Patient Age', 'Administered By', 
+            'Created At', 'Invalidated At', 'Time Since Invalid'
+        ];
+        const invalidTestsRows = data.invalid_tests.map(test => [
+            test.id,
+            test.link,
+            test.age,
+            test.user__username,
+            test.created_at,
+            test.invalidated_at,
+            test.time_since_invalid
+        ]);
+        addSheet(workbook, 'Invalid Patient Tests', invalidTestsHeaders, invalidTestsRows);
+
+        // Save workbook as a Blob and trigger download
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `TestResults_${data.test_link}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error exporting spreadsheet:', error);
+    }
 }
+
 
 // Function to save account changes for the user.
 function saveAccountChanges() {
@@ -1174,6 +1199,24 @@ function markAsRead(id, notifItem) {
             }
         })
         .catch(error => console.error('Error updating notification', error))
+}
+
+async function getSpreadsheetImages(testId) {
+    try {
+        const response = await fetch(`/create_result_charts/${testId}/`);
+        const data = await response.json();
+    
+        const accuracyChartBase64 = data.accuracy_chart;
+        const latencyChartBase64 = data.latency_chart;
+    
+        const accuracyImage = `data:image/png;base64,${accuracyChartBase64}`;
+        const latencyImage = `data:image/png;base64,${latencyChartBase64}`;
+    
+        return [accuracyImage,latencyImage];
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        throw error;
+    }
 }
 
 // Automatically load the "Dashboard" tab when the page is first loaded
