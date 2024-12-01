@@ -322,3 +322,26 @@ button#start-test:hover {
     transform: scale(1.05);
     /* Change color on hover */
 }
+
+@media screen and (max-width: 750px) {
+    /* Welcome Screen */
+    #introduction h1 {
+        margin-top: 55px;
+        margin-bottom: 0px;
+    }
+    
+    form#changeFont {
+        top: 30px;
+        right: 290px;
+        left: 65px;
+    }
+
+    #pause-message {
+        font-size: 1.2em;
+        width: 150px;
+    }
+
+    #response-section h2 {
+        margin-top: 70px;
+    }
+}
