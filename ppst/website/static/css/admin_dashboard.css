@@ -785,3 +785,33 @@ textarea:focus {
 .view-toggle-buttons button:hover {
     background-color: #0056b3;
 }
+
+@media screen and (max-width: 925px) {
+
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+}
