@@ -47,14 +47,15 @@ h2 {
     color: #0077b3;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
-    font-size: 2.0em;
-    margin-top: 20px;
+    font-size: 2.5em;
+    margin-top: 30px;
     margin-bottom: 25px;
 }
 
 #introduction h2 {
     color: #000000;
     font-family: 'Montserrat', sans-serif;
+    line-height: 1.6;
 }
 
 #introduction h3 {
@@ -117,7 +118,6 @@ form#changeFont {
     margin-right: 30px;
     margin-bottom: 20px;
     margin-top: 10px;
-    width: 361.24px;
     height: 30px;
     line-height: 30px;
     font-weight: bolder;
@@ -126,7 +126,29 @@ form#changeFont {
 
 form#changeFont select {
     border: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px 10px; /* Add some padding inside the dropdown */
+    font-size: 14px; /* Adjust font size */
+    font-family: 'Montserrat', sans-serif; /* Match form font */
+    color: #333; /* Text color */
+    background-color: #f9f9f9; /* Light background */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+    cursor: pointer; /* Pointer cursor for dropdown */
+}
+
+form#changeFont select:hover {
+    border-color: #0099ff;
+    background-color: #e6f7ff;
+    box-shadow: 0 0 5px rgba(0, 119, 204, 0.5);
+}
+
+/* Focus effect */
+form#changeFont select:focus {
+    border-color: #0099ff;
+    background-color: #e6f7ff;
+    outline: none; /* Remove default focus outline */
+    border-color: #0099ff; /* Highlight border on focus */
+    box-shadow: 0 0 8px rgba(0, 153, 255, 0.7);
 }
 
 
@@ -142,7 +164,7 @@ form#changeFont input[type="submit"] {
     cursor: pointer;
     border-radius: 4px;
     font-size: 16px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 form#changeFont input[type="submit"]:hover {
@@ -224,8 +246,18 @@ p {
     background-color: #0056b3;
     box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
     transform: scale(1.2);
-    transition: transform 0.2s ease-in-out
+    transition: transform 0.2s ease-in-out;
+    cursor: url('/static/images/cursor.png') 32 32, auto;
 }
+
+.key:active {
+    background-color: #003f7f; /* Darker color to simulate depression */
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.5);
+    transform: scale(0.95); /* Slightly reduce size */
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    outline: 3px solid #000000;
+}
+
 
 #submit-response {
     width: 200px;
@@ -250,6 +282,7 @@ p {
     background-color: #0056b3;
     box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
     transform: scale(1.05);
+    cursor: url('/static/images/cursor.png') 32 32, auto;
 }
 
 #continue-button {

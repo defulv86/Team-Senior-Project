@@ -283,12 +283,29 @@ function nextStimulus() {
         timestamps.length = 0;
 
     } else {
-        document.getElementById('stimulus').textContent = 'Test completed! Thank you for your participation.';
-        document.getElementById('stimulus').style.fontSize = '2.5em';
-        document.getElementById('stimulus').style.fontWeight = 'bold';
-        document.getElementById('stimulus').style.fontFamily = 'Montserrat';
-        document.getElementById('stimulus').style.color = '#0077b3';
-        document.getElementById('stimulus').style.marginTop = '100px';
+        const stimulusElement = document.getElementById('stimulus');
+        // First line of message
+        stimulusElement.textContent = 'Congratulations on Completing Your Philadelphia Pointing Span Test.';
+        stimulusElement.style.fontSize = '2.5em';
+        stimulusElement.style.fontWeight = 'bolder';
+        stimulusElement.style.fontFamily = 'Montserrat';
+        stimulusElement.style.color = '#0077b3';
+        stimulusElement.style.height = '250px';
+    
+        // Create a new element for the second line of text
+        const additionalText = document.createElement('div');
+        additionalText.innerHTML = 'You have successfully <b>completed</b> your <b>Philadelphia Pointing Span Test</b>. Your health provider has been notified of your updated test status. The results will be available for your health provider\'s review for further medical evaluation.';
+        additionalText.style.fontSize = '32px'; // Adjusted font size
+        additionalText.style.color = '#000000'; // Different color
+        additionalText.style.fontFamily = 'Montserrat';
+        additionalText.style.width = '70%';
+        additionalText.style.textAlign = 'center';
+        additionalText.style.marginTop = '-80px';
+        additionalText.style.lineHeight = '1.6';
+    
+        // Append the new text to the parent of the stimulus element
+        stimulusElement.parentNode.appendChild(additionalText);
+    
         document.getElementById('response-section').style.display = 'none';
 
 
