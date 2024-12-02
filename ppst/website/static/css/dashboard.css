@@ -372,6 +372,7 @@ button {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
 button:hover {
@@ -498,6 +499,7 @@ ul#ticket-items {
 }
 
 ul#ticket-items li {
+    list-style-type: none;
     background-color: #fff;
     padding: 15px;
     border-radius: 8px;
@@ -593,7 +595,6 @@ textarea:focus {
 
 .notification-header .close-btn:hover {
     color: #FF6347;
-    /* Tomato color for hover effect */
 }
 
 .notification-body {
@@ -671,25 +672,33 @@ textarea:focus {
     outline: none;
 }
 
-#test-content {
-    width: 1000px;
+.create-test-section {
     background-color: white;
-    padding: 15px;
-    box-shadow: none;
+    padding: 20px;
     border-radius: 8px;
-    display: none;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 500px;
+    margin: 20px auto;
+}
+
+.test-results-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 700px;
+    height: 100%;
 }
 
 #test-content.loaded {
     display: block;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .filter-content-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    width: 1350px;
+    width: 1000px;
     margin-top: 30px;
     margin-bottom: 40px;
 }
@@ -761,10 +770,11 @@ textarea:focus {
     justify-content: center;
 }
 
-.test-status-filter{
+.test-status-filter {
     display: flex;
-    max-width:500px;
+    max-width: 500px;
     padding-top: 25px;
+    margin-bottom: 50px;
 }
 
 .test-list li {
@@ -800,13 +810,6 @@ textarea:focus {
     background-color: #ff4c4c;
     /* Red for invalid */
     color: white;
-}
-
-/* Table styling for test results and aggregate results */
-.table-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
 }
 
 .table-container h2,
@@ -864,7 +867,6 @@ textarea:focus {
     font-size: 14px;
     cursor: pointer;
     background-color: #007bff;
-    /* blue */
     color: white;
     border: none;
     border-radius: 4px;
@@ -878,7 +880,7 @@ textarea:focus {
 .apply-filter-button {
     margin-top: 10px;
     padding: 10px 15px;
-    background-color: #0099ff; /* Adjust color as needed */
+    background-color: #0099ff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -886,7 +888,7 @@ textarea:focus {
 }
 
 .apply-filter-button:hover {
-    background-color: #0077cc; /* Darken on hover */
+    background-color: #0077cc;
 }
 
 .btn-danger {
@@ -898,8 +900,95 @@ textarea:focus {
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s ease;
+    margin-bottom: 20px;
 }
 
 .btn-danger:hover {
     background-color: #c82333;
+}
+
+@media screen and (max-width: 925px) {
+
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 1350px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .results-table {
+        font-size: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 2px;
+        width: 60px;
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
 }

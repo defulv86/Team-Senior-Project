@@ -270,11 +270,13 @@ function createTest() {
     toggleTestStatusFilter(false);
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
-        <h2>Create a New Test</h2>
-        <label for="patient-age">Please provide the patient's age:</label>
-        <input type="number" id="patient-age" name="patient-age" required class="small-input"><br><br>
-        <button onclick="generateTestLink()">Generate Test Link</button>
-        <div id="generated-link"></div>
+        <div class="create-test-section">
+            <h2>Create a New Test</h2>
+            <label for="patient-age">Please provide the patient's age:</label>
+            <input type="number" id="patient-age" name="patient-age" required class="small-input"><br><br>
+            <button onclick="generateTestLink()">Generate Test Link</button>
+            <div id="generated-link"></div>
+        </div>
     `;
     testContent.classList.add('loaded');
 }
@@ -345,7 +347,11 @@ function retrieveTestResults() {
     // Show the test-status filter
     toggleTestStatusFilter(true);
     const testContent = document.getElementById('test-content');
-    testContent.innerHTML = `<h2>Patient Test Results</h2>`;
+
+    let content = `
+        <div class="test-results-section">
+            <h2>Patient Test Results</h2>
+    `;
 
     const test_status = document.getElementById('test_status_menu');
     const test_status_selection = test_status.options[test_status.selectedIndex].text;
@@ -371,24 +377,30 @@ function retrieveTestResults() {
                         `;
                     }
 
-                    testContent.innerHTML += `
+                    content += `
                         <div class="test-entry">
                             <button class="${colorClass}" ${onclickAttr}>
                                 Test ID ${test.id} | Link: ${test.link}
                             </button>
                             ${deleteButtonHTML} <!-- Add delete button if test is invalid -->
                         </div>
-                        <br>
                     `;
                 });
-                testContent.classList.add('loaded');
+
             } else {
-                testContent.innerHTML = "<p>No test results available.</p>";
-                testContent.classList.add('loaded');
+                content += "<p>No test results available.</p>";
             }
+
+            content += `</div>`;
+
+            testContent.innerHTML = content;
+            testContent.classList.add('loaded');
         })
         .catch(error => {
             console.error('Error:', error);
+
+            content += `</div>`;
+            testContent.innerHTML = content;
             testContent.classList.add('loaded');
         });
 }
@@ -425,6 +437,7 @@ function viewTestResults(testId) {
             console.error('Error:', error);
             testContent.innerHTML = `<p style="color:red;">Failed to load test results.</p>`;
         });
+
 }
 
 function renderTestResultsTable(data, testId) {
