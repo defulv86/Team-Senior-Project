@@ -1,3 +1,5 @@
+let lastScroll = 0;
+
 // Smooth Scrolling Behavior
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('nav ul li a').forEach(anchor => {
@@ -12,4 +14,20 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    const nav = document.querySelector('nav');
+
+    if (nav) {
+        window.addEventListener('scroll', function () {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > lastScroll) {
+                nav.classList.add('hidden');
+            } else {
+                nav.classList.remove('hidden');
+            }
+
+            lastScroll = scrollTop <= 0 ? 0 : scrollTop;
+        });
+    }
 });
