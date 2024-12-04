@@ -795,9 +795,9 @@ async function exportToSpreadsheet(testId) {
         const patientResultsRows = data.test_results.map(result => [
             result.metric.replace(/_/g, ' '),
             result.user_accuracy_values.join(', '),
-            result.user_accuracy_average || "N/A",
+            result.user_accuracy_average !== null ? result.user_accuracy_average : 0,
             result.user_latency_values.join(', '),
-            result.user_latency_average || "N/A"
+            result.user_latency_average !== null ? result.user_latency_average : 0,
         ]);
         addSheet(workbook, 'Patient Results', patientResultsHeaders, patientResultsRows);
 
@@ -805,8 +805,8 @@ async function exportToSpreadsheet(testId) {
         const aggregateResultsHeaders = ['Metric', 'Latency Average', 'Accuracy Average'];
         const aggregateResultsRows = data.aggregate_results.map(result => [
             result.metric.replace(/_/g, ' '),
-            result.latency_average || "N/A",
-            result.accuracy_average || "N/A"
+            result.latency_average !== null ? result.latency_average : 0,
+            result.accuracy_average !== null ? result.accuracy_average : 0,
         ]);
         addSheet(
             workbook, 
