@@ -303,7 +303,7 @@ def test_page_view(request, link):
         else:
             return errorpage(request)  # For any other undefined statuses
     except Test.DoesNotExist:
-        return render(request, '404.html')
+        return render(request, 'test_link_not_found.html', {'link': link})
 
 @csrf_exempt
 def submit_response(request):
