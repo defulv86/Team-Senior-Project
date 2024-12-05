@@ -29,13 +29,21 @@ Installation along with instructions to make sure it works properly.
     - OPTIONAL. In the Settings tab, you can choose whether you want to stop the task if it runs longer than an hour but that's up to you.
     - Click ok
 
-7. in the Team-Senior-Project/ppst directory, run this command:
-    - Windows: py migrationsfix.py
-
-    - macOS/Linux will need to run these:
-        python manage.py makemigrations
-        python manage.py migrate
-        python manage.py shell < fixture.py
+7. in the Team-Senior-Project/ppst directory, run either of these two commands:
+    - Windows:
+        For only real data (regular fixture), run:
+            migrate_regular_fixture.py
+        For only fake data, run:
+            migrate_fake_test_data_fixture.py
+    - macOS/Linux:
+        For only real data (regular fixture), run:
+            python manage.py makemigrations
+            python manage.py migrate
+            python manage.py shell < regular_fixture.py
+        For only fake data, run:
+            python manage.py makemigrations
+            python manage.py migrate
+            python manage.py shell < fake_data_fixture.py
 
 8. Once you install the requirements needed.. You need to make one edit to a file in your virtual environment.
     - Go to your venv/Lib/django/contrib/admin/templates/admin/base.html

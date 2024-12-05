@@ -303,11 +303,10 @@ def test_page_view(request, link):
         else:
             return errorpage(request)  # For any other undefined statuses
     except Test.DoesNotExist:
-        return render(request, '404.html')
+        return render(request, 'test_link_not_found.html', {'link': link})
 
 @csrf_exempt
 def submit_response(request):
-        
     """
     Handles the submission of a response for a specific test and stimulus. It processes the
     response data, calculates character latencies and accuracies, and updates the corresponding
@@ -368,7 +367,6 @@ def submit_response(request):
                         current_timestamp = timestamps[index]
                         latency = current_timestamp - reference_timestamp
                         character_latencies.append(round(latency, 2))
-            
                         reference_timestamp = current_timestamp
             else:
                 return JsonResponse({'error': 'No timestamps available.'}, status=400)
@@ -381,8 +379,11 @@ def submit_response(request):
             else:
                 expected_count = len(expected_stimulus)
 
-            # Truncate character_latencies to expected_count
-            character_latencies = character_latencies[:expected_count]
+            # Ensure character_latencies has the expected length (pad with 0s if necessary)
+            if len(character_latencies) < expected_count:
+                character_latencies.extend([0] * (expected_count - len(character_latencies)))
+            else:
+                character_latencies = character_latencies[:expected_count]  # Truncate if longer
 
             # Calculate accuracy for each character
             accuracy = []

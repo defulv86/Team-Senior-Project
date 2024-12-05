@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/testpage.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Test Does Not Exist</title>
+    <link rel="stylesheet" href="{% static 'css/test_does_not_exist.css' %}">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="alert">
+            The test link you are trying to reach does not exist.
+        </div>
+        <div class="message">
+            <b>The test link: {{ link }} does not exist. Make sure you check the capitalization and spelling.</b>
+        </div>
+        <div class="message">
+            Please contact your doctor if you require further assistance.
+        </div>
+        <a href="/" class="btn-home">Return to Home</a>
+    </div>
+
+    <div class="footer text-center">
+        &copy; 2024 Online Philadelphia Pointing Span Test. All rights reserved.
+    </div>
+</body>
+
+</html>
