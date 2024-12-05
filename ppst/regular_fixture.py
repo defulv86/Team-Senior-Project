@@ -17,8 +17,15 @@ Stimulus_Type.objects.all().delete()
 # Create superuser 'admin' with password 'password'
 admin_user = User.objects.create_superuser(username='admin', password='password', email='admin@example.com')
 
-# Create additional user 'DoctorWho' with password '@password115'
+# Create another user as medical personnel: 'DoctorWho' with password '@password115'
 doctor_who = User.objects.create_user(username='DoctorWho', password='@password115')
+
+# Create additional doctors as medical personnel
+mitchell_A = User.objects.create_user(username='Mitchell_A', password='935abc115!')
+
+clark_H = User.objects.create_user(username='Clark_H', password='healthy!mind2024')
+
+alexandria_P = User.objects.create_user(username='Alexandria_P', password='@tree_frog123')
 
 # Test instances:
 # 1. Completed Test
@@ -69,11 +76,29 @@ completed_test_5 = Test.objects.create(
 )
 
 completed_test_6 = Test.objects.create(
-    user=doctor_who,
-    age=52,
-    created_at=timezone.now() - timedelta(days=6, hours=23, minutes=59),
-    started_at=timezone.now() - timedelta(days=6, hours=23, minutes=58),
-    finished_at=timezone.now() - timedelta(days=6, hours=23, minutes=57),
+    user=mitchell_A,
+    age=51,
+    created_at=timezone.now() - timedelta(days=15, hours=23, minutes=59),
+    started_at=timezone.now() - timedelta(days=14, hours=3, minutes=22),
+    finished_at=timezone.now() - timedelta(days=14, hours=3, minutes=12, seconds=58),
+    status='completed'
+)
+
+completed_test_7 = Test.objects.create(
+    user=clark_H,
+    age=53,
+    created_at="2024-11-17T11:33:00Z",
+    started_at="2024-11-17T19:12:00Z", 
+    finished_at="2024-11-17T19:17:02Z",
+    status='completed'
+)
+
+completed_test_8 = Test.objects.create(
+    user=alexandria_P,
+    age=55,
+    created_at="2024-11-17T13:43:00Z",
+    started_at="2024-11-17T19:27:00Z",
+    finished_at="2024-11-17T19:30:30Z",
     status='completed'
 )
 
@@ -199,85 +224,6 @@ Ticket.objects.create(
 	status='open'  # Set the default or desired status
 )
 
-aggregates_data = [
-	# Existing entry for age group 50-59
-	{
-		"min_age": 50,
-		"max_age": 59,
-		"average_latencies": {
-			"fourdigit_1": 753,
-			"fourdigit_2": 1331,
-			"fourdigit_3": 969,
-			"fivedigit_1": 1246.2,
-			"fivedigit_2": 913,
-			"fivedigit_3": 765.6,
-			"fourmixed_1": 1619,
-			"fourmixed_2": 1601.5,
-			"fourmixed_3": 1395,
-			"fivemixed_1": 1110.8,
-			"fivemixed_2": 1744.4,
-			"fivemixed_3": 1608.4
-		},
-		"average_accuracies": {
-			"fourdigit_1": 1.0,
-			"fourdigit_2": 1.0,
-			"fourdigit_3": 1.0,
-			"fivedigit_1": 1.0,
-			"fivedigit_2": 1.0,
-			"fivedigit_3": 1.0,
-			"fourmixed_1": 1.0,
-			"fourmixed_2": 1.0,
-			"fourmixed_3": 1.0,
-			"fivemixed_1": 1.0,
-			"fivemixed_2": 0.8,
-			"fivemixed_3": 1.0
-		}
-	},
-	# New entry for age group 40-49
-	{
-		"min_age": 40,
-		"max_age": 49,
-		"average_latencies": {
-			"fourdigit_1": 1786.55,
-			"fourdigit_2": 1464.22,
-			"fourdigit_3": 1057.03,
-			"fivedigit_1": 1280.04,
-			"fivedigit_2": 1060.78,
-			"fivedigit_3": 1133.62,
-			"fourmixed_1": 1417.53,
-			"fourmixed_2": 1552.5,
-			"fourmixed_3": 1487.47,
-			"fivemixed_1": 2298.44,
-			"fivemixed_2": 2232.94,
-			"fivemixed_3": 2129.44
-		},
-		"average_accuracies": {
-			"fourdigit_1": 1.0,
-			"fourdigit_2": 1.0,
-			"fourdigit_3": 1.0,
-			"fivedigit_1": 1.0,
-			"fivedigit_2": 1.0,
-			"fivedigit_3": 1.0,
-			"fourmixed_1": 1.0,
-			"fourmixed_2": 1.0,
-			"fourmixed_3": 1.0,
-			"fivemixed_1": 0.6,
-			"fivemixed_2": 0.8,
-			"fivemixed_3": 0.4
-		}
-	},
-    {
-        "min_age": 18,
-        "max_age": 29,
-        "average_latencies": {
-            
-        }
-    }
-	# Add more dictionaries for other age groups as needed
-]
-
-for aggregate_data in aggregates_data:
-	Aggregate.objects.create(**aggregate_data)
 
 # Results data
 results_data = [
@@ -480,15 +426,141 @@ results_data = [
             "16": [1.0, 1.0, 1.0, 1.0, 1.0]
         },
         "amount_correct": 14
+    },
+    {
+        "test": completed_test_6,
+        "character_latencies": {
+            "1": [3244.2, 1544.8, 1706.0, 1636.9],
+            "2": [2478.2, 1376.9, 2096.6, 1599.3, 1933.3],
+            "3": [14149.3, 1384.2, 1459.5, 1242.8],
+            "4": [5654.6, 1559.7, 1337.4, 1507.6],
+            "5": [6157.0, 1619.4, 1291.5, 1507.6],
+            "6": [7813.9, 5891.4, 7069.4, 1638.1, 1355.1],
+            "7": [4482.5, 10679.1, 4115.6, 1402.5, 1495.5],
+            "8": [2550.3, 1588.8, 1634.1, 2046.0, 1470.7],
+            "9": [7227.5, 2160.4, 2134.0, 1342.0],
+            "10": [12243.6, 14729.5, 9414, 1547.6, 1615.8],
+            "11": [5279.7, 1698.7, 1708.2, 1214.1],
+            "12": [4967.0, 1711.9, 2043.8, 1462.4],
+            "13": [3719.7, 1761.9, 2043.8, 1544.0],
+            "14": [8508.8, 1914.2, 1556.5, 2026.8, 1370.4],
+            "15": [1982.2, 1391.1, 1555.0, 2519.6, 1418.1],
+            "16": [3787.5, 1418.7, 1495.9, 8046.7, 1244.7]
+        },
+        "character_accuracies": {
+            "1": [0.0, 0.0, 1.0, 0.0],
+            "2": [0.0, 0.0, 0.0, 0.0, 0.0],
+            "3": [1.0, 1.0, 1.0, 1.0],
+            "4": [1.0, 1.0, 1.0, 1.0],
+            "5": [1.0, 1.0, 1.0, 1.0],
+            "6": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "7": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "8": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "9": [1.0, 1.0, 1.0, 1.0],
+            "10": [0.0, 1.0, 0.0, 1.0, 1.0],
+            "11": [1.0, 1.0, 1.0, 1.0],
+            "12": [1.0, 1.0, 1.0, 1.0],
+            "13": [1.0, 1.0, 1.0, 1.0],
+            "14": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "15": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "16": [1.0, 1.0, 1.0, 0.0, 0.0]
+        },
+        "amount_correct": 12
+    },
+    {
+        "test": completed_test_7,
+        "character_latencies": {
+            "1": [2221.4, 586.1, 7899.0],
+            "2": [4392.4, 943.9, 767.7, 2816.9, 569.1],
+            "3": [2390.8, 1203.1, 1078.3, 690.8],
+            "4": [1361.6, 1087.7, 3572.6, 947.9],
+            "5": [4317.5, 3524.3, 1162.2, 901.4],
+            "6": [2635.8, 587.1, 802.4, 3192.0, 530.6],
+            "7": [4454.9, 1536.2, 4042.8, 4962.1],
+            "8": [1495.4, 1007.5, 3944.8, 1520.5, 612.5],
+            "9": [2702.1, 1115.7, 4134.0, 510.7],
+            "10": [6120.9, 712.7, 667.4, 2126.1, 474.4],
+            "11": [3514.3, 1173.0, 1778.1, 588.3],
+            "12": [2929.0, 1401.1, 3980.8, 696.5],
+            "13": [3333.8, 816.3, 3627.5, 591.5],
+            "14": [1336.5, 1819.7, 1195.3, 965.3, 1076.6],
+            "15": [4608.8, 791.4, 1570.3, 3598.6, 770.6],
+            "16": [6797.2, 460.3, 473.5, 5438.7, 671.0]
+        },
+        "character_accuracies": {
+            "1": [1.0, 1.0, 0.0, 0.0],
+            "2": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "3": [1.0, 1.0, 1.0, 1.0],
+            "4": [1.0, 1.0, 1.0, 1.0],
+            "5": [1.0, 1.0, 1.0, 1.0],
+            "6": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "7": [1.0, 1.0, 1.0, 0.0, 0.0],
+            "8": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "9": [1.0, 1.0, 1.0, 1.0],
+            "10": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "11": [1.0, 1.0, 1.0, 1.0],
+            "12": [1.0, 1.0, 1.0, 1.0],
+            "13": [1.0, 1.0, 1.0, 1.0],
+            "14": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "15": [1.0, 1.0, 1.0, 0.0, 1.0],
+            "16": [1.0, 1.0, 1.0, 1.0, 1.0]
+        },
+        "amount_correct": 13
+    },
+    {
+        "test": completed_test_8,
+        "character_latencies": {
+            "1": [1219.8, 786.1, 841.4, 902.6],
+            "2": [1033.5, 936.1, 860.5, 819.5, 868.7],
+            "3": [1203.2, 982.8, 1472.5, 821.4],
+            "4": [873.0, 853.5, 1133.5, 731.3],
+            "5": [1105.6, 798.7, 793.8, 736.9],
+            "6": [1092.3, 896.6, 758.8, 939.1, 744.7],
+            "7": [1589.7, 915.1, 764.2, 783.7, 762.4],
+            "8": [983.8, 934.3, 918.4, 1114.7, 825.2],
+            "9": [2147.4, 901.6, 757.1, 618.5],
+            "10": [3444.4, 879.7, 779.4, 1509.9, 617.3],
+            "11": [1165.9, 1033.6, 1191.9, 559.1],
+            "12": [1212.9, 885.7, 1986.2, 890.0],
+            "13": [1583.7, 1061.9, 1213.9, 853.8],
+            "14": [1726.0, 804.8, 902.5, 1153.1, 4439.4],
+            "15": [1362.7, 763.0, 2159.8, 970.6, 703.1],
+            "16": [1490.1, 716.9, 855.9, 770.5, 833.3]
+        },
+        "character_accuracies": {
+            "1": [1.0, 1.0, 1.0, 1.0],
+            "2": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "3": [1.0, 1.0, 1.0, 1.0],
+            "4": [1.0, 1.0, 1.0, 1.0],
+            "5": [1.0, 1.0, 1.0, 1.0],
+            "6": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "7": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "8": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "9": [1.0, 1.0, 1.0, 1.0],
+            "10": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "11": [1.0, 1.0, 1.0, 1.0],
+            "12": [1.0, 1.0, 1.0, 1.0],
+            "13": [1.0, 1.0, 1.0, 1.0],
+            "14": [1.0, 1.0, 1.0, 1.0, 0.0],
+            "15": [1.0, 1.0, 1.0, 1.0, 1.0],
+            "16": [1.0, 1.0, 1.0, 1.0, 1.0]
+        },
+        "amount_correct": 15
     }
+    # Add more tests results if needed (Only real data.)
 ]
 
 for results_data in results_data:
 	Result.objects.create(**results_data)
 
+update_or_create_aggregate(completed_test)
+update_or_create_aggregate(completed_test_2)
 update_or_create_aggregate(completed_test_3)
 update_or_create_aggregate(completed_test_4)
 update_or_create_aggregate(completed_test_5)
+update_or_create_aggregate(completed_test_6)
+update_or_create_aggregate(completed_test_7)
+update_or_create_aggregate(completed_test_8)
 
 test1_response_1 = [
 	{
@@ -1450,4 +1522,581 @@ test5_response_16 = [
 ]
 for test5_response_16 in test5_response_16:
     Response.objects.create(**test5_response_16)
+
+test6_response_1 = [
+    {
+        "response": "6254",
+        "test": completed_test_6,
+        "response_position": 1,
+        "stimulus": stimulus_instance_1,
+        "time_submitted": "2024-12-04T18:39:04Z"
+    }
+]
+for test6_response_1 in test6_response_1:
+    Response.objects.create(**test6_response_1)
+
+test6_response_2 = [
+    {
+        "response": "46523",
+        "test": completed_test_6,
+        "response_position": 2,
+        "stimulus": stimulus_instance_2,
+        "time_submitted": "2024-12-04T18:39:24Z"
+    }
+]
+for test6_response_2 in test6_response_2:
+    Response.objects.create(**test6_response_2)
+
+test6_response_3 = [
+    {
+        "response": "2346",
+        "test": completed_test_6,
+        "response_position": 3,
+        "stimulus": stimulus_instance_3,
+        "time_submitted": "2024-12-04T18:40:48Z"
+    }
+]
+for test6_response_3 in test6_response_3:
+    Response.objects.create(**test6_response_3)
+
+test6_response_4 = [
+    {
+        "response": "1356",
+        "test": completed_test_6,
+        "response_position": 4,
+        "stimulus": stimulus_instance_4,
+        "time_submitted": "2024-12-04T18:41:06Z"
+    }
+]
+for test6_response_4 in test6_response_4:
+    Response.objects.create(**test6_response_4)
+
+test6_response_5 = [
+    {
+        "response": "1245",
+        "test": completed_test_6,
+        "response_position": 5,
+        "stimulus": stimulus_instance_5,
+        "time_submitted": "2024-12-04T18:41:27Z"
+    }
+]
+for test6_response_5 in test6_response_5:
+    Response.objects.create(**test6_response_5)
+
+test6_response_6 = [
+    {
+        "response": "12345",
+        "test": completed_test_6,
+        "response_position": 6,
+        "stimulus": stimulus_instance_6,
+        "time_submitted": "2024-12-04T18:42:01Z"
+    }
+]
+for test6_response_6 in test6_response_6:
+    Response.objects.create(**test6_response_6)
+
+test6_response_7 = [
+    {
+        "response": "13456",
+        "test": completed_test_6,
+        "response_position": 7,
+        "stimulus": stimulus_instance_7,
+        "time_submitted": "2024-12-04T18:42:32Z"
+    }
+]
+for test6_response_7 in test6_response_7:
+    Response.objects.create(**test6_response_7)
+
+test6_response_8 = [
+    {
+        "response": "12345",
+        "test": completed_test_6,
+        "response_position": 8,
+        "stimulus": stimulus_instance_8,
+        "time_submitted": "2024-12-04T18:42:52Z"
+    }
+]
+for test6_response_8 in test6_response_8:
+    Response.objects.create(**test6_response_8)
+
+test6_response_9 = [
+    {
+        "response": "6R5K",
+        "test": completed_test_6,
+        "response_position": 9,
+        "stimulus": stimulus_instance_9,
+        "time_submitted": "2024-12-04T18:44:05Z"
+    }
+]
+for test6_response_9 in test6_response_9:
+    Response.objects.create(**test6_response_9)
+
+test6_response_10 = [
+    {
+        "response": "64KLY",
+        "test": completed_test_6,
+        "response_position": 10,
+        "stimulus": stimulus_instance_10,
+        "time_submitted": "2024-12-04T18:44:54Z"
+    }
+]
+for test6_response_10 in test6_response_10:
+    Response.objects.create(**test6_response_10)
+
+test6_response_11 = [
+    {
+        "response": "56FP",
+        "test": completed_test_6,
+        "response_position": 11,
+        "stimulus": stimulus_instance_11,
+        "time_submitted": "2024-12-04T18:45:23Z"
+    }
+]
+for test6_response_11 in test6_response_11:
+    Response.objects.create(**test6_response_11)
+
+test6_response_12 = [
+    {
+        "response": "25RY",
+        "test": completed_test_6,
+        "response_position": 12,
+        "stimulus": stimulus_instance_12,
+        "time_submitted": "2024-12-04T18:45:42Z"
+    }
+]
+for test6_response_12 in test6_response_12:
+    Response.objects.create(**test6_response_12)
+
+test6_response_13 = [
+    {
+        "response": "56LP",
+        "test": completed_test_6,
+        "response_position": 13,
+        "stimulus": stimulus_instance_13,
+        "time_submitted": "2024-12-04T18:45:59Z"
+    }
+]
+for test6_response_13 in test6_response_13:
+    Response.objects.create(**test6_response_13)
+
+test6_response_14 = [
+    {
+        "response": "134FR",
+        "test": completed_test_6,
+        "response_position": 14,
+        "stimulus": stimulus_instance_14,
+        "time_submitted": "2024-12-04T18:46:24Z"
+    }
+]
+for test6_response_14 in test6_response_14:
+    Response.objects.create(**test6_response_14)
+
+test6_response_15 = [
+    {
+        "response": "136LY",
+        "test": completed_test_6,
+        "response_position": 15,
+        "stimulus": stimulus_instance_15,
+        "time_submitted": "2024-12-04T18:46:42Z"
+    }
+]
+for test6_response_15 in test6_response_15:
+    Response.objects.create(**test6_response_15)
+
+test6_response_16 = [
+    {
+        "response": "246PR",
+        "test": completed_test_6,
+        "response_position": 16,
+        "stimulus": stimulus_instance_16,
+        "time_submitted": "2024-12-04T18:47:07Z"
+    }
+]
+for test6_response_16 in test6_response_16:
+    Response.objects.create(**test6_response_16)
+
+test7_response_1 = [
+    {
+        "response": "246",
+        "test": completed_test_7,
+        "response_position": 1,
+        "stimulus": stimulus_instance_1,
+        "time_submitted": "2024-11-17T19:12:00.000Z"
+    }
+]
+for test7_response_1 in test7_response_1:
+    Response.objects.create(**test7_response_1)
+
+test7_response_2 = [
+    {
+        "response": "23456",
+        "test": completed_test_7,
+        "response_position": 2,
+        "stimulus": stimulus_instance_2,
+        "time_submitted": "2024-11-17T19:12:00.000Z"
+    }
+]
+for test7_response_2 in test7_response_2:
+    Response.objects.create(**test7_response_2)
+
+test7_response_3 = [
+    {
+        "response": "2346",
+        "test": completed_test_7,
+        "response_position": 3,
+        "stimulus": stimulus_instance_3,
+        "time_submitted": "2024-11-17T19:12:00.000Z"
+    }
+]
+for test7_response_3 in test7_response_3:
+    Response.objects.create(**test7_response_3)
+
+test7_response_4 = [
+    {
+        "response": "1356",
+        "test": completed_test_7,
+        "response_position": 4,
+        "stimulus": stimulus_instance_4,
+        "time_submitted": "2024-11-17T19:13:00.000Z"
+    }
+]
+for test7_response_4 in test7_response_4:
+    Response.objects.create(**test7_response_4)
+
+test7_response_5 = [
+    {
+        "response": "1245",
+        "test": completed_test_7,
+        "response_position": 5,
+        "stimulus": stimulus_instance_5,
+        "time_submitted": "2024-11-17T19:13:00.000Z"
+    }
+]
+for test7_response_5 in test7_response_5:
+    Response.objects.create(**test7_response_5)
+
+test7_response_6 = [
+    {
+        "response": "12345",
+        "test": completed_test_7,
+        "response_position": 6,
+        "stimulus": stimulus_instance_6,
+        "time_submitted": "2024-11-17T19:13:00.000Z"
+    }
+]
+for test7_response_6 in test7_response_6:
+    Response.objects.create(**test7_response_6)
+
+test7_response_7 = [
+    {
+        "response": "1346",
+        "test": completed_test_7,
+        "response_position": 7,
+        "stimulus": stimulus_instance_7,
+        "time_submitted": "2024-11-17T19:14:00.000Z"
+    }
+]
+for test7_response_7 in test7_response_7:
+    Response.objects.create(**test7_response_7)
+
+test7_response_8 = [
+    {
+        "response": "12345",
+        "test": completed_test_7,
+        "response_position": 8,
+        "stimulus": stimulus_instance_8,
+        "time_submitted": "2024-11-17T19:14:00.000Z"
+    }
+]
+for test7_response_8 in test7_response_8:
+    Response.objects.create(**test7_response_8)
+
+test7_response_9 = [
+    {
+        "response": "56KR",
+        "test": completed_test_7,
+        "response_position": 9,
+        "stimulus": stimulus_instance_9,
+        "time_submitted": "2024-11-17T19:14:00.000Z"
+    }
+]
+for test7_response_9 in test7_response_9:
+    Response.objects.create(**test7_response_9)
+
+test7_response_10 = [
+    {
+        "response": "346LY",
+        "test": completed_test_7,
+        "response_position": 10,
+        "stimulus": stimulus_instance_10,
+        "time_submitted": "2024-11-17T19:15:00.000Z"
+    }
+]
+for test7_response_10 in test7_response_10:
+    Response.objects.create(**test7_response_10)
+
+test7_response_11 = [
+    {
+        "response": "56FP",
+        "test": completed_test_7,
+        "response_position": 11,
+        "stimulus": stimulus_instance_11,
+        "time_submitted": "2024-11-17T19:15:00.000Z"
+    }
+]
+for test7_response_11 in test7_response_11:
+    Response.objects.create(**test7_response_11)
+
+test7_response_12 = [
+    {
+        "response": "25RY",
+        "test": completed_test_7,
+        "response_position": 12,
+        "stimulus": stimulus_instance_12,
+        "time_submitted": "2024-11-17T19:15:00.000Z"
+    }
+]
+for test7_response_12 in test7_response_12:
+    Response.objects.create(**test7_response_12)
+
+test7_response_13 = [
+    {
+        "response": "56LP",
+        "test": completed_test_7,
+        "response_position": 13,
+        "stimulus": stimulus_instance_13,
+        "time_submitted": "2024-11-17T19:15:00.000Z"
+    }
+]
+for test7_response_13 in test7_response_13:
+    Response.objects.create(**test7_response_13)
+
+test7_response_14 = [
+    {
+        "response": "134FR",
+        "test": completed_test_7,
+        "response_position": 14,
+        "stimulus": stimulus_instance_14,
+        "time_submitted": "2024-11-17T19:16:00.000Z"
+    }
+]
+for test7_response_14 in test7_response_14:
+    Response.objects.create(**test7_response_14)
+
+test7_response_15 = [
+    {
+        "response": "136RY",
+        "test": completed_test_7,
+        "response_position": 15,
+        "stimulus": stimulus_instance_15,
+        "time_submitted": "2024-11-17T19:16:00.000Z"
+    }
+]
+for test7_response_15 in test7_response_15:
+    Response.objects.create(**test7_response_15)
+
+test7_response_16 = [
+    {
+        "response": "246KP",
+        "test": completed_test_7,
+        "response_position": 16,
+        "stimulus": stimulus_instance_16,
+        "time_submitted": "2024-11-17T19:16:00.000Z"
+    }
+]
+for test7_response_16 in test7_response_16:
+    Response.objects.create(**test7_response_16)
+
+test8_response_1 = [
+    {
+        "response": "2456",
+        "test": completed_test_8,
+        "response_position": 1,
+        "stimulus": stimulus_instance_1,
+        "time_submitted": "2024-11-17T19:27:00Z"
+    }
+]
+for test8_response_1 in test8_response_1:
+    Response.objects.create(**test8_response_1)
+
+test8_response_2 = [
+    {
+        "response": "23456",
+        "test": completed_test_8,
+        "response_position": 2,
+        "stimulus": stimulus_instance_2,
+        "time_submitted": "2024-11-17T19:27:00Z"
+    }
+]
+for test8_response_2 in test8_response_2:
+    Response.objects.create(**test8_response_2)
+
+test8_response_3 = [
+    {
+        "response": "2346",
+        "test": completed_test_8,
+        "response_position": 3,
+        "stimulus": stimulus_instance_3,
+        "time_submitted": "2024-11-17T19:27:00Z"
+    }
+]
+for test8_response_3 in test8_response_3:
+    Response.objects.create(**test8_response_3)
+
+test8_response_4 = [
+    {
+        "response": "1356",
+        "test": completed_test_8,
+        "response_position": 4,
+        "stimulus": stimulus_instance_4,
+        "time_submitted": "2024-11-17T19:27:00Z"
+    }
+]
+for test8_response_4 in test8_response_4:
+    Response.objects.create(**test8_response_4)
+
+test8_response_5 = [
+    {
+        "response": "1245",
+        "test": completed_test_8,
+        "response_position": 5,
+        "stimulus": stimulus_instance_5,
+        "time_submitted": "2024-11-17T19:27:00Z"
+    }
+]
+for test8_response_5 in test8_response_5:
+    Response.objects.create(**test8_response_5)
+
+test8_response_6 = [
+    {
+        "response": "12345",
+        "test": completed_test_8,
+        "response_position": 6,
+        "stimulus": stimulus_instance_6,
+        "time_submitted": "2024-11-17T19:28:00Z"
+    }
+]
+for test8_response_6 in test8_response_6:
+    Response.objects.create(**test8_response_6)
+
+test8_response_7 = [
+    {
+        "response": "13456",
+        "test": completed_test_8,
+        "response_position": 7,
+        "stimulus": stimulus_instance_7,
+        "time_submitted": "2024-11-17T19:28:00Z"
+    }
+]
+for test8_response_7 in test8_response_7:
+    Response.objects.create(**test8_response_7)
+
+test8_response_8 = [
+    {
+        "response": "12345",
+        "test": completed_test_8,
+        "response_position": 8,
+        "stimulus": stimulus_instance_8,
+        "time_submitted": "2024-11-17T19:28:00Z"
+    }
+]
+for test8_response_8 in test8_response_8:
+    Response.objects.create(**test8_response_8)
+
+test8_response_9 = [
+    {
+        "response": "56KR",
+        "test": completed_test_8,
+        "response_position": 9,
+        "stimulus": stimulus_instance_9,
+        "time_submitted": "2024-11-17T19:28:00Z"
+    }
+]
+for test8_response_9 in test8_response_9:
+    Response.objects.create(**test8_response_9)
+
+test8_response_10 = [
+    {
+        "response": "346LY",
+        "test": completed_test_8,
+        "response_position": 10,
+        "stimulus": stimulus_instance_10,
+        "time_submitted": "2024-11-17T19:29:00Z"
+    }
+]
+for test8_response_10 in test8_response_10:
+    Response.objects.create(**test8_response_10)
+
+test8_response_11 = [
+    {
+        "response": "56FP",
+        "test": completed_test_8,
+        "response_position": 11,
+        "stimulus": stimulus_instance_11,
+        "time_submitted": "2024-11-17T19:29:00Z"
+    }
+]
+for test8_response_11 in test8_response_11:
+    Response.objects.create(**test8_response_11)
+
+test8_response_12 = [
+    {
+        "response": "25RY",
+        "test": completed_test_8,
+        "response_position": 12,
+        "stimulus": stimulus_instance_12,
+        "time_submitted": "2024-11-17T19:29:00Z"
+    }
+]
+for test8_response_12 in test8_response_12:
+    Response.objects.create(**test8_response_12)
+
+test8_response_13 = [
+    {
+        "response": "56LP",
+        "test": completed_test_8,
+        "response_position": 13,
+        "stimulus": stimulus_instance_13,
+        "time_submitted": "2024-11-17T19:29:00Z"
+    }
+]
+for test8_response_13 in test8_response_13:
+    Response.objects.create(**test8_response_13)
+
+test8_response_14 = [
+    {
+        "response": "136LY",
+        "test": completed_test_8,
+        "response_position": 14,
+        "stimulus": stimulus_instance_14,
+        "time_submitted": "2024-11-17T19:29:00Z"
+    }
+]
+for test8_response_14 in test8_response_14:
+    Response.objects.create(**test8_response_14)
+
+test8_response_15 = [
+    {
+        "response": "136RY",
+        "test": completed_test_8,
+        "response_position": 15,
+        "stimulus": stimulus_instance_15,
+        "time_submitted": "2024-11-17T19:30:00Z"
+    }
+]
+for test8_response_15 in test8_response_15:
+    Response.objects.create(**test8_response_15)
+
+test8_response_16 = [
+    {
+        "response": "246KP",
+        "test": completed_test_8,
+        "response_position": 16,
+        "stimulus": stimulus_instance_16,
+        "time_submitted": "2024-11-17T19:30:00Z"
+    }
+]
+for test8_response_16 in test8_response_16:
+    Response.objects.create(**test8_response_16)
+
 
