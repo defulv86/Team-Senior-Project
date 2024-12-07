@@ -872,10 +872,10 @@ async function exportToSpreadsheet(testId) {
                 ];
 
                 for (let i = 0; i < 5; i++) {
-                    const character = patientResponseChars[i] || "N/A";
+                    const character = patientResponseChars[i] || "";
 
-                    const latency = latencyValues[i] !== undefined ? latencyValues[i] : "N/A";
-                    const accuracy = accuracyValues[i] !== undefined ? accuracyValues[i] : "N/A";
+                    const latency = latencyValues[i] !== undefined ? latencyValues[i] : "";
+                    const accuracy = accuracyValues[i] !== undefined ? accuracyValues[i] : "";
 
                     row.push(character, latency, accuracy);
                 }
