@@ -334,13 +334,25 @@ function generateTestLink() {
                 } else {
                     const testLink = data.test_link;
                     linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                           <a href="${testLink}" target="_blank">${testLink}</a>`;
+                                           <a href="${testLink}" target="_blank">${testLink}</a>
+                                           <button id="btn-copy-link" onclick=copyLink("${testLink}")>copy link</button>`;
                 }
             })
             .catch(error => console.error('Error:', error));
     } else {
-        linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
+        if (age) {
+            linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
+        }
+        else{
+            linkContainer.innerHTML = `<p style="color: red;">Please input an age for the patient.</p>`;
+        }
     }
+}
+
+function copyLink(testLink) {
+    const copyButton = document.getElementById("btn-copy-link");
+    navigator.clipboard.writeText(testLink);
+    copyButton.textContent = "link copied!";
 }
 
 function retrieveTestResults() {
