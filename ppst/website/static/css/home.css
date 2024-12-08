@@ -145,7 +145,7 @@ body {
 
     /* Styles for Section 4 */
     #section4 {
-        height: 200vh;
+        height: 300vh;
     }
 
     #section4 h1 {
@@ -776,7 +776,7 @@ body {
 
     /* Styles for Section 4 */
     #section4 {
-        height: 200vh;
+        height: 250vh;
     }
 
     #section4 h1 {
@@ -804,7 +804,7 @@ body {
 
     nav .nav-links {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         padding: 0;
@@ -1094,11 +1094,11 @@ body {
 
     /* Styles for Section 4 */
     #section4 {
-        height: 200vh;
+        height: 300vh;
     }
 
     #section4 h1 {
-        margin-top: -100px;
+        margin-top: -200px;
     }
 
     .benefits {
@@ -1142,7 +1142,7 @@ body {
     }
 
     .nav-links ul li a {
-        font-size: 18px;
+        font-size: 12px;
         padding: 10px 20px;
     }
 
@@ -1256,11 +1256,11 @@ body {
 
     /* Styles for Section 4 */
     #section4 {
-        height: 200vh;
+        height: 250vh;
     }
 
     #section4 h1 {
-        margin-top: -100px;
+        margin-top: 200px;
     }
 
     .benefits {
@@ -1986,6 +1986,17 @@ p {
     font-size: 24px;
     display: block;
 }
+
+@media screen and (max-width: 1180px) {
+    #section3 p {
+        max-width: none;
+    }
+
+    .sign-up-button {
+        margin-top: 0;
+    }
+}
+
 @media screen and (max-width: 1024px) {
     #section3 {
         display: flex;
@@ -2008,6 +2019,52 @@ p {
     }
 }
 
+/* Bugfix for navbar on iPhone 14 Pro Max */
+@media screen and (max-width: 431px) {
+    nav {
+        flex-wrap: wrap;
+        height: 15vh;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .login-button {
+        margin-top: 20px;
+        padding: 5px 10px;
+        font-size: 10px;
+        width: auto;
+        text-align: center;
+        margin-left: 20px;
+        flex-direction: column;
+        display: flex;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    #section3 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 20px 20px;
+    }
+
+    #section3 p {
+        text-align: center;
+        font-size: 20px;
+        width: 250px;
+        padding-left: 190px;
+    }
+
+    .sign-up-button {
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 344px) {
+    nav {
+        height: 10vh;
+    }
+}
 
 /* Footer Styles */
 footer {
