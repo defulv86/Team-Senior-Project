@@ -145,7 +145,7 @@ body {
 
     /* Styles for Section 4 */
     #section4 {
-        height: 300vh;
+        height: 250vh;
     }
 
     #section4 h1 {
@@ -2017,6 +2017,145 @@ p {
     .sign-up-button {
         text-align: center;
     }
+
+    #section4 {
+        height: 300vh;
+    }
+}
+
+@media screen and (max-width: 932px) {
+    .image-container {
+        margin-right: -5px;
+    }
+    
+    #section4 {
+        height: 400vh;
+    }
+}
+
+@media screen and (max-width: 912px) {
+    #section4 {
+        height: 150vh;
+    }
+}
+
+@media screen and (max-width: 896px) {
+    #section4 {
+        height: 400vh;
+    }
+}
+
+@media screen and (max-width: 883px) {
+    #section1 {
+        height: 150vh;
+    }
+    
+    #section4 {
+        height: 500vh;
+    }
+}
+
+@media screen and (max-width: 854px) {
+    #section1 {
+        height: 60vh;
+    }
+
+    #section4 {
+        height: 150vh;
+    }
+}
+
+@media screen and (max-width: 844px) {
+    #section4 {
+        height: 450vh;
+    }
+}
+
+@media screen and (max-width: 820px) {
+    #section4 {
+        height: 150vh;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #section1 {
+        height: 60vh;
+    }
+
+    #section4 {
+        height: 180vh;
+    }
+}
+
+@media screen and (max-width: 740px) {
+    #section1 {
+        height: 150vh;
+    }
+}
+
+@media screen and (max-width: 720px) {
+    #section4 {
+        height: 300vh;
+    }
+}
+
+@media screen and (max-width: 668px) {
+    #section1 h1 {
+        margin-top: 50px;
+    }
+    
+    #section1 p {
+        font-size: 1.0em;
+    }
+
+    #section3 p {
+        font-size: 15px;
+        padding-left: 140px;
+    }
+
+    #section3 h1 {
+        padding-left: 260px;
+    }
+
+    .sign-up-button {
+        padding: 10px 5px;
+        margin-left: 260px;
+    }
+
+    .services-image {
+        width: 180px;
+        height: 180px;
+    }
+
+    .services-image-container {
+        margin-right: 90px;
+    }
+
+    #section4 {
+        height: 475vh;
+    }
+}
+
+@media screen and (max-width: 540px) {
+    #section2 p {
+        padding-left: 40px;
+    }
+
+    #section3 h1 {
+        padding-left: 200px;
+    }
+
+    #section3 p {
+        padding-left: 100px;
+    }
+
+    .sign-up-button {
+        margin-left: 185px;
+    }
+
+    #section4 {
+        height: 250vh;
+    }
 }
 
 /* Bugfix for navbar on iPhone 14 Pro Max */
@@ -2037,6 +2176,38 @@ p {
         margin-left: 20px;
         flex-direction: column;
         display: flex;
+    }
+}
+
+@media screen and (max-width: 412px) {
+    #section1 {
+        height: 60vh;
+    }
+    
+    .services-content {
+        margin-right: 280px;
+    }
+
+    #section2 p {
+        padding-left: 0;
+    }
+
+    #section3 h1 {
+        padding-left: 265px;
+    }
+
+    #section3 p {
+        font-size: 15px;
+        width: 90%;
+        padding-left: 155px;
+    }
+
+    .sign-up-button {
+        margin-left: 255px;
+    }
+
+    #section4 {
+        height: 200vh;
     }
 }
 
@@ -2063,6 +2234,18 @@ p {
 @media screen and (max-width: 344px) {
     nav {
         height: 10vh;
+    }
+
+    #section1 {
+        height: 100vh;
+    }
+
+    #section2 p {
+        padding-left: 0;
+    }
+
+    .services-content {
+        margin-right: 200px;
     }
 }
 
