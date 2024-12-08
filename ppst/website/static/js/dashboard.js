@@ -444,7 +444,9 @@ function renderTestResultsTable(data, testId) {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
     <div class="table-container">
-        <h2>Test Results for Link: ${data.test_link}</h2>
+        <div class="test-results-header">
+            <h2>Test Results for Link: ${data.test_link}</h2>
+        </div>
         <p><strong>Patient's Age:</strong> ${data.patient_age}</p>
         <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
         <table class="results-table">
@@ -507,7 +509,9 @@ function renderTestResultsTable(data, testId) {
         </table>
     </div>
     <div class="table-container">
-        <h3>Aggregate Results for Age Group ${data.min_age}-${data.max_age}</h3>
+        <div class="aggregate-results-header">
+            <h3>Aggregate Results (Ages: ${data.min_age}-${data.max_age})</h3>
+        </div>
         <table class="results-table">
             <thead>
                 <tr>
@@ -527,8 +531,10 @@ function renderTestResultsTable(data, testId) {
             </tbody>
         </table>
     </div>
-    <button onclick="backToTestResults()">Back to Test Results</button>
-    <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+    <div class="results-buttons">
+        <button onclick="backToTestResults()">Back to Test Results</button>
+        <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+    </div>
     `;
 
     // Check if the View as Graph button is already present
@@ -550,7 +556,9 @@ function toggleResultsView(testId, data) {
     // If currently in the table view, switch to the graph view with latency chart as default
     if (testContent.querySelector('.results-table')) {
         testContent.innerHTML = `
-            <h2>Patient vs Aggregate Comparison</h2>
+            <div class="graph-main-header">
+                <h2>Patient vs Aggregate Comparison</h2>
+            </div>
             <div class="chart-toggle-buttons">
                 <button onclick="loadLatencyChart(${testId})">Latency Comparison</button>
                 <button onclick="loadAccuracyChart(${testId})">Accuracy Comparison</button>
@@ -603,7 +611,7 @@ function loadLatencyChart(testId) {
 
             // Set header for the chart
             const { min_age, max_age } = data.age_group;
-            document.getElementById('chart-header').innerText = `Latency Comparison Graph for Age Group ${min_age} - ${max_age}`;
+            document.getElementById('chart-header').innerText = `Latency Comparison Graph (Ages: ${min_age} - ${max_age})`;
 
             
             const labels = Object.keys(data.patient.latencies || data.patient.accuracies)
@@ -678,7 +686,7 @@ function loadAccuracyChart(testId) {
 
             // Set header for the chart
             const { min_age, max_age } = data.age_group;
-            document.getElementById('chart-header').innerText = `Accuracy Comparison Graph for Age Group ${min_age} - ${max_age}`;
+            document.getElementById('chart-header').innerText = `Accuracy Comparison Graph (Ages: ${min_age} - ${max_age})`;
 
             const labels = Object.keys(data.patient.latencies || data.patient.accuracies)
                 .map(pos => getMetricForPosition(pos));
