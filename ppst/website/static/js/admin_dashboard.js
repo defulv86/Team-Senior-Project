@@ -241,6 +241,7 @@ let isDragging = false;
 let offsetX, offsetY;
 
 const notificationPopout = document.getElementById('notification-popout');
+const notificationHeader = document.querySelector('.notification-header');
 const notificationBody = document.getElementById('notification-body');
 const notificationList = document.getElementById('notification-list');
 
@@ -443,6 +444,7 @@ function markAsRead(id ,notifItem){
 }
 
 // Automatically load the "Dashboard" tab when the page is first loaded
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded, calling loadContent for dashboard...");
     loadContent('dashboard');
 });
