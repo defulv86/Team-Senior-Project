@@ -1866,7 +1866,7 @@ section {
 }
 
 .services-image-container {
-    margin-top: 10px;
+    margin-top: 200px;
     margin-right: 50px;
     flex-shrink: 0;
 }
@@ -1888,6 +1888,12 @@ section {
         object-fit: cover;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
+
+    .services-image-container {
+        margin-top: 20px;
+        margin-right: 50px;
+        flex-shrink: 0;
+    }
 }
 
 /* 912 Media */
@@ -1898,6 +1904,12 @@ section {
         border-radius: 30%;
         object-fit: cover;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .services-image-container {
+        margin-top: 20px;
+        margin-right: 50px;
+        flex-shrink: 0;
     }
 }
 
