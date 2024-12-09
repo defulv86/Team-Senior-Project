@@ -874,7 +874,7 @@ async function exportToSpreadsheet(testId) {
                 for (let i = 0; i < 5; i++) {
                     const character = patientResponseChars[i] || "";
 
-                    const latency = latencyValues[i] !== undefined ? latencyValues[i] : "";
+                    const latency = latencyValues[i] !== undefined ? `${(latencyValues[i] / 1000).toFixed(2)} seconds`: ""; //Converted to seconds.
                     const accuracy = accuracyValues[i] !== undefined ? accuracyValues[i] : "";
 
                     row.push(character, latency, accuracy);
@@ -889,7 +889,7 @@ async function exportToSpreadsheet(testId) {
         const aggregateResultsHeaders = ['Metric', 'Latency Average', 'Accuracy Average'];
         const aggregateResultsRows = data.aggregate_results.map(result => [
             result.metric.replace(/_/g, ' '),
-            result.latency_average !== null ? result.latency_average : 0,
+            result.latency_average !== null ? `${(result.latency_average / 1000).toFixed(2)} seconds` : "0 seconds",
             result.accuracy_average !== null ? result.accuracy_average : 0,
         ]);
         addSheet(
@@ -917,26 +917,41 @@ async function exportToSpreadsheet(testId) {
         ]);
         const comparisonSheet = addSheet(workbook, 'Comparison Results', comparisonResultsHeaders, comparisonResultsRows);
 
-        const applyColorFormat = (sheet, row, column, comparisonValue) => {
+        const applyColorFormat = (sheet, row, column, comparisonValue, isLatency) => {
             const cell = sheet.getCell(row, column);
-            if (comparisonValue === 'Below average') {
-                cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
-            } else if (comparisonValue === 'Above average') {
-                cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FF00' } };
-            } else if (comparisonValue === 'Average') {
+        
+            // Determine the color based on the type (latency or accuracy)
+            if (isLatency) {
+                // Green for below average, red for above average
+                if (comparisonValue === 'Below average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FF00' } };
+                } else if (comparisonValue === 'Above average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
+                }
+            } else {
+                // Green for above average, red for below average
+                if (comparisonValue === 'Above average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FF00' } };
+                } else if (comparisonValue === 'Below average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
+                }
+            }
+        
+            // Gray for 'Average'
+            if (comparisonValue === 'Average') {
                 cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF808080' } };
             }
         };
 
         comparisonResultsRows.forEach((row, index) => {
-            const accuracyComparison = row[3];
-            if (accuracyComparison === 'Below average' || accuracyComparison === 'Above average' || accuracyComparison === 'Average') {
-                applyColorFormat(comparisonSheet, index + 2, 4, accuracyComparison);
+            const accuracyComparison = row[3]; // Accuracy Comparison column
+            if (['Below average', 'Above average', 'Average'].includes(accuracyComparison)) {
+                applyColorFormat(comparisonSheet, index + 2, 4, accuracyComparison, false); // false for accuracy
             }
-
-            const latencyComparison = row[6];
-            if (latencyComparison === 'Below average' || latencyComparison === 'Above average' || latencyComparison === 'Average') {
-                applyColorFormat(comparisonSheet, index + 2, 7, latencyComparison);
+        
+            const latencyComparison = row[6]; // Latency Comparison column
+            if (['Below average', 'Above average', 'Average'].includes(latencyComparison)) {
+                applyColorFormat(comparisonSheet, index + 2, 7, latencyComparison, true); // true for latency
             }
         });
 
