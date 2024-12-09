@@ -1,11 +1,51 @@
+async function checkForNewNotifications() {
+    try {
+        const response = await fetch('/get_user_notifications/unread');
+        const data = await response.json();
+
+        const notificationCount = data.notifications ? data.notifications.length : 0;
+        return notificationCount;
+    } catch (error) {
+        console.error('Error checking for notifications:', error);
+        return 0; // Default to no notifications if there's an error
+    }
+}
+
+async function getUserName() {
+    try {
+        const response = await fetch('/get_user_info/');
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        return data; // Assuming the data contains a `username` field
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        return { username: 'Guest' }; // Fallback for guest users
+    }
+}
+
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
     if (section === 'dashboard') {
-        dynamicContent.innerHTML = `
-            <h2>Dashboard</h2>
-            <p>Overview of recent activity and statistics will be displayed here.</p>
-        `;
+        Promise.all([checkForNewNotifications(), getUserName()]).then(([notificationCount, user]) => {
+            dynamicContent.innerHTML = `
+                <h2>Dashboard</h2>
+                <p>Welcome back, ${user.username}.</p>
+                ${notificationCount > 0 
+                    ? `<p style="color: green; font-weight: bold;">You have ${notificationCount} new notification${notificationCount > 1 ? 's' : ''}!</p>`
+                    : `<p>You have no new notifications.</p>`}
+            `;
+        }).catch(error => {
+            console.error("Error loading dashboard content:", error);
+            dynamicContent.innerHTML = `
+                <h2>Dashboard</h2>
+                <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
+            `;
+        });
     } else if (section === 'support') {
         dynamicContent.innerHTML = `
             <h2>Support Tickets</h2>

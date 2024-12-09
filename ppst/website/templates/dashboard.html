@@ -25,9 +25,7 @@
                 <span class="header-title">Medical Personnel Dashboard</span>
                 <p class="welcome-message">
                     {% if user.is_authenticated %}
-                    Welcome, {{ user.username }}
-                    {% else %}
-                    Welcome, Guest
+                    {{ user.username }}
                     {% endif %}
                 </p>
             </div>

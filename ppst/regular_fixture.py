@@ -18,14 +18,14 @@ Stimulus_Type.objects.all().delete()
 admin_user = User.objects.create_superuser(username='admin', password='password', email='admin@example.com')
 
 # Create another user as medical personnel: 'DoctorWho' with password '@password115'
-doctor_who = User.objects.create_user(username='DoctorWho', password='@password115')
+doctor_who = User.objects.create_user(username='DoctorWho', password='@password115', email='doctorwho@example.com', first_name='Doctor', last_name='Who')
 
 # Create additional doctors as medical personnel
-mitchell_A = User.objects.create_user(username='Mitchell_A', password='935abc115!')
+mitchell_A = User.objects.create_user(username='Mitchell_A', password='935abc115!', email='mitchell@example.com', first_name='Mitchell', last_name='Anderson')
 
-clark_H = User.objects.create_user(username='Clark_H', password='healthy!mind2024')
+clark_H = User.objects.create_user(username='Clark_H', password='healthy!mind2024', email='clark@example.com', first_name='Clark', last_name='Hawkins')
 
-alexandria_P = User.objects.create_user(username='Alexandria_P', password='@tree_frog123')
+alexandria_P = User.objects.create_user(username='Becky_P', password='@tree_frog123', email='becky@example.com', first_name='Becky', last_name='Parker')
 
 # Test instances:
 # 1. Completed Test
