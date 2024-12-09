@@ -379,20 +379,48 @@ function generateTestLink() {
             },
             body: JSON.stringify({ age: age })
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
-                } else {
-                    const testLink = data.test_link;
-                    linkContainer.innerHTML = `<p>Here is the link to your patient's unique test:</p>
-                                           <a href="${testLink}" target="_blank">${testLink}</a>`;
-                }
-            })
-            .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                linkContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            } else {
+                const testLink = data.test_link;
+                linkContainer.innerHTML = `
+                    <p>Here is the link to your patient's unique test:</p>
+                    <input type="text" id="test-link" value="${testLink}" readonly style="width: 100%; margin-bottom: 5px;">
+                    <button id="btn-copy-link" onclick="copyLink('${testLink}')">Copy Link</button>
+                    <p id="copy-confirmation" style="color: green; display: none;">Test link has been copied!</p>
+                `;
+            }
+        })
+        .catch(error => console.error('Error:', error));
     } else {
-        linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
+        if (age) {
+            linkContainer.innerHTML = `<p style="color: red;">Invalid: Age must be 18 or older.</p>`;
+        } else {
+            linkContainer.innerHTML = `<p style="color: red;">Please input an age for the patient.</p>`;
+        }
     }
+}
+
+/**
+ * Copies a given test link to the user's clipboard, and displays a confirmation message after successful copy.
+ *
+ * @param {string} testLink - The link to the test.
+ */
+function copyLink(testLink) {
+    const copyButton = document.getElementById("btn-copy-link");
+    const confirmationMessage = document.getElementById("copy-confirmation");
+
+    navigator.clipboard.writeText(testLink);
+    copyButton.textContent = "Link copied!";
+    confirmationMessage.style.display = "block";
+
+    // Hide the confirmation message after 2 seconds
+    setTimeout(() => {
+        copyButton.textContent = "Copy Link";
+        confirmationMessage.style.display = "none";
+    }, 2000);
 }
 
 function retrieveTestResults() {
@@ -413,9 +441,10 @@ function retrieveTestResults() {
         .then(data => {
             if (data.tests && data.tests.length > 0) {
                 data.tests.forEach(test => {
-                    let colorClass = 'incomplete';
+                    let colorClass = '';
                     let onclickAttr = '';
                     let deleteButtonHTML = ''; // For delete button
+                    let copyButtonHTML = ''; // For copy button
 
                     if (test.status === 'completed') {
                         colorClass = 'completed';
@@ -427,6 +456,12 @@ function retrieveTestResults() {
                                 Delete Test
                             </button>
                         `;
+                    } else if (test.status === 'pending') {
+                        // Set colorClass to gray for pending tests, matching the delete button style
+                        colorClass = 'incomplete';
+                        copyButtonHTML = `
+                            <button class="btn btn-copy" onclick="copyTestLink('localhost:8000/testpage/${test.link}')">Copy Link</button>
+                        `;
                     }
 
                     content += `
@@ -434,11 +469,11 @@ function retrieveTestResults() {
                             <button class="${colorClass}" ${onclickAttr}>
                                 Test ID ${test.id} | Link: ${test.link}
                             </button>
-                            ${deleteButtonHTML} <!-- Add delete button if test is invalid -->
+                            ${copyButtonHTML}
+                            ${deleteButtonHTML}
                         </div>
                     `;
                 });
-
             } else {
                 content += "<p>No test results available.</p>";
             }
@@ -455,6 +490,11 @@ function retrieveTestResults() {
             testContent.innerHTML = content;
             testContent.classList.add('loaded');
         });
+}
+
+function copyTestLink(testLink) {
+    navigator.clipboard.writeText(testLink);
+    alert("Test link has been copied!");
 }
 
 // Track if we're in test viewing mode
