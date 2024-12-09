@@ -355,7 +355,48 @@ button#start-test:hover {
     /* Change color on hover */
 }
 
+@media screen and (max-width: 1024px) {
+    /* Welcome Screen */
+    /* Stack and center form elements */
+    form#changeFont {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Space between dropdowns and button */
+        top: 10px; /* Adjust for better placement */
+        margin: 0 auto;
+    }
 
+    /* Add spacing between the form and the header */
+    #introduction h1 {
+        margin-top: 2px; /* Push header further down */
+        font-size: 3em; /* Slightly smaller for mobile screens */
+    }
+
+    /* Add spacing between the form and the header */
+    #introduction h3 { 
+        font-size: 17px; /* Slightly smaller for mobile screens */
+    }
+
+    /* Add more space for the introduction section */
+    #introduction {
+        padding-top: 0px;
+        margin-bottom: 100px; /* Ensure space below */
+    }
+
+    #pause-message {
+        font-size: 1.2em;
+        width: 500px;
+    }
+    
+    #response-section h2 {
+        margin-top: 70px;
+    }
+    
+    .key {
+    width: 125px;
+    height: 125px;
+    }
+}
 
 @media screen and (max-width: 912px) {
     /* Welcome Screen */
@@ -389,13 +430,18 @@ button#start-test:hover {
         font-size: 1.2em;
         width: 500px;
     }
-
+    
     #response-section h2 {
         margin-top: 70px;
     }
+    
+    .key {
+    width: 100px;
+    height: 100px;
+    }
 }
 
-@media screen and (max-width: 853px) {
+@media screen and (max-width: 854px) {
     /* Welcome Screen */
     /* Stack and center form elements */
     form#changeFont {
@@ -421,11 +467,15 @@ button#start-test:hover {
 
     #pause-message {
         font-size: 1.2em;
-        width: 150px;
+        width: 500px;
     }
 
     #response-section h2 {
         margin-top: 70px;
+    }
+    .key {
+    width: 98px;
+    height: 98px;
     }
 }
 
@@ -445,8 +495,8 @@ button#start-test:hover {
 
     /* Add spacing between the form and the header */
     #introduction h1 {
-        margin-top: 0px; /* Push header further down */
-        font-size: 2em; /* Slightly smaller for mobile screens */
+        margin-top: 75px; /* Push header further down */
+        font-size: 1.5em; /* Slightly smaller for mobile screens */
     }
 
     /* Add more space for the introduction section */
@@ -454,7 +504,6 @@ button#start-test:hover {
         padding-top: 0px;
         margin-bottom: 100px; /* Ensure space below */
     }
-
     #pause-message {
         font-size: 1.5em;
         width: 500px;
@@ -464,7 +513,8 @@ button#start-test:hover {
         margin-top: 70px;
     }
     .key {
-        width: 80px;
+    width: 80px;
+    height: 80px;
     }
 }
 
@@ -480,7 +530,7 @@ button#start-test:hover {
         top: 10px; /* Adjust for better placement */
         margin: 0 auto;
     }
-
+    
     /* Add spacing between the form and the header */
     #introduction h1 {
         margin-top: 185px; /* Push header further down */
@@ -505,6 +555,10 @@ button#start-test:hover {
 
     #response-section h2 {
         margin-top: 70px;
+    }
+    .key {
+    width: 100px;
+    height: 100px;
     }
 }
 
@@ -534,15 +588,19 @@ button#start-test:hover {
 
     #pause-message {
         font-size: 1.2em;
-        width: 150px;
+        width: 350px;
     }
 
     #response-section h2 {
         margin-top: 70px;
     }
+    .key {
+    width: 80px;
+    height: 80px;
+    }
 }
 
-@media screen and (max-width: 375px) {
+@media screen and (max-width: 376px) {
     /* Welcome Screen */
     /* Stack and center form elements */
     form#changeFont {
@@ -573,11 +631,15 @@ button#start-test:hover {
     }
     #pause-message {
         font-size: 1.2em;
-        width: 20px;
+        width: 350px;
     }
 
     #response-section h2 {
         margin-top: 70px;
+    }
+    .key {
+    width: 80px;
+    height: 80px;
     }
 }
 
@@ -608,10 +670,93 @@ button#start-test:hover {
 
     #pause-message {
         font-size: 1.2em;
-        width: 150px;
+        width: 350px;
     }
 
     #response-section h2 {
         margin-top: 70px;
+    }
+    .key {
+    width: 75px;
+    height: 75px;
+    }
+}
+
+@media screen and (max-width: 344px) {
+    /* Welcome Screen */
+    /* Stack and center form elements */
+    form#changeFont {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* Space between dropdowns and button */
+        position: relative;
+        top: 2px; /* Adjust for better placement */
+        margin: 0 auto;
+    }
+
+    /* Add spacing between the form and the header */
+    #introduction h1 {
+        margin-top: 165px; /* Push header further down */
+        font-size: 2em; /* Slightly smaller for mobile screens */
+    }
+
+    /* Add more space for the introduction section */
+    #introduction {
+        padding-top: 0px;
+        margin-bottom: 100px; /* Ensure space below */
+    }
+
+    #pause-message {
+        font-size: 1.2em;
+        width: 350px;
+    }
+
+    #response-section h2 {
+        margin-top: 70px;
+    }
+    .key {
+    width: 70px;
+    height: 70px;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    /* Welcome Screen */
+    /* Stack and center form elements */
+    form#changeFont {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* Space between dropdowns and button */
+        position: relative;
+        top: 2px; /* Adjust for better placement */
+        margin: 0 auto;
+    }
+
+    /* Add spacing between the form and the header */
+    #introduction h1 {
+        margin-top: 165px; /* Push header further down */
+        font-size: 2em; /* Slightly smaller for mobile screens */
+    }
+
+    /* Add more space for the introduction section */
+    #introduction {
+        padding-top: 0px;
+        margin-bottom: 100px; /* Ensure space below */
+    }
+
+    #pause-message {
+        font-size: 1.2em;
+        width: 350px;
+    }
+
+    #response-section h2 {
+        margin-top: 70px;
+    }
+    .key {
+    width: 60px;
+    height: 60px;
+    font-size: 40px;
     }
 }
