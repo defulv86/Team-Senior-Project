@@ -803,30 +803,101 @@ async function exportToSpreadsheet(testId) {
 
         const addSheet = (workbook, sheetName, headers, rows) => {
             const sheet = workbook.addWorksheet(sheetName);
-            sheet.addRow(headers);
-            rows.forEach(row => sheet.addRow(row));
+            const headerRow = sheet.addRow(headers);
+            applyHeaderStyle(headerRow);
+
+            rows.forEach((row, index) => {
+                const rowObj = sheet.addRow(row);
+                applyRowStyle(rowObj, index);
+            });
+
             return sheet;
+        };
+
+        const applyHeaderStyle = (headerRow) => {
+            headerRow.eachCell(cell => {
+                cell.style = {
+                    font: { bold: true },
+                    alignment: { horizontal: 'center', vertical: 'middle' },
+                    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ff3c6d9e' } },
+                    border: {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'double' },
+                        right: { style: 'thin' }
+                    }
+                };
+            });
+        };
+
+        const applyRowStyle = (rowObj, index) => {
+            rowObj.eachCell(cell => {
+                if (index % 2 === 0) {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F8F8' } };
+                } else {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+                }
+
+                cell.style.alignment = { horizontal: 'center', vertical: 'middle' };
+
+                cell.style.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
         };
 
         // Patient Test Results Sheet
         const patientResultsHeaders = [
-            'Metric', 'Accuracy Values', 'Accuracy Value Average', 
-            'Latency Values', 'Latency Value Average'
+            'Stimulus Type', 'Stimulus Question', 'Stimulus Correct Answer', 'Patient Response',
+            'Patient First Character', 'Latency for First Character', 'Accuracy for First Character',
+            'Patient Second Character', 'Latency for Second Character', 'Accuracy for Second Character',
+            'Patient Third Character', 'Latency for Third Character', 'Accuracy for Third Character',
+            'Patient Fourth Character', 'Latency for Fourth Character', 'Accuracy for Fourth Character',
+            'Patient Fifth Character', 'Latency for Fifth Character', 'Accuracy for Fifth Character'
         ];
-        const patientResultsRows = data.test_results.map(result => [
-            result.metric.replace(/_/g, ' '),
-            result.user_accuracy_values.join(', '),
-            result.user_accuracy_average !== null ? result.user_accuracy_average : 0,
-            result.user_latency_values.join(', '),
-            result.user_latency_average !== null ? result.user_latency_average : 0,
-        ]);
+
+        const patientResultsRows = data.stimuli_responses
+            .filter(item => !item.stimulus_type.toLowerCase().includes("pr"))
+            .map((item, index) => {
+                const stimulusType = item.stimulus_type || "N/A";
+                const stimulusQuestion = item.stimulus_content || "N/A";
+                const correctAnswer = item.correct_answer || "N/A";
+                const patientResponse = item.response || "N/A";
+
+                const patientResponseChars = patientResponse.split('');
+
+                const accuracyValues = data.test_results[index]?.user_accuracy_values || [];
+                const latencyValues = data.test_results[index]?.user_latency_values || [];
+
+                const row = [
+                    stimulusType,
+                    stimulusQuestion,
+                    correctAnswer,
+                    patientResponse
+                ];
+
+                for (let i = 0; i < 5; i++) {
+                    const character = patientResponseChars[i] || "";
+
+                    const latency = latencyValues[i] !== undefined ? `${(latencyValues[i] / 1000).toFixed(2)} seconds`: ""; //Converted to seconds.
+                    const accuracy = accuracyValues[i] !== undefined ? accuracyValues[i] : "";
+
+                    row.push(character, latency, accuracy);
+                }
+
+                return row;
+            });
+
         addSheet(workbook, 'Patient Results', patientResultsHeaders, patientResultsRows);
 
         // Aggregate Results Sheet
         const aggregateResultsHeaders = ['Metric', 'Latency Average', 'Accuracy Average'];
         const aggregateResultsRows = data.aggregate_results.map(result => [
             result.metric.replace(/_/g, ' '),
-            result.latency_average !== null ? result.latency_average : 0,
+            result.latency_average !== null ? `${(result.latency_average / 1000).toFixed(2)} seconds` : "0 seconds",
             result.accuracy_average !== null ? result.accuracy_average : 0,
         ]);
         addSheet(
@@ -852,7 +923,46 @@ async function exportToSpreadsheet(testId) {
             result.latency_average || "N/A",
             result.latency_comparison || "N/A"
         ]);
-        var comparisonSheet = addSheet(workbook, 'Comparison Results', comparisonResultsHeaders, comparisonResultsRows);
+        const comparisonSheet = addSheet(workbook, 'Comparison Results', comparisonResultsHeaders, comparisonResultsRows);
+
+        const applyColorFormat = (sheet, row, column, comparisonValue, isLatency) => {
+            const cell = sheet.getCell(row, column);
+        
+            // Determine the color based on the type (latency or accuracy)
+            if (isLatency) {
+                // Green for below average, red for above average
+                if (comparisonValue === 'Below average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FF00' } };
+                } else if (comparisonValue === 'Above average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
+                }
+            } else {
+                // Green for above average, red for below average
+                if (comparisonValue === 'Above average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FF00' } };
+                } else if (comparisonValue === 'Below average') {
+                    cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
+                }
+            }
+        
+            // Gray for 'Average'
+            if (comparisonValue === 'Average') {
+                cell.style.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF808080' } };
+            }
+        };
+
+        comparisonResultsRows.forEach((row, index) => {
+            const accuracyComparison = row[3]; // Accuracy Comparison column
+            if (['Below average', 'Above average', 'Average'].includes(accuracyComparison)) {
+                applyColorFormat(comparisonSheet, index + 2, 4, accuracyComparison, false); // false for accuracy
+            }
+        
+            const latencyComparison = row[6]; // Latency Comparison column
+            if (['Below average', 'Above average', 'Average'].includes(latencyComparison)) {
+                applyColorFormat(comparisonSheet, index + 2, 7, latencyComparison, true); // true for latency
+            }
+        });
+
         // Stimuli and Responses Sheet
         const stimuliResponsesHeaders = [
             'Stimulus ID', 'Stimulus Type', 'Stimulus Content', 
@@ -939,6 +1049,18 @@ async function exportToSpreadsheet(testId) {
             test.time_since_invalid
         ]);
         addSheet(workbook, 'Invalid Patient Tests', invalidTestsHeaders, invalidTestsRows);
+
+        const sheets = workbook.worksheets;
+        sheets.forEach(sheet => {
+            sheet.columns.forEach(column => {
+                let maxLength = 0;
+                column.eachCell({ includeEmpty: true }, (cell) => {
+                    const length = cell.value ? cell.value.toString().length : 0;
+                    maxLength = Math.max(maxLength, length);
+                });
+                column.width = maxLength + 2;
+            });
+        });
 
         // Save workbook as a Blob and trigger download
         const buffer = await workbook.xlsx.writeBuffer();
