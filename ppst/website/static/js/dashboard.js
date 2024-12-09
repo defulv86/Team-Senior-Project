@@ -1,8 +1,45 @@
+async function checkForNewNotifications() {
+    try {
+        const response = await fetch('/get_user_notifications/unread');
+        const data = await response.json();
+
+        const notificationCount = data.notifications ? data.notifications.length : 0;
+        return notificationCount;
+    } catch (error) {
+        console.error('Error checking for notifications:', error);
+        return 0; // Default to no notifications if there's an error
+    }
+}
+
+async function getUserName() {
+    try {
+        const response = await fetch('/get_user_info/');
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        return data; // Assuming the data contains a `username` field
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        return { username: 'Guest' }; // Fallback for guest users
+    }
+}
+function setCurrentSection(section) {
+    localStorage.setItem('currentSection', section);
+}
+
+function clearCurrentSection() {
+    localStorage.removeItem('currentSection');
+}
+
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
 
     if (section === 'account') {
+        setCurrentSection('account');
         dynamicContent.innerHTML = `
 <form id="account-form">
 <h2>My Account</h2>
@@ -50,11 +87,25 @@ function loadContent(section) {
         // calling getUserInfo() to populate the form with user info, such as first name, last name, and email.
         getUserInfo();
     } else if (section === 'dashboard') {
-        dynamicContent.innerHTML = `
-            <h2>Dashboard</h2>
-            <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
-        `;
-    } else if (section === 'tests') { 
+        setCurrentSection('dashboard');
+        // Fetch notifications and user information
+        Promise.all([checkForNewNotifications(), getUserName()]).then(([notificationCount, user]) => {
+            dynamicContent.innerHTML = `
+                <h2>Dashboard</h2>
+                <p>Welcome back, ${user.first_name} ${user.last_name}. </p>
+                ${notificationCount > 0 
+                    ? `<p style="color: green; font-weight: bold;">You have ${notificationCount} new notification${notificationCount > 1 ? 's' : ''}!</p>`
+                    : `<p>You have no new notifications.</p>`}
+            `;
+        }).catch(error => {
+            console.error("Error loading dashboard content:", error);
+            dynamicContent.innerHTML = `
+                <h2>Dashboard</h2>
+                <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
+            `;
+        });
+    } else if (section === 'tests') {
+        setCurrentSection('tests'); 
         dynamicContent.innerHTML = `
             <div class="dynamic-content">
                 <h2>Tests</h2>
@@ -104,6 +155,7 @@ function loadContent(section) {
         `;
         toggleTestStatusFilter(false);
     } else if (section === 'support') {
+        setCurrentSection('support');
         dynamicContent.innerHTML = `
             <section id="support-section">
                 <h2>Support</h2>
@@ -444,7 +496,9 @@ function renderTestResultsTable(data, testId) {
     const testContent = document.getElementById('test-content');
     testContent.innerHTML = `
     <div class="table-container">
-        <h2>Test Results for Link: ${data.test_link}</h2>
+        <div class="test-results-header">
+            <h2>Test Results for Link: ${data.test_link}</h2>
+        </div>
         <p><strong>Patient's Age:</strong> ${data.patient_age}</p>
         <p><strong>Amount Correct:</strong> ${data.amount_correct}</p>
         <table class="results-table">
@@ -507,7 +561,9 @@ function renderTestResultsTable(data, testId) {
         </table>
     </div>
     <div class="table-container">
-        <h3>Aggregate Results for Age Group ${data.min_age}-${data.max_age}</h3>
+        <div class="aggregate-results-header">
+            <h3>Aggregate Results (Ages: ${data.min_age}-${data.max_age})</h3>
+        </div>
         <table class="results-table">
             <thead>
                 <tr>
@@ -527,8 +583,10 @@ function renderTestResultsTable(data, testId) {
             </tbody>
         </table>
     </div>
-    <button onclick="backToTestResults()">Back to Test Results</button>
-    <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+    <div class="results-buttons">
+        <button onclick="backToTestResults()">Back to Test Results</button>
+        <button id="exportToSpreadsheetBtn" onclick="exportToSpreadsheet(${testId})">Export to Spreadsheet</button>
+    </div>
     `;
 
     // Check if the View as Graph button is already present
@@ -550,7 +608,9 @@ function toggleResultsView(testId, data) {
     // If currently in the table view, switch to the graph view with latency chart as default
     if (testContent.querySelector('.results-table')) {
         testContent.innerHTML = `
-            <h2>Patient vs Aggregate Comparison</h2>
+            <div class="graph-main-header">
+                <h2>Patient vs Aggregate Comparison</h2>
+            </div>
             <div class="chart-toggle-buttons">
                 <button onclick="loadLatencyChart(${testId})">Latency Comparison</button>
                 <button onclick="loadAccuracyChart(${testId})">Accuracy Comparison</button>
@@ -603,7 +663,7 @@ function loadLatencyChart(testId) {
 
             // Set header for the chart
             const { min_age, max_age } = data.age_group;
-            document.getElementById('chart-header').innerText = `Latency Comparison Graph for Age Group ${min_age} - ${max_age}`;
+            document.getElementById('chart-header').innerText = `Latency Comparison Graph (Ages: ${min_age} - ${max_age})`;
 
             
             const labels = Object.keys(data.patient.latencies || data.patient.accuracies)
@@ -678,7 +738,7 @@ function loadAccuracyChart(testId) {
 
             // Set header for the chart
             const { min_age, max_age } = data.age_group;
-            document.getElementById('chart-header').innerText = `Accuracy Comparison Graph for Age Group ${min_age} - ${max_age}`;
+            document.getElementById('chart-header').innerText = `Accuracy Comparison Graph (Ages: ${min_age} - ${max_age})`;
 
             const labels = Object.keys(data.patient.latencies || data.patient.accuracies)
                 .map(pos => getMetricForPosition(pos));
@@ -1354,7 +1414,8 @@ async function getSpreadsheetImages(testId) {
     }
 }
 
-// Automatically load the "Dashboard" tab when the page is first loaded
 window.addEventListener('load', () => {
-    loadContent('dashboard');
+    // Get the current section from localStorage
+    const currentSection = localStorage.getItem('currentSection') || 'dashboard' // Default to 'dashboard' if not found
+    loadContent(currentSection);
 });

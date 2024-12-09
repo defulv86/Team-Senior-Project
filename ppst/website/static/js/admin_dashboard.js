@@ -1,12 +1,62 @@
+async function checkForNewNotifications() {
+    try {
+        const response = await fetch('/get_user_notifications/unread');
+        const data = await response.json();
+
+        const notificationCount = data.notifications ? data.notifications.length : 0;
+        return notificationCount;
+    } catch (error) {
+        console.error('Error checking for notifications:', error);
+        return 0; // Default to no notifications if there's an error
+    }
+}
+
+async function getUserName() {
+    try {
+        const response = await fetch('/get_user_info/');
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        return data; // Assuming the data contains a `username` field
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        return { username: 'Guest' }; // Fallback for guest users
+    }
+}
+function setCurrentSection(section) {
+    localStorage.setItem('currentSection', section);
+}
+
+function clearCurrentSection() {
+    localStorage.removeItem('currentSection');
+}
+
+
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
     if (section === 'dashboard') {
-        dynamicContent.innerHTML = `
-            <h2>Dashboard</h2>
-            <p>Overview of recent activity and statistics will be displayed here.</p>
-        `;
+        setCurrentSection('dashboard');
+        Promise.all([checkForNewNotifications(), getUserName()]).then(([notificationCount, user]) => {
+            dynamicContent.innerHTML = `
+                <h2>Dashboard</h2>
+                <p>Welcome back, ${user.username}.</p>
+                ${notificationCount > 0 
+                    ? `<p style="color: green; font-weight: bold;">You have ${notificationCount} new notification${notificationCount > 1 ? 's' : ''}!</p>`
+                    : `<p>You have no new notifications.</p>`}
+            `;
+        }).catch(error => {
+            console.error("Error loading dashboard content:", error);
+            dynamicContent.innerHTML = `
+                <h2>Dashboard</h2>
+                <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
+            `;
+        });
     } else if (section === 'support') {
+        setCurrentSection('support');
         dynamicContent.innerHTML = `
             <h2>Support Tickets</h2>
             <div id="support-section">
@@ -30,6 +80,7 @@ function loadContent(section) {
         `;
         loadUserTickets();
     } else if (section === 'registrationreview') {
+        setCurrentSection('registrationreview');
         dynamicContent.innerHTML = `
             <h2>Registration Review</h2>
             <div id="registration-list">
@@ -196,11 +247,14 @@ function getCookie(name) {
     return cookieValue;
 }
 
+
+
 // Enable dragging for the notification popout
 let isDragging = false;
 let offsetX, offsetY;
 
 const notificationPopout = document.getElementById('notification-popout');
+const notificationHeader = document.querySelector('.notification-header');
 const notificationBody = document.getElementById('notification-body');
 const notificationList = document.getElementById('notification-list');
 
@@ -402,7 +456,8 @@ function markAsRead(id ,notifItem){
     .catch(error => console.error('Error updating notification', error))
 }
 
-// Automatically load the "Dashboard" tab when the page is first loaded
 window.addEventListener('load', () => {
-    loadContent('dashboard');
+    // Get the current section from localStorage
+    const currentSection = localStorage.getItem('currentSection') || 'dashboard' // Default to 'dashboard' if not found
+    loadContent(currentSection);
 });

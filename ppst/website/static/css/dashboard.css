@@ -819,6 +819,12 @@ textarea:focus {
     margin-bottom: 10px;
 }
 
+.test-results-header h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
 .results-table {
     width: 100%;
     border-collapse: collapse;
@@ -986,6 +992,676 @@ textarea:focus {
     .results-table td {
         padding: 2px;
         width: 60px;
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 853px) {
+
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 1350px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .results-table {
+        font-size: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 2px;
+        width: 60px;
+    }
+
+    #comparisonChart {
+        width: 100%; /* Makes the chart responsive */
+        max-width: 853px;
+        padding: 0;
+        box-sizing: border-box; /* Includes padding in the total width */
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
+}
+/* 768px Media*/
+@media screen and (max-width: 768px) {
+
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 1350px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .results-table {
+        font-size: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 2px;
+        width: 60px;
+    }
+
+    #comparisonChart {
+        width: 100%; /* Makes the chart responsive */
+        max-width: 768px;
+        padding: 0;
+        box-sizing: border-box; /* Includes padding in the total width */
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
+}
+/* 540px Media*/
+@media screen and (max-width: 540px) {
+
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 1350px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .results-table {
+        font-size:9px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 2px;
+        width: 10px;
+    }
+
+    #comparisonChart {
+        width: 100%; /* Makes the chart responsive */
+        max-width: 540px;
+        padding: 0;
+        box-sizing: border-box; /* Includes padding in the total width */
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
+}
+/* 430px Media */
+@media screen and (max-width: 430px) {
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease;
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .table-container h2,
+    .table-container h3 {
+        text-align: left;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .test-results-header h2 {
+    text-align: left;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 20px;
+    }
+    
+
+    
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%; /* Ensure this fits within the container width */
+        overflow-x: auto; /* Enable horizontal scrolling */
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    /* Container for horizontal scrolling */
+    .scroll-container {
+        overflow-x: auto; /* Enable horizontal scrolling */
+        white-space: nowrap; /* Prevent line breaks */
+        width: 100%; /* Ensure it takes full width */
+    }
+
+    .results-table {
+        font-size: 10px;
+        margin-block: 10px;
+        display:inline-block; /* Ensure it behaves like an inline element */
+        overflow-x: auto;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 2px;
+        font-size: 5px;
+    }
+
+    #comparisonChart {
+        width: 100%; /* Makes the chart responsive */
+        max-width: 430px;
+        padding: 0;
+        box-sizing: border-box; /* Includes padding in the total width */
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
+}
+
+
+/* 376px Media */
+@media screen and (max-width: 376px) {
+
+    .header-title {
+        font-size: 16px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .table-container h2,
+    .table-container h3 {
+        text-align: left;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .test-results-header h2 {
+        text-align: left;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 18px;
+        }
+
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 1350px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .results-table {
+        font-size: 10px;
+        margin-block: 10px;
+        display:inline-block; /* Ensure it behaves like an inline element */
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 2px;
+        width: 5px;
+        font-size: 5px;
+    }
+
+    .chart-toggle-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        width: 200px;
+    }
+    .view-toggle-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        width: 200px;
+    }
+    
+    .graph-main-header {
+        font-size: 10px;
+    }
+    #chart-header {
+        font-size: 10px;
+    }
+    
+    #comparisonChart {
+        width: 100%; /* Makes the chart responsive */
+        max-width: 376px;
+        padding: 10px;
+        box-sizing: border-box; /* Includes padding in the total width */
+    }
+
+    #support-section {
+        max-width: 100%;
+    }
+}
+/* 360px Media */
+@media screen and (max-width: 360px) {
+
+    .header-title {
+        font-size: 10px;
+        margin-left: 10px;
+    }
+
+    .welcome-message {
+        font-size: 8px;
+        margin-left: 10px;
+    }
+
+    .top-right-item:hover .icon {
+        transform: none;
+        opacity: 0.6;
+        transition: opacity 0.5s ease
+    }
+
+    .top-right-item {
+        margin-left: 1px;
+    }
+
+    .top-right-item .icon-text {
+        display: none;
+        opacity: 0;
+        width: 0;
+        transition: none;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        width: 280px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .test-buttons {
+        margin-top: 50px;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .create-test-section {
+        max-width: 265px;
+    }
+
+    #generated-link {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .test-results-section {
+        max-width: 40%;
+    }
+
+    .table-container h2,
+    .table-container h3 {
+        text-align: left;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .test-results-header h2 {
+        text-align: left;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .filter-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 1350px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+
+    .results-table {
+        font-size: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0px;
+        width: 5px;
+    }
+    .results-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .chart-toggle-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        width: 200px;
+    }
+    .view-toggle-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        width: 200px;
+    }
+    
+    .graph-main-header {
+        font-size: 10px;
+    }
+    #chart-header {
+        font-size: 10px;
+    }
+
+    #comparisonChart {
+        width: 100%; /* Makes the chart responsive */
+        max-width: 365px;
+        padding: 20px;
+        box-sizing: border-box; /* Includes padding in the total width */
     }
 
     #support-section {

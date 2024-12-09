@@ -92,16 +92,14 @@ def register_view(request):
                     for user in admins:
                         Notification.objects.create(
                             user=user,
-                            info = f"registration:{username}",
+                            info=f"registration:{username}",
                             header="New registration request",
-                            message=f"The user {username}, has requested the creation of a new account. Please proceed to the registration tab to approve or deny."
+                            message=f"The user {username} has requested the creation of a new account. Please proceed to the registration tab to approve or deny."
                         )
-
 
                     registration = Registration(username=username, password=password)
                     registration.save()
-                    success_message = "Your registration request has been submitted for admin approval."
-                    return redirect('home')
+                    success_message = "Your registration request has been submitted for review by an admin."
                 except Exception as e:
                     error_message = f"An error occurred: {e}"
 
@@ -109,6 +107,7 @@ def register_view(request):
         'error_message': error_message,
         'success_message': success_message
     })
+
 
 
 def logout_view(request):
@@ -1404,6 +1403,7 @@ def get_user_info(request):
     if request.method == 'GET':
         user = request.user
         user_info = {
+            'username': user.username,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'email': user.email,
