@@ -26,11 +26,20 @@ async function getUserName() {
         return { username: 'Guest' }; // Fallback for guest users
     }
 }
+function setCurrentSection(section) {
+    localStorage.setItem('currentSection', section);
+}
+
+function clearCurrentSection() {
+    localStorage.removeItem('currentSection');
+}
+
 
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
     if (section === 'dashboard') {
+        setCurrentSection('dashboard');
         Promise.all([checkForNewNotifications(), getUserName()]).then(([notificationCount, user]) => {
             dynamicContent.innerHTML = `
                 <h2>Dashboard</h2>
@@ -47,6 +56,7 @@ function loadContent(section) {
             `;
         });
     } else if (section === 'support') {
+        setCurrentSection('support');
         dynamicContent.innerHTML = `
             <h2>Support Tickets</h2>
             <div id="support-section">
@@ -70,6 +80,7 @@ function loadContent(section) {
         `;
         loadUserTickets();
     } else if (section === 'registrationreview') {
+        setCurrentSection('registrationreview');
         dynamicContent.innerHTML = `
             <h2>Registration Review</h2>
             <div id="registration-list">
@@ -235,6 +246,8 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+
 
 // Enable dragging for the notification popout
 let isDragging = false;
@@ -443,8 +456,8 @@ function markAsRead(id ,notifItem){
     .catch(error => console.error('Error updating notification', error))
 }
 
-// Automatically load the "Dashboard" tab when the page is first loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded, calling loadContent for dashboard...");
-    loadContent('dashboard');
+window.addEventListener('load', () => {
+    // Get the current section from localStorage
+    const currentSection = localStorage.getItem('currentSection') || 'dashboard' // Default to 'dashboard' if not found
+    loadContent(currentSection);
 });

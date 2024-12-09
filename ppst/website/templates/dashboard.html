@@ -36,7 +36,7 @@
                 <img class="icon" src="{% static 'images/notifications.png' %}" alt="Notifications Icon">
                 <span class="icon-text">Notifications</span>
             </a>
-            <a href="{% url 'logout' %}" class="top-right-item">
+            <a href="{% url 'logout' %}" class="top-right-item" onclick="clearCurrentSection()">
                 <img class="icon" src="{% static 'images/logout.png' %}" alt="Sign Out Icon">
                 <span class="icon-text">Sign Out</span>
             </a>

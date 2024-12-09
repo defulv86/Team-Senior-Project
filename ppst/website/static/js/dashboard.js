@@ -26,12 +26,20 @@ async function getUserName() {
         return { username: 'Guest' }; // Fallback for guest users
     }
 }
+function setCurrentSection(section) {
+    localStorage.setItem('currentSection', section);
+}
+
+function clearCurrentSection() {
+    localStorage.removeItem('currentSection');
+}
 
 // Load content dynamically based on selected tab
 function loadContent(section) {
     const dynamicContent = document.getElementById('dynamic-content');
 
     if (section === 'account') {
+        setCurrentSection('account');
         dynamicContent.innerHTML = `
 <form id="account-form">
 <h2>My Account</h2>
@@ -79,6 +87,7 @@ function loadContent(section) {
         // calling getUserInfo() to populate the form with user info, such as first name, last name, and email.
         getUserInfo();
     } else if (section === 'dashboard') {
+        setCurrentSection('dashboard');
         // Fetch notifications and user information
         Promise.all([checkForNewNotifications(), getUserName()]).then(([notificationCount, user]) => {
             dynamicContent.innerHTML = `
@@ -95,7 +104,8 @@ function loadContent(section) {
                 <p>Overview of recent activity, test statistics, and other relevant information will be displayed here.</p>
             `;
         });
-    } else if (section === 'tests') { 
+    } else if (section === 'tests') {
+        setCurrentSection('tests'); 
         dynamicContent.innerHTML = `
             <div class="dynamic-content">
                 <h2>Tests</h2>
@@ -145,6 +155,7 @@ function loadContent(section) {
         `;
         toggleTestStatusFilter(false);
     } else if (section === 'support') {
+        setCurrentSection('support');
         dynamicContent.innerHTML = `
             <section id="support-section">
                 <h2>Support</h2>
@@ -1403,7 +1414,8 @@ async function getSpreadsheetImages(testId) {
     }
 }
 
-// Automatically load the "Dashboard" tab when the page is first loaded
 window.addEventListener('load', () => {
-    loadContent('dashboard');
+    // Get the current section from localStorage
+    const currentSection = localStorage.getItem('currentSection') || 'dashboard' // Default to 'dashboard' if not found
+    loadContent(currentSection);
 });
