@@ -511,12 +511,12 @@ def invalidate_test(request, link):
         
         return JsonResponse({"status": "canceled"})
     return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
-
-def check_and_notify_test_status():
+    
+def check_and_notify_test_status(request):
     """
     Periodically checks each test status to see if a warning or expiration notification should be sent.
     """
-    now = timezone.now()
+    now = timezone.now()  # Ensure timezone is correctly accessed
     tests = Test.objects.all()
 
     for test in tests:
@@ -526,7 +526,7 @@ def check_and_notify_test_status():
         # Adjust the time checks to ensure precision with 24-hour notifications
         if timedelta(hours=23, minutes=59) < time_until_expiry <= timedelta(hours=24) and not test.finished_at:
             # Warning if time left is between 23 hours 59 minutes and exactly 24 hours
-            if not Notification.objects.filter(test=test, header="Test Expiry Warning").exists():
+            if not Notification.objects.filter(user=test.user, header="Test Expiry Warning").exists():
                 Notification.objects.create(
                     user=test.user,
                     header="Test Expiry Warning",
@@ -535,12 +535,14 @@ def check_and_notify_test_status():
 
         # Send expiration notification if the test is now expired
         elif time_until_expiry <= timedelta(0) and not test.finished_at:
-            if not Notification.objects.filter(test=test, header="Test Expired").exists():
+            if not Notification.objects.filter(user=test.user, header="Test Expired").exists():
                 Notification.objects.create(
                     user=test.user,
                     header="Test Expired",
                     message=f"Test link {test.link} has expired because it was not completed in one week.",
                 )
+
+    return JsonResponse({'status': 'success', 'message': 'Test Statuses and Time Remaining checked. Notifications will be sent if necessary.'})
 
 def start_test(request, link):
     """

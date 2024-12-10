@@ -1454,6 +1454,26 @@ async function getSpreadsheetImages(testId) {
     }
 }
 
+function checkTestStatus() {
+    fetch('/check-and-notify-test-status/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') // Include CSRF token if enabled
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Test status checked:', data);
+    })
+    .catch(error => {
+        console.error('Error checking test status:', error);
+    });
+}
+
+// Call the function every 30 seconds
+setInterval(checkTestStatus, 30000);
+
 window.addEventListener('load', () => {
     // Get the current section from localStorage
     const currentSection = localStorage.getItem('currentSection') || 'dashboard' // Default to 'dashboard' if not found
