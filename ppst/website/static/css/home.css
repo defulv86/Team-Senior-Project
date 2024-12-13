@@ -793,7 +793,7 @@ body {
 }
 
 /* 430 Media */
-@media screen and (max-width: 430px) {
+@media screen and (max-width: 431px) {
     nav {
         display: flex;
         flex-direction: column;
@@ -2182,16 +2182,18 @@ p {
         height: 15vh;
         justify-content: center;
         align-items: center;
+        margin-top: -25px
     }
     
     .login-button {
-        margin-top: px;
+        margin-top: 75px;
         padding: 5px 10px;
-        font-size: 10px;
+        font-size: 18px;
         width: auto;
+        height: 25px;
         text-align: center;
-        margin-left: 20px;
-        flex-direction: column;
+        margin-left: -400px;
+        flex-direction: row;
         display: flex;
     }
     #section1  {
