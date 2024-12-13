@@ -355,6 +355,25 @@ button#start-test:hover {
     /* Change color on hover */
 }
 
+#stimulus.stimulus-text {
+    font-size: 2.5em;
+    font-weight: bolder;
+    font-family: Montserrat, sans-serif;
+    color: #0077b3;
+    height: 250px;
+    text-align: center;
+}
+
+.stimulus-additional-text {
+    font-size: 32px;
+    color: #000000;
+    font-family: Montserrat, sans-serif;
+    width: 70%;
+    text-align: center;
+    margin-top: -80px;
+    line-height: 1.6;
+}
+
 @media screen and (max-width: 1024px) {
     /* Welcome Screen */
     /* Stack and center form elements */
@@ -516,6 +535,19 @@ button#start-test:hover {
     width: 80px;
     height: 80px;
     }
+    #stimulus.stimulus-text {
+        font-size: 2.5em;
+        height: auto;
+        padding: 10px;
+    }
+
+    .stimulus-additional-text {
+        font-size: 1.5em;
+        width: 90%;
+        margin-bottom: 150px;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
 }
 
 @media screen and (max-width: 540px) {
@@ -560,6 +592,19 @@ button#start-test:hover {
     width: 100px;
     height: 100px;
     }
+    #stimulus.stimulus-text {
+        font-size: 1.8em;
+        height: auto;
+        padding: 10px;
+    }
+
+    .stimulus-additional-text {
+        font-size: 1.2em;
+        width: 90%;
+        margin-bottom: 150px;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
 }
 
 @media screen and (max-width: 430px) {
@@ -598,6 +643,20 @@ button#start-test:hover {
     width: 80px;
     height: 80px;
     }
+    #stimulus.stimulus-text {
+        font-size: 1.8em;
+        height: auto;
+        padding: 10px;
+    }
+
+    .stimulus-additional-text {
+        font-size: 1.2em;
+        width: 90%;
+        margin-bottom: 150px;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
+
 }
 
 @media screen and (max-width: 376px) {
