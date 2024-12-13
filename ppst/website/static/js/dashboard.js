@@ -951,6 +951,12 @@ async function exportToSpreadsheet(testId) {
             'Patient Fifth Character', 'Latency for Fifth Character', 'Accuracy for Fifth Character'
         ];
 
+        patientResultsHeaders.push('Latency Time Total for Stimuli Type');
+        patientResultsHeaders.push('Test Completion Time (Real Stimuli)');
+
+        // Initialize total test completion time accumulator
+        let overallCompletionTime = 0;
+        
         const patientResultsRows = data.stimuli_responses
             .filter(item => !item.stimulus_type.toLowerCase().includes("pr"))
             .map((item, index) => {
@@ -958,31 +964,52 @@ async function exportToSpreadsheet(testId) {
                 const stimulusQuestion = item.stimulus_content || "N/A";
                 const correctAnswer = item.correct_answer || "N/A";
                 const patientResponse = item.response || "N/A";
-
+        
                 const patientResponseChars = patientResponse.split('');
-
+        
                 const accuracyValues = data.test_results[index]?.user_accuracy_values || [];
                 const latencyValues = data.test_results[index]?.user_latency_values || [];
-
+        
                 const row = [
                     stimulusType,
                     stimulusQuestion,
                     correctAnswer,
                     patientResponse
                 ];
-
+        
+                // Calculate total latency for actual question responses
+                let totalLatency = 0;
                 for (let i = 0; i < 5; i++) {
                     const character = patientResponseChars[i] || "";
-
-                    const latency = latencyValues[i] !== undefined ? `${(latencyValues[i] / 1000).toFixed(2)} seconds`: ""; //Converted to seconds.
+        
+                    const latency = latencyValues[i] !== undefined ? latencyValues[i] : 0; // Default to 0 if undefined
+                    const formattedLatency = latency !== 0 ? `${(latency / 1000).toFixed(2)} seconds` : ""; // Convert to seconds
                     const accuracy = accuracyValues[i] !== undefined ? accuracyValues[i] : "";
-
-                    row.push(character, latency, accuracy);
+        
+                    row.push(character, formattedLatency, accuracy);
+        
+                    totalLatency += latency;
                 }
-
+        
+                // Add the calculated column for total latency
+                const formattedTotalLatency = `${(totalLatency / 1000).toFixed(2)} seconds`;
+                row.push(formattedTotalLatency);
+        
+                // Add to overall completion time
+                overallCompletionTime += totalLatency;
+        
                 return row;
             });
-
+        
+        // Convert overall completion time to seconds and format
+        const formattedOverallCompletionTime = `${(overallCompletionTime / 1000).toFixed(2)} seconds`;
+        
+        // Append the total row with the overall completion time
+        const totalRow = Array(patientResultsHeaders.length - 1).fill(''); // Empty cells for alignment
+        totalRow.push(formattedOverallCompletionTime); // Add the total value in the final column
+        
+        patientResultsRows.push(totalRow);
+        
         addSheet(workbook, 'Patient Results', patientResultsHeaders, patientResultsRows);
 
         // Aggregate Results Sheet
