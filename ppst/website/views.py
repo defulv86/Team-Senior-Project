@@ -99,7 +99,7 @@ def register_view(request):
 
                     registration = Registration(username=username, password=password)
                     registration.save()
-                    success_message = "Your registration request has been submitted for review by an admin."
+                    success_message = "Your registration request has been submitted for review."
                 except Exception as e:
                     error_message = f"An error occurred: {e}"
 
