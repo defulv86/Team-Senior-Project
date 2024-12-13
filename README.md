@@ -32,7 +32,7 @@ Installation along with instructions to make sure it works properly.
 7. Once you install the requirements needed.. You need to make one edit to a file in your virtual environment.
     - Go to your venv/Lib/django/contrib/admin/templates/admin/base.html
     - At line 48, replace the line with: 
-        - <a href="{% url 'admin_dashboard' %}" class="headerlink">Back to Admin Dashboard</a>
+        - <a href="{% url 'admin_dashboard' %}" class="headerlink">Back to Admin Dashboard</a> /
     - Save the file.
 
 8. Run the project: py manage.py runserver
