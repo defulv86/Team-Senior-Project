@@ -38,5 +38,6 @@ urlpatterns = [
     path('approve_registration/<int:registration_id>/', views.approve_registration, name='approve_registration'),
     path('deny_registration/<int:registration_id>/', views.deny_registration, name='deny_registration'),
     path('create_result_charts/<int:test_id>/', views.create_result_charts, name='create_result_charts'),
+    path('check-and-notify-test-status/', views.check_and_notify_test_status, name='check_and_notify_test_status'),
 
 ]
