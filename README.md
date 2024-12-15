@@ -1,38 +1,115 @@
-Installation along with instructions to make sure it works properly.
+# **Team Senior Project**
 
-1. Clone the repository to your local repository: git clone https://github.com/defulv86/Team-Senior-Project.git
+This repository contains the code and resources for the **Philadelphia Pointing Span Test (PPST)** application, developed as part of our Senior Project. Follow the steps below to ensure proper installation and functionality.
 
-2. Go to the following directory after the clone is complete: Team-Senior-Project/ppst
+---
 
-3. Please add the virtual environment using either of the following two commands:
-    - macOS/Linux: python -m venv venv
-    - Windows:     py -m venv venv
+## **Installation Instructions**
 
-4. Activate the virtual environment: source venv/scripts/activate
+### **1. Clone the Repository**
+Clone the repository to your local machine:
+```bash
+git clone https://github.com/defulv86/Team-Senior-Project.git
+```
 
-5. Install the Django and Python-Dateutil with this command:
-    pip install -r requirements.txt
+Navigate to the project directory:
+```bash
+cd Team-Senior-Project/ppst
+```
 
-6. in the Team-Senior-Project/ppst directory, run either of these two commands:
-    - Windows:
-        For only real data (regular fixture), run:
-            migrate_regular_fixture.py
-        For only fake data, run:
-            migrate_fake_test_data_fixture.py
-    - macOS/Linux:
-        For only real data (regular fixture), run:
-            python manage.py makemigrations
-            python manage.py migrate
-            python manage.py shell < regular_fixture.py
-        For only fake data, run:
-            python manage.py makemigrations
-            python manage.py migrate
-            python manage.py shell < fake_data_fixture.py
+---
 
-7. Once you install the requirements needed.. You need to make one edit to a file in your virtual environment.
-    - Go to your venv/Lib/django/contrib/admin/templates/admin/base.html
-    - At line 48, replace the line with: 
-        - <a href="{% url 'admin_dashboard' %}" class="headerlink">Back to Admin Dashboard</a> /
-    - Save the file.
+### **2. Set Up a Virtual Environment**
+Create and activate a virtual environment for dependency management.
 
-8. Run the project: py manage.py runserver
+#### **macOS/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+#### **Windows:**
+```bash
+py -m venv venv
+venv\Scripts\activate
+```
+
+---
+
+### **3. Install Required Dependencies**
+Install Django and other dependencies using the `requirements.txt` file:
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### **4. Apply Database Migrations**
+
+#### **For Real Data (Regular Fixture):**
+- **Windows:**
+  ```bash
+  py migrate_regular_fixture.py
+  ```
+- **macOS/Linux:**
+  ```bash
+  python manage.py makemigrations
+  python manage.py migrate
+  python manage.py shell < regular_fixture.py
+  ```
+
+#### **For Fake Data:**
+- **Windows:**
+  ```bash
+  py migrate_fake_test_data_fixture.py
+  ```
+- **macOS/Linux:**
+  ```bash
+  python manage.py makemigrations
+  python manage.py migrate
+  python manage.py shell < fake_data_fixture.py
+  ```
+
+---
+
+### **5. Update Admin Dashboard File**
+To ensure proper functioning of the admin dashboard, make the following change:
+
+1. Open the file:  
+   ```
+   venv/Lib/django/contrib/admin/templates/admin/base.html
+   ```
+2. Locate **line 48** and replace the line with:
+   ```html
+   Back to Admin Dashboard /
+   ```
+3. Save the file.
+
+---
+
+### **6. Run the Project**
+Start the Django development server:
+
+#### **Windows:**
+```bash
+py manage.py runserver
+```
+
+#### **macOS/Linux:**
+```bash
+python manage.py runserver
+```
+
+---
+
+### **7. Access the Application**
+Visit the application in your browser:
+```
+http://127.0.0.1:8000/
+```
+
+---
+
+## **Notes**
+- Ensure that your virtual environment is activated before running the project.
+- Make sure to select the correct fixture (real or fake data) based on your testing needs.
