@@ -1,5 +1,5 @@
 # **Team Senior Project**
-
+---
 This repository contains the code and resources for the **Philadelphia Pointing Span Test (PPST)** application, developed as part of our Senior Project. Follow the steps below to ensure proper installation and functionality.
 
 ---
